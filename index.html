@@ -305,7 +305,7 @@
 
 <script>
     // --- 配置数据 ---
-    const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "小格蕾修"];
+    const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "斗罗", "CPU0", "闪柠", "小格蕾修"];
     
     const ITEMS_DB = {
         "rose": { name: "🌹 玫瑰", price: 50, type: "gift", loveBonus: 15, desc: "赠人玫瑰，手有余香" },
@@ -381,13 +381,19 @@
     const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
     const choose = (arr) => arr[Math.floor(Math.random() * arr.length)];
     
-    const TOWN_EVENTS = [
+const TOWN_EVENTS = [
         { id: 'concert', name: '🎤 巨星演唱会', cost: 500, desc: '全员快乐+20，关系+5。10%概率翻车效果减半。', emoji: '🎤' },
         { id: 'matchmaking', name: '💘 镇立相亲大会', cost: 200, desc: '所有单身者尝试表白(成功率up)，成对后快乐+5。', emoji: '💘' },
         { id: 'charity', name: '🎗️ 慈善募捐', cost: 0, desc: '居民自愿捐款给镇库，快乐-5，关系+5。', emoji: '🎗️' },
         { id: 'anniversary', name: '🎈 小镇纪念日', cost: 100, desc: '全员快乐+10，关系微量提升。', emoji: '🎈' },
         { id: 'fireworks', name: '🎆 盛大烟花会', cost: 250, desc: '全员快乐+25，关系+5。5%概率引发火灾烧毁建筑。', emoji: '🎆' },
-        { id: 'jobfair', name: '🤝 大型招聘会', cost: 150, desc: '帮助无业游民自动填补空缺岗位，入职快乐+10。', emoji: '🤝' }
+        { id: 'jobfair', name: '🤝 大型招聘会', cost: 150, desc: '帮助无业游民自动填补空缺岗位，入职快乐+10。', emoji: '🤝' },
+        // --- 新增活动 ---
+        { id: 'artfest', name: '🎨 艺术节', cost: 300, desc: '全员快乐+15，关系+3。10%概率发生艺术品失窃。', emoji: '🎨' },
+        { id: 'marathon', name: '🏃 全民马拉松', cost: 200, desc: '快乐+10，饱食-10。5%概率有人受伤(快乐-20)。', emoji: '🏃' },
+        { id: 'reading', name: '📚 读书会', cost: 100, desc: '快乐+5，关系+2。20%概率触发知识竞赛赢家。', emoji: '📚' },
+        { id: 'planting', name: '🌳 植树节', cost: 150, desc: '快乐+5，关系+3。10%概率树苗枯死效果减半。', emoji: '🌳' },
+        { id: 'shopping', name: '🛍️ 购物节', cost: 0, desc: '刺激消费！居民概率花钱，镇库获得20%税收。', emoji: '🛍️' }
     ];
 
     function getJobWage(role) { 
@@ -666,22 +672,132 @@
         triggerTownEvent(id) {
             const ev = TOWN_EVENTS.find(x => x.id === id);
             if (!ev || this.townMoney < ev.cost) return;
+            
+            // 扣除活动成本
             this.townMoney -= ev.cost;
             this.log(`[🎉活动] 镇长斥资 💰${ev.cost} 举办了 **${ev.name}**！`, "tag-event");
             document.getElementById('town-event-modal').classList.remove('active');
+
+            // --- 原有活动逻辑 ---
             if (id === 'concert') {
                 const fail = Math.random() < 0.1;
-                if (fail) { this.log(`[😱意外] 音响设备爆炸了！演唱会效果大打折扣！`, "tag-reject"); this.chars.forEach(c => { c.happiness += 5; }); } else { this.chars.forEach(c => { c.happiness += 20; c.happiness = Math.min(100, c.happiness); }); this.chars.forEach(c1 => { this.chars.forEach(c2 => { if (c1.name !== c2.name && c1.relationships[c2.name]) { c1.relationships[c2.name].love = Math.min(100, c1.relationships[c2.name].love + 5); } }); }); }
+                if (fail) { 
+                    this.log(`[😱意外] 音响设备爆炸了！演唱会效果大打折扣！`, "tag-reject"); 
+                    this.chars.forEach(c => { c.happiness += 5; }); 
+                } else { 
+                    this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); }); 
+                    this.chars.forEach(c1 => { 
+                        this.chars.forEach(c2 => { if (c1.name !== c2.name && c1.relationships[c2.name]) { c1.relationships[c2.name].love = Math.min(100, c1.relationships[c2.name].love + 5); } }); 
+                    }); 
+                }
             } else if (id === 'matchmaking') {
                 let pairCount = 0; this.chars.forEach(c => { if (!c.partner) { let bestT = null; let maxL = -100; for(let tName in c.relationships) { const t = this.chars.find(x=>x.name===tName); if (t && !t.partner && c.relationships[tName].love > maxL) { maxL = c.relationships[tName].love; bestT = t; } } if (bestT && maxL > 40 && Math.random() < 0.5) { if (bestT.decideProposal(c.name, 'confess') || Math.random() < 0.3) { c.partner = bestT.name; bestT.partner = c.name; c.relationships[bestT.name].status = 'lover'; bestT.relationships[c.name].status = 'lover'; c.happiness += 20; bestT.happiness += 20; this.log(`[❤️配对] 在相亲大会上，**${c.name}** 和 **${bestT.name}** 牵手成功！`, "tag-love"); pairCount++; } } } }); if (pairCount > 0) { this.chars.forEach(c => c.happiness += 5); } else { this.log(`[🍂尴尬] 相亲大会结束了，似乎没人配对成功...`, "tag-reject"); }
             } else if (id === 'charity') {
                 let totalRaised = 0; this.chars.forEach(c => { if (c.money > 10) { const donation = Math.min(c.money, rand(5, 20)); c.money -= donation; totalRaised += donation; c.happiness -= 5; this.chars.forEach(other => { if(other.name!==c.name) { c.relationships[other.name].love += 2; } }); } }); this.townMoney += totalRaised; this.log(`[🎗️募捐] 居民们共捐款 💰${totalRaised}，虽然心疼钱但关系更紧密了。`, "tag-build");
-            } else if (id === 'anniversary') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); for(let k in c.relationships) c.relationships[k].love += 2; });
+            } else if (id === 'anniversary') { 
+                this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); for(let k in c.relationships) c.relationships[k].love += 2; });
             } else if (id === 'fireworks') {
                 if (Math.random() < 0.05) { const built = this.buildings.filter(b => b.isBuilt); if (built.length > 0) { const burn = choose(built); burn.isBuilt = false; burn.currentProgress = 0; burn.staff.forEach(sName => { const s = this.chars.find(x=>x.name===sName); if(s) { s.job = null; s.happiness -= 30; } }); burn.staff = []; this.log(`[🔥火灾] 天呐！烟花引燃了 **${burn.name}**！建筑被烧毁，需要重建！`, "tag-crime"); this.chars.forEach(c => c.happiness -= 10); } } else { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 25); for(let k in c.relationships) c.relationships[k].love += 5; }); }
             } else if (id === 'jobfair') {
                 let hiredCount = 0; this.buildings.forEach(b => { if (b.isBuilt && b.staff.length < b.jobs.length) { const needed = b.jobs.length - b.staff.length; for(let i=0; i<needed; i++) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0 && Math.random() < 0.5) { const worker = choose(candidates); const role = b.jobs[b.staff.length]; worker.job = { buildingId: b.id, role: role }; b.staff.push(worker.name); worker.happiness += 10; this.log(`[🤝入职] **${worker.name}** 在招聘会上找到了 **${b.name}** 的工作！`, "tag-build"); hiredCount++; } } } }); if(hiredCount === 0) this.log("招聘会结束了，似乎没有合适的岗位或求职者。", "tag-reject");
             }
+            
+            // --- 新增活动逻辑开始 ---
+            
+            else if (id === 'artfest') {
+                // 艺术节
+                this.chars.forEach(c => {
+                    c.happiness = Math.min(100, c.happiness + 15);
+                    for(let k in c.relationships) c.relationships[k].love += 3;
+                });
+                // 10% 艺术品被盗
+                if (Math.random() < 0.1) {
+                    const victim = choose(this.chars);
+                    victim.happiness -= 10;
+                    this.log(`[🎨失窃] 糟糕！**${victim.name}** 珍藏的艺术品在活动中被偷了！(心情-10)`, "tag-crime");
+                }
+            } 
+            
+            else if (id === 'marathon') {
+                // 马拉松
+                this.chars.forEach(c => {
+                    c.happiness = Math.min(100, c.happiness + 10);
+                    c.hunger = Math.max(0, c.hunger - 10); // 消耗饱食度
+                });
+                // 5% 受伤
+                if (Math.random() < 0.05) {
+                    const injured = choose(this.chars);
+                    injured.happiness -= 20;
+                    this.log(`[🚑意外] **${injured.name}** 在马拉松中不慎扭伤了脚！(心情-20)`, "tag-reject");
+                }
+            }
+            
+            else if (id === 'reading') {
+                // 读书会
+                this.chars.forEach(c => {
+                    c.happiness = Math.min(100, c.happiness + 5);
+                    for(let k in c.relationships) c.relationships[k].love += 2;
+                });
+                // 20% 知识竞赛
+                if (Math.random() < 0.2) {
+                    const winner = choose(this.chars);
+                    winner.happiness = Math.min(100, winner.happiness + 10);
+                    this.log(`[🧠竞赛] **${winner.name}** 赢得了读书知识竞赛的冠军！大家向他表示祝贺。`, "tag-build");
+                }
+            }
+            
+            else if (id === 'planting') {
+                // 植树节
+                let success = true;
+                // 10% 树苗死亡
+                if (Math.random() < 0.1) {
+                    success = false;
+                    this.log(`[🍂枯萎] 哎呀，由于天气原因，一半的树苗没能存活...效果减半。`, "tag-reject");
+                }
+                const happyBonus = success ? 5 : 2;
+                const relBonus = success ? 3 : 1;
+                
+                this.chars.forEach(c => {
+                    c.happiness = Math.min(100, c.happiness + happyBonus);
+                    for(let k in c.relationships) c.relationships[k].love += relBonus;
+                });
+            }
+            
+            else if (id === 'shopping') {
+                // 购物节
+                let totalSpent = 0;
+                let totalTax = 0;
+                let shopperCount = 0;
+                
+                this.chars.forEach(c => {
+                    // 50% 概率消费，且必须有钱
+                    if (c.money > 5 && Math.random() < 0.5) {
+                        // 随机消费 10% - 30% 的存款
+                        const spendRatio = rand(10, 30) / 100;
+                        const spent = Math.floor(c.money * spendRatio);
+                        if (spent > 0) {
+                            c.money -= spent;
+                            c.happiness = Math.min(100, c.happiness + 10);
+                            
+                            // 税收计算
+                            const tax = Math.floor(spent * 0.2);
+                            totalTax += tax;
+                            totalSpent += spent;
+                            shopperCount++;
+                        }
+                    }
+                });
+                
+                this.townMoney += totalTax;
+                
+                if (shopperCount > 0) {
+                    this.log(`[🛍️狂欢] 购物节圆满结束！${shopperCount} 位居民疯狂剁手，总消费 💰${totalSpent}。`, "tag-item");
+                    this.log(`[💰税收] 镇库从交易税中获得了 💰${totalTax} 的收入！`, "tag-build");
+                } else {
+                    this.log(`[🌬️冷清] 购物节似乎没有人愿意花钱...`, "tag-lonely");
+                }
+            }
+
             this.updateUI();
         }
         closeTownEvents() { document.getElementById('town-event-modal').classList.remove('active'); }
