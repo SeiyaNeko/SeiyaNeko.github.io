@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快乐小镇 Ver 2.4.4 - 罪恶统计版</title>
+    <style>
+        :root { --bg: #f0f2f5; --card: #fff; --primary: #4a90e2; --love: #ff6b6b; --text: #333; --dark: #2d3436; --crime: #8e44ad; --item: #e17055; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        
+        /* 顶部 */
+        header { background: var(--card); padding: 10px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .header-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        h1 { margin: 0; font-size: 1.2rem; }
+        .btn { cursor: pointer; background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.9rem; transition: 0.2s; white-space: nowrap; }
+        .btn:hover { opacity: 0.9; }
+        .btn.save { background: #27ae60; }
+        .btn.reset { background: #e74c3c; }
+        .btn.gold { background: #f1c40f; color: #333; font-weight: bold; }
+        .btn.cyan { background: #00b894; color: white; font-weight: bold; }
+        .btn.purple { background: #9b59b6; color: white; font-weight: bold; }
+        .btn.speed { background: #e67e22; font-weight: bold; width: 80px; }
+        .btn.create { background: #e17055; color: white; font-weight: bold; }
+        .btn.create:hover { background: #d35400; }
+
+        .btn.fund { background: #9b59b6; font-size: 0.8rem; padding: 2px 6px; margin-left: 5px; } 
+        .btn.accelerate { background: #2ecc71; color: white; font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: 100%; border: 1px solid #27ae60; }
+        .btn.accelerate:hover { background: #27ae60; }
+        .btn.control { background: #34495e; width: 100%; margin-top: 10px; }
+        input[type="number"] { width: 50px; padding: 4px; }
+
+        /* 标签导航栏 */
+        .tab-nav { display: flex; gap: 10px; margin-bottom: 15px; background: var(--card); padding: 8px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-btn { flex: 1; padding: 10px; cursor: pointer; border: none; background: #f0f2f5; color: #666; border-radius: 6px; font-weight: bold; font-size: 1rem; transition: 0.2s; }
+        .tab-btn:hover { background: #e1e4e8; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3); }
+
+        /* 主区域 */
+        .game-container { display: flex; flex: 1; gap: 15px; overflow: hidden; }
+        .col-view { display: none; flex-direction: column; gap: 10px; overflow-y: auto; flex: 2.5; } 
+        .col-view.active-view { display: flex; }
+
+        .section-title { font-weight: bold; color: #666; margin-bottom: 5px; display: flex; justify-content: space-between; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+        
+        .char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+        .char-card { cursor: pointer; background: var(--card); padding: 12px; border-radius: 8px; border-left: 5px solid #ddd; font-size: 0.9rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+        .char-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); z-index: 1; }
+        .char-card.action-social { border-left-color: var(--love); }
+        .char-card.action-work { border-left-color: #f1c40f; }
+        .char-card.action-build { border-left-color: #e67e22; }
+        .char-card.action-lieflat { border-left-color: #a29bfe; background: #f8f8ff; }
+        .char-card.action-eat { border-left-color: #00b894; background: #f0fff4; }
+        .char-card.action-crime { border-left-color: var(--crime); background: #fcf0ff; }
+        .char-card.action-shop { border-left-color: var(--item); background: #fff5f0; } 
+        .char-card.action-use { border-left-color: #00cec9; background: #e0f7fa; }
+        
+        .bar-container { height: 6px; background: #eee; margin: 8px 0; border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0; transition: width 0.3s; }
+        .hp-fill { background: #ff7675; }
+        .food-fill { background: #fdcb6e; }
+
+        .build-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+        .build-card { cursor: pointer; background: var(--card); padding: 15px; border-radius: 8px; opacity: 0.6; filter: grayscale(1); transition: 0.3s; border: 2px dashed #ccc; display: flex; flex-direction: column; justify-content: space-between; }
+        .build-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .build-card.built { opacity: 1; filter: grayscale(0); border: 2px solid #27ae60; background: #f0fff4; }
+        .build-card.building { opacity: 0.9; filter: grayscale(0.5); border: 2px solid #e67e22; }
+        .build-prog { font-size: 0.85rem; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
+        .category-header { grid-column: 1 / -1; font-weight: bold; margin-top: 15px; margin-bottom: 5px; border-left: 4px solid #aaa; padding-left: 8px; background: #f0f2f5; padding: 5px; border-radius: 4px; }
+
+        .col-right { flex: 1; background: var(--dark); color: #dfe6e9; border-radius: 10px; padding: 15px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; display: flex; flex-direction: column; min-width: 250px; }
+        .log-entry { margin-bottom: 8px; line-height: 1.4; border-bottom: 1px solid #444; padding-bottom: 4px; }
+        .log-time { color: #74b9ff; opacity: 0.7; margin-right: 5px; font-size: 0.8em; }
+        .tag-love { color: #ff7675; }
+        .tag-reject { color: #a29bfe; font-weight: bold; }
+        .tag-drama { color: #fdcb6e; font-weight: bold; }
+        .tag-build { color: #00b894; }
+        .tag-venue { color: #81ecec; font-style: italic; }
+        .tag-crime { color: #e056fd; font-weight: bold; text-shadow: 0 0 2px rgba(142, 68, 173, 0.5); }
+        .tag-event { color: #0984e3; font-weight: bold; background: rgba(9, 132, 227, 0.1); padding: 2px 4px; border-radius: 3px;}
+        .tag-item { color: var(--item); font-weight: bold; }
+        .tag-use { color: #00cec9; }
+
+        @media (max-width: 800px) { 
+            .game-container { flex-direction: column; overflow-y: auto; } 
+            .col-right { height: 200px; flex: none; order: 3; }
+            .col-view { flex: none; }
+        }
+
+        /* 模态框与关系视图 */
+        .relation-view { display: none; flex: 1; background: var(--card); padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; flex-direction: column; }
+        .relation-view.active { display: flex; }
+        
+        .rel-layout { display: flex; gap: 20px; flex: 1; min-height: 0; height: 100%; }
+        .rel-graph { flex: 2; border: 1px solid #eee; border-radius: 8px; position: relative; background: #fdfdfd; overflow: hidden; }
+        .rel-list { flex: 1; overflow-y: auto; overflow-x: hidden; font-size: 0.9rem; padding-right: 5px; border-left: 1px solid #eee; padding-left: 10px; }
+        .rel-item { padding: 8px; border-bottom: 1px solid #eee; }
+        .rel-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; color: white; }
+        .tag-spouse { background: #e84393; } .tag-lover { background: #ff7675; } .tag-mistress { background: #ff8c00; } .tag-friend { background: #74b9ff; } .tag-bestfriend { background: #3498db; } .tag-ex { background: #636e72; } .tag-stranger { background: #95a5a6; } .tag-enemy { background: #c0392b; }
+        
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* 模态框 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .modal-header h3 { margin: 0; font-size: 1.3rem; }
+        .modal-close { cursor: pointer; font-size: 1.5rem; color: #999; background: none; border: none; padding: 0; width: 30px; height: 30px; }
+        .modal-close:hover { color: #333; }
+
+        .personality-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .personality-item { background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #ddd; }
+        .personality-item.chaos { border-left-color: #e74c3c; }
+        .personality-item.peace { border-left-color: #27ae60; }
+        .personality-item.neutral { border-left-color: #3498db; }
+        .personality-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
+        .personality-desc { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+        .personality-stats { font-size: 0.85rem; color: #555; }
+        .stat-item { margin: 3px 0; }
+        .stat-positive { color: #27ae60; }
+        .stat-negative { color: #e74c3c; }
+
+        .detail-group { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .detail-group:last-child { border-bottom: none; }
+        .detail-label { font-weight: bold; color: #666; margin-bottom: 5px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+        .detail-val { font-size: 1.05rem; }
+        .detail-desc { font-size: 0.9rem; color: #888; margin-top: 4px; font-style: italic; }
+        .trait-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #f0f0f0; color: #333; margin-right: 5px; font-size: 0.9rem; margin-bottom: 5px; }
+        .ideology-box { padding: 10px; border-radius: 6px; background: #f9f9f9; border: 1px solid #eee; margin-top: 5px; }
+        .edit-btn { font-size: 0.8rem; color: var(--primary); cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; }
+        
+        .rank-list { display: flex; flex-direction: column; gap: 10px; }
+        .rank-item { display: flex; align-items: center; background: #f8f9fa; padding: 10px 15px; border-radius: 8px; border: 1px solid #eee; }
+        .rank-num { width: 40px; font-weight: bold; font-size: 1.2rem; color: #999; text-align: center; margin-right: 10px; }
+        .rank-1 { color: #f1c40f; font-size: 1.5rem; }
+        .rank-2 { color: #bdc3c7; font-size: 1.4rem; }
+        .rank-3 { color: #e67e22; font-size: 1.3rem; }
+        .rank-info { flex: 1; }
+        .rank-name { font-weight: bold; font-size: 1.05rem; }
+        .rank-val { font-weight: bold; color: #27ae60; font-family: monospace; font-size: 1.1rem; }
+        
+        .job-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .job-name { font-weight: bold; }
+        .job-wage { color: #e67e22; font-weight: bold; }
+        .job-loc { font-size: 0.85rem; color: #999; }
+        
+        .job-section-header { padding: 8px; font-weight: bold; background: #f0f2f5; border-left: 4px solid #333; margin-top: 15px; margin-bottom: 5px; border-radius: 4px; }
+        
+        /* 拨款/操作弹窗样式 */
+        .fund-list { display: flex; flex-direction: column; gap: 5px; }
+        .fund-item { padding: 8px; background: #f9f9f9; border-radius: 4px; cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
+        .fund-item:hover { background: #eef5ff; border-color: var(--primary); }
+        .fund-item.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+        .action-btn { padding: 8px; border: 1px solid #ddd; border-radius: 5px; background: #f8f9fa; cursor: pointer; font-size: 0.9rem; transition: 0.2s; text-align: center; }
+        .action-btn:hover { background: #e1e4e8; border-color: #ccc; }
+
+        /* 活动策划卡片 */
+        .event-card { display: flex; flex-direction: column; background: #f8f9fa; border: 1px solid #eee; border-radius: 6px; padding: 10px; gap: 5px; transition: 0.2s; }
+        .event-card:hover { border-color: var(--primary); background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .event-header { display: flex; justify-content: space-between; align-items: center; }
+        .event-name { font-weight: bold; font-size: 1.1rem; }
+        .event-cost { font-weight: bold; color: #e67e22; background: #fff3e0; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem; }
+        .event-desc { font-size: 0.9rem; color: #666; margin: 5px 0; min-height: 32px; }
+        .event-btn { background: var(--primary); color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .event-btn:hover { opacity: 0.9; }
+        .event-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .staff-list-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; background: #f9f9f9; align-items: center; }
+        .staff-role { font-weight: bold; color: #2d3436; margin-right: 5px; }
+        .staff-name { color: #0984e3; font-weight: bold; }
+        
+        /* 物品与背包 */
+        .bag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 5px; margin-top: 5px; }
+        .bag-item { background: #fff5f0; border: 1px solid #e17055; border-radius: 4px; padding: 5px; text-align: center; font-size: 0.8rem; color: #d35400; cursor:help; }
+        
+        /* 新增：足迹历史列表样式 */
+        .history-list { font-size: 0.85rem; color: #555; background: #f8f9fa; border-radius: 6px; padding: 8px; border: 1px solid #eee; max-height: 150px; overflow-y: auto; }
+        .history-item { padding: 4px 0; border-bottom: 1px dashed #e0e0e0; }
+        .history-item:last-child { border-bottom: none; }
+        .history-time { color: #999; font-size: 0.8em; margin-right: 5px; font-family: monospace; }
+
+        /* 新增：物品悬浮提示框样式 */
+        .tooltip-item { position: relative; cursor: help; }
+        .tooltip-item:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            z-index: 9999;
+            width: max-content;
+            max-width: 220px;
+            line-height: 1.4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+        .tooltip-item:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-group">
+        <h1>🏡 快乐小镇 <small>Ver 2.4.4</small></h1>
+        <div style="font-size: 0.9rem;">
+            <span>📅 <span id="game-day">周一</span></span> |
+            <span>🕒 <span id="game-time">08:00</span></span> <button class="btn speed" onclick="toggleSpeed()" id="speed-btn">⏸ 正常</button> |
+            <span>👥 居民: <span id="resident-count">0</span></span> | 
+            <span>💰 镇库: <span id="town-money">0</span> <button class="btn fund" onclick="showEmbezzle()">💸 拨款</button></span>
+        </div>
+    </div>
+    <div class="header-group">
+        <button class="btn create" onclick="inputNewResident()">➕ 入住新居民</button>
+        <button class="btn purple" onclick="showTownEvents()">🎉 举办活动</button>
+        <button class="btn gold" onclick="showLeaderboard()">🏆 排行榜</button>
+        <button class="btn cyan" onclick="showJobBoard()">📋 工作榜</button>
+        <button class="btn" onclick="showPersonalityInfo()">📖 性格说明</button>
+        <button class="btn" onclick="toggleRelationView()">❤ 关系谱</button>
+        <span style="font-size:0.8rem;">自动存档: <input type="number" id="autosave-rate" value="30" min="5">秒</span>
+        <button class="btn save" onclick="manualSave()">💾 存档</button>
+        <button class="btn reset" onclick="resetData()">🗑 重置</button>
+    </div>
+</header>
+
+<div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('residents')" id="tab-residents">👥 居民状态</button>
+    <button class="tab-btn" onclick="switchTab('buildings')" id="tab-buildings">🏗️ 小镇建设</button>
+</div>
+
+<div class="game-container" id="main-view">
+    <div class="col-view active-view" id="view-residents">
+        <div class="section-title">居民生活圈 <small style="font-weight:normal; font-size:0.8em; color:#999;">(点击卡片查看详情)</small></div>
+        <div class="char-grid" id="char-list"></div>
+    </div>
+
+    <div class="col-view" id="view-buildings">
+        <div class="section-title">公共设施建设 <small style="font-weight:normal; font-size:0.8em; color:#999;">(点击建筑查看员工与工资)</small></div>
+        <div class="build-grid" id="build-list"></div>
+    </div>
+
+    <div class="col-right" id="game-log">
+        <div class="log-entry">✨ 游戏开始。Ver 2.4.4 罪恶统计版。</div>
+    </div>
+</div>
+
+<div class="relation-view" id="relation-view">
+    <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
+        <h2 style="margin:0; font-size:1.2rem">❤ 居民关系谱</h2>
+        <button class="btn" onclick="toggleRelationView()">🔙 返回小镇</button>
+    </div>
+    <div id="rel-stats" style="background:#f8f9fa; padding:10px; border-radius:6px; margin-bottom:15px; font-size:0.9rem; display:flex; gap:20px; border:1px solid #eee;">
+        <span style="color:#e17055">🔥 <b>人气王:</b> <span id="stat-pop">计算中...</span></span>
+        <span style="color:#636e72">🍂 <b>小透明:</b> <span id="stat-lonely">计算中...</span></span>
+    </div>
+    <div class="rel-layout">
+        <div class="rel-graph" id="rel-graph-container"><canvas id="rel-canvas"></canvas></div>
+        <div class="rel-list" id="rel-list"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="personality-modal"><div class="modal-content"><div class="modal-header"><h3>📖 性格系统说明</h3><button class="modal-close" onclick="closePersonalityInfo()">×</button></div><div class="personality-list" id="personality-list"></div></div></div>
+<div class="modal-overlay" id="char-detail-modal"><div class="modal-content"><div class="modal-header"><h3 id="detail-name">角色详情</h3><button class="modal-close" onclick="closeCharDetail()">×</button></div><div id="detail-content"></div></div></div>
+
+<div class="modal-overlay" id="leaderboard-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🏆 小镇排行榜</h3>
+            <button class="modal-close" onclick="closeLeaderboard()">×</button>
+        </div>
+        <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap: wrap;">
+            <button class="btn" onclick="renderLeaderboard('money')">💰 财富榜</button>
+            <button class="btn" onclick="renderLeaderboard('happiness')" style="background:#ff7675">❤ 幸福榜</button>
+            <button class="btn" onclick="renderLeaderboard('popularity')" style="background:#a55eea">🔥 人气榜</button>
+            <button class="btn" onclick="renderLeaderboard('robbery')" style="background:#2d3436; color:white;">🔪 抢劫榜</button>
+            <button class="btn" onclick="renderLeaderboard('streetwalk')" style="background:#e056fd; color:white;">💋 站街榜</button>
+            <button class="btn" onclick="renderLeaderboard('assault')" style="background:#c0392b; color:white;">😈 劫色榜</button>
+        </div>
+        <div id="leaderboard-list" class="rank-list"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="jobboard-modal"><div class="modal-content"><div class="modal-header"><h3>📋 人才市场 & 工作榜</h3><button class="modal-close" onclick="closeJobBoard()">×</button></div><div id="jobboard-list"></div></div></div>
+<div class="modal-overlay" id="embezzle-modal"><div class="modal-content"><div class="modal-header"><h3>💸 镇库拨款</h3><button class="modal-close" onclick="closeEmbezzle()">×</button></div><div style="margin-bottom:15px;"><p>当前镇库资金: <span id="embezzle-town-money" style="font-weight:bold; color:#f1c40f;">0</span></p><p>选择拨款对象:</p><div id="embezzle-list" class="fund-list" style="max-height:200px; overflow-y:auto; margin-bottom:10px; border:1px solid #eee; padding:5px;"></div><div style="display:flex; gap:10px; align-items:center;"><span>金额:</span><input type="number" id="embezzle-amount" value="100" style="width:100px;"><button class="btn save" onclick="doEmbezzle()">确认拨款</button></div></div></div></div>
+<div class="modal-overlay" id="action-select-modal"><div class="modal-content"><div class="modal-header"><h3>🕹️ 强制安排活动</h3><button class="modal-close" onclick="closeActionSelect()">×</button></div><div id="action-select-content"></div></div></div>
+<div class="modal-overlay" id="town-event-modal"><div class="modal-content"><div class="modal-header"><h3>🎉 活动策划部</h3><button class="modal-close" onclick="closeTownEvents()">×</button></div><p style="color:#666; font-size:0.9rem; margin-bottom:15px;">当前镇库: <span id="event-town-money" style="font-weight:bold; color:#f1c40f; font-size:1.1rem;">0</span> (花费资金举办全镇活动)</p><div id="town-event-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px;"></div></div></div>
+<div class="modal-overlay" id="building-detail-modal"><div class="modal-content"><div class="modal-header"><h3 id="b-detail-name">建筑详情</h3><button class="modal-close" onclick="closeBuildingDetail()">×</button></div><div id="b-detail-content"></div></div></div>
+
+<script>
+    // --- 配置数据 ---
+    const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "小格蕾修"];
+    
+    const ITEMS_DB = {
+        "rose": { name: "🌹 玫瑰", price: 50, type: "gift", loveBonus: 15, desc: "赠人玫瑰，手有余香" },
+        "baozi_tofu": { name: "🥟 豆腐包", price: 2, type: "food", hungerBonus: 10, desc: "素食主义者的最爱" },
+        "baozi_pork": { name: "🥩 猪肉包", price: 4, type: "food", hungerBonus: 20, desc: "皮薄馅大汁多" },
+        "baozi_beef": { name: "🐮 牛肉包", price: 5, type: "food", hungerBonus: 25, desc: "实实在在的牛肉" },
+        "water_wahaha": { name: "🥤 娃哈哈", price: 2, type: "drink", hungerBonus: 2, happinessBonus: 1, desc: "童年的味道" },
+        "water_ganten": { name: "💧 百岁山", price: 4, type: "drink", hungerBonus: 2, happinessBonus: 3, desc: "水中贵族" },
+        "noodle_beef": { name: "🍜 康师傅", price: 5, type: "food", hungerBonus: 30, desc: "红烧牛肉面，就是这个味" },
+        "chips_lays": { name: "🥔 乐事薯片", price: 6, type: "snack", hungerBonus: 5, happinessBonus: 5, desc: "原味最经典" },
+        "cola_pepsi": { name: "🥤 日本生可乐", price: 5, type: "drink", hungerBonus: 3, happinessBonus: 4, desc: "听说很好喝" },
+        "coffee_instant": { name: "☕ 速溶咖啡", price: 6, type: "drink", hungerBonus: 2, happinessBonus: 5, desc: "提神醒脑" },
+        "sushi_box": { name: "🍱 寿司拼盘", price: 12, type: "food", hungerBonus: 35, happinessBonus: 3, desc: "便利店的高级货" },
+        "beer_tsingtao": { name: "🍺 青岛啤酒", price: 6, type: "alcohol", hungerBonus: 2, happinessBonus: 6, desc: "哈啤酒吃嘎啦" },
+        "beer_laoshan": { name: "🍺 崂山啤酒", price: 5, type: "alcohol", hungerBonus: 2, happinessBonus: 5, desc: "甚至能当水喝" },
+        "cocktail": { name: "🍸 鸡尾酒", price: 25, type: "alcohol", hungerBonus: -2, happinessBonus: 15, desc: "色彩斑斓的微醺" },
+        "bloody_mary": { name: "🍹 血腥玛丽", price: 30, type: "alcohol", hungerBonus: -2, happinessBonus: 18, desc: "口味独特的经典" },
+        "rum": { name: "🥃 朗姆酒", price: 35, type: "alcohol", hungerBonus: -3, happinessBonus: 20, desc: "海盗的最爱" },
+        "tequila": { name: "🌵 龙舌兰", price: 40, type: "alcohol", hungerBonus: -3, happinessBonus: 22, desc: "舔一口盐，干一杯酒" },
+        "whisky": { name: "🥃 威士忌", price: 50, type: "alcohol", hungerBonus: -4, happinessBonus: 25, desc: "男人的浪漫" }
+    };
+
+    // --- 新增：生成物品属性文本的辅助函数 ---
+    function getItemTooltipText(itemId) {
+        const item = ITEMS_DB[itemId];
+        if (!item) return "";
+        
+        let parts = [];
+        parts.push(item.desc); // 第一行：简介
+        parts.push("──────────"); // 分割线
+        
+        if (item.type === 'gift') {
+            parts.push(`💗 增加好感: +${item.loveBonus || 0}`);
+        } else {
+            if (item.hungerBonus !== undefined && item.hungerBonus !== 0) {
+                const sign = item.hungerBonus > 0 ? '+' : '';
+                parts.push(`🍗 饱食度: ${sign}${item.hungerBonus}`);
+            }
+            if (item.happinessBonus !== undefined && item.happinessBonus !== 0) {
+                const sign = item.happinessBonus > 0 ? '+' : '';
+                parts.push(`❤ 心情值: ${sign}${item.happinessBonus}`);
+            }
+        }
+        parts.push(`💰 价值: ${item.price}`);
+        
+        return parts.join('\n'); // 用换行符连接
+    }
+
+    const BUILDINGS_BLUEPRINT = [
+        { id: "baozi", name: "🥯 包子铺", category: "food", cost: 100, desc: "物美价廉的早餐店", effect: "shop", price: 0, open: 5, close: 14, jobs: ["早点工"], sells: ["baozi_tofu", "baozi_pork", "baozi_beef"] }, 
+        { id: "ramen", name: "🍜 兰州拉面", category: "food", cost: 250, desc: "正宗牛肉面，管饱", effect: "food", price: 12, food: 35, open: 7, close: 22, jobs: ["拉面师傅"] },
+        { id: "711", name: "🏪 7-11便利店", category: "food", cost: 300, desc: "24小时营业", effect: "shop", price: 0, open: 0, close: 24, jobs: ["收银员"], sells: ["water_wahaha", "water_ganten", "noodle_beef", "chips_lays", "cola_pepsi", "coffee_instant", "sushi_box", "beer_tsingtao", "beer_laoshan"] },
+        { id: "kfc", name: "🍗 肯德基", category: "food", cost: 600, desc: "疯狂星期四", effect: "food", price: 30, food: 50, open: 10, close: 22, jobs: ["前台", "炸鸡厨师"] },
+        { id: "police", name: "👮 派出所", category: "service", cost: 800, desc: "维护小镇治安", effect: "security", price: 0, open: 0, close: 24, jobs: ["警察", "警察"] }, 
+        { id: "church", name: "⛪ 婚礼教堂", category: "service", cost: 1200, desc: "神圣之地", effect: "marriage", price: 20, open: 8, close: 20, jobs: ["神父"] },
+        { id: "park", name: "🌳 中心公园", category: "fun", cost: 200, desc: "免费休闲", effect: "romance", price: 0, open: 0, close: 24, jobs: [] },
+        { id: "netcafe", name: "🎮 麦克电竞", category: "fun", cost: 450, desc: "通宵开黑", effect: "fun", price: 15, open: 0, close: 24, jobs: ["网管", "网吧保洁"] },
+        { id: "cinema", name: "🎬 电影院", category: "fun", cost: 400, desc: "恢复心情快", effect: "fun", price: 40, open: 10, close: 24, jobs: ["售票员"] },
+        { id: "bar", name: "🍺 深夜酒吧", category: "fun", cost: 500, desc: "买醉消愁", effect: "shop", price: 50, open: 18, close: 2, jobs: ["老板", "大厨", "跑堂"], closedDays: [0], sells: ["beer_tsingtao", "cocktail", "bloody_mary", "rum", "tequila", "whisky"] },
+        { id: "footshop", name: "💆 神秘洗脚店", category: "fun", cost: 600, desc: "涩情交易场所", effect: "ntr", price: 0, open: 0, close: 24, jobs: ["老板"] },
+        { id: "hotel", name: "🏩 快捷酒店", category: "fun", cost: 800, desc: "懂得都懂", effect: "ntr", price: 100, open: 0, close: 24, jobs: ["前台", "保洁"] },
+        { id: "flowershop", name: "🌹 浪漫花店", category: "shop", cost: 300, desc: "购买鲜花送给心上人", effect: "shop", price: 50, open: 9, close: 20, jobs: ["花艺师"], sells: ["rose"] }
+    ];
+
+    const CATEGORY_NAMES = { 'food': '🍔 饮食餐饮', 'service': '🏥 公共服务', 'fun': '🎡 休闲娱乐', 'shop': '🛍️ 商业购物' };
+
+    const DAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+    const TRAITS = [{id:"sleepy",name:"喜欢睡觉",desc:"睡眠时间更长"},{id:"promiscuous",name:"淫乱",desc:"更容易交欢，增加颜值"},{id:"money-loving",name:"爱钱",desc:"更珍惜金钱"}];
+    const PERSONALITIES = [{name:"易怒",chaosBonus:0.3,loveGain:-0.5,desc:"脾气暴躁"},{name:"沉着",chaosBonus:-0.2,loveGain:0.3,desc:"冷静理智"},{name:"开朗",chaosBonus:-0.1,loveGain:0.5,desc:"乐观外向"},{name:"内向",chaosBonus:0.1,loveGain:-0.2,desc:"不善社交"},{name:"温柔",chaosBonus:-0.15,loveGain:0.4,desc:"温和友善"},{name:"刻薄",chaosBonus:0.25,loveGain:-0.3,desc:"说话带刺"},{name:"幽默",chaosBonus:-0.1,loveGain:0.3,desc:"风趣幽默"},{name:"严肃",chaosBonus:0.05,loveGain:0,desc:"一本正经"}];
+    const IDEOLOGIES = [{name:"共产主义",color:"#e74c3c",chaosMod:-0.3,loveMod:0.5,wageMod:0,desc:"追求共同富裕"},{name:"社会主义",color:"#e74c3c",chaosMod:-0.25,loveMod:0.5,wageMod:0,desc:"公平正义，团结互助"},{name:"民主主义",color:"#3498db",chaosMod:-0.2,loveMod:0.6,wageMod:0,desc:"自由平等"},{name:"资本主义",color:"#f1c40f",chaosMod:-0.1,loveMod:0.3,wageMod:0.07,desc:"金钱至上，效率优先"},{name:"君主立宪",color:"#9b59b6",chaosMod:-0.15,loveMod:0.6,wageMod:0,desc:"传统与现代"},{name:"军国主义",color:"#2c3e50",chaosMod:0.1,loveMod:0,wageMod:0.1,desc:"武力至上"}];
+    const ODD_JOBS = [{name:"清洁工",wage:5,mood:-3},{name:"发传单",wage:4,mood:-2},{name:"搬砖",wage:6,mood:-4},{name:"躺平",wage:-3,mood:5}];
+    const REL_TRANSLATE = { 'friend': '朋友', 'stranger': '陌生人', 'bestfriend': '挚友', 'lover': '情侣', 'spouse': '配偶', 'mistress': '小三', 'ex': '前任', 'enemy': '仇人' };
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const choose = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    
+    const TOWN_EVENTS = [
+        { id: 'concert', name: '🎤 巨星演唱会', cost: 500, desc: '全员快乐+20，关系+5。10%概率翻车效果减半。', emoji: '🎤' },
+        { id: 'matchmaking', name: '💘 镇立相亲大会', cost: 200, desc: '所有单身者尝试表白(成功率up)，成对后快乐+5。', emoji: '💘' },
+        { id: 'charity', name: '🎗️ 慈善募捐', cost: 0, desc: '居民自愿捐款给镇库，快乐-5，关系+5。', emoji: '🎗️' },
+        { id: 'anniversary', name: '🎈 小镇纪念日', cost: 100, desc: '全员快乐+10，关系微量提升。', emoji: '🎈' },
+        { id: 'fireworks', name: '🎆 盛大烟花会', cost: 250, desc: '全员快乐+25，关系+5。5%概率引发火灾烧毁建筑。', emoji: '🎆' },
+        { id: 'jobfair', name: '🤝 大型招聘会', cost: 150, desc: '帮助无业游民自动填补空缺岗位，入职快乐+10。', emoji: '🤝' }
+    ];
+
+    function getJobWage(role) { 
+        if (role.includes("老板")) return 30; if (role.includes("神父")) return 25; if (role.includes("警察")) return 22; 
+        if (role.includes("大厨")) return 18; if (role.includes("花艺")) return 16; if (role.includes("炸鸡")) return 16; if (role.includes("网管")) return 15; if (role.includes("前台")) return 14; if (role.includes("拉面")) return 13; if (role.includes("收银")) return 12; if (role.includes("售票")) return 12; if (role.includes("网吧保洁")) return 10; if (role.includes("保洁")) return 10; if (role.includes("跑堂")) return 10; if (role.includes("早点")) return 10; if (role.includes("卖银")) return 20; return 10; 
+    }
+    function getBaseJobWage(role) { return getJobWage(role); }
+
+    class Character {
+        constructor(name) {
+            this.name = name; this.gender = Math.random() > 0.5 ? '♂ 男' : '♀ 女'; this.happiness = 60; this.hunger = 80; this.money = 0; this.job = null; this.currentAction = "发呆"; this.relationships = {}; this.partner = null; this.interactingWith = null; 
+            this.personality = choose(PERSONALITIES); this.traits = []; this.ideology = choose(IDEOLOGIES);
+            this.nextActionOverride = null; 
+            this.bag = []; 
+            this.history = [];
+            
+            // --- 新增：统计数据 ---
+            this.stat_rob = 0;        // 抢劫别人次数
+            this.stat_be_robbed = 0;  // 被抢次数
+            this.stat_streetwalk = 0; // 站街次数
+            this.stat_assault = 0;    // 劫色别人次数
+            this.stat_be_assaulted = 0; // 被劫色次数
+            // ------------------
+
+            const traitCount = rand(0, 2); for (let i = 0; i < traitCount; i++) { const availableTraits = TRAITS.filter(t => !this.traits.find(tt => tt.id === t.id)); if (availableTraits.length > 0) this.traits.push(choose(availableTraits)); }
+            this.constructionContribution = {}; this.prostitute = null; 
+            
+            // --- 新增：颜值系统 ---
+            this.appearance = rand(40, 80); // 基础颜值
+            if (this.hasTrait('promiscuous')) this.appearance += 15; // 淫乱加成
+            if (this.hasTrait('sleepy')) this.appearance += 5; // 美容觉加成
+            if (this.personality.name === '开朗') this.appearance += 5;
+            if (this.personality.name === '阴沉') this.appearance -= 5;
+            if (this.personality.name === '温柔') this.appearance += 3;
+            this.appearance = Math.max(0, Math.min(100, this.appearance));
+        }
+        hasTrait(traitId) { return this.traits.some(t => t.id === traitId); }
+        
+        addLog(msg) {
+            this.history.unshift(msg);
+            if (this.history.length > 10) this.history.pop();
+        }
+
+        getSleepSchedule() { let start, end; if (this.job && (this.job.buildingId === 'bar' || this.job.buildingId === 'netcafe')) { start = 4; end = 12; } else { start = 23; end = 7; } if (this.hasTrait('sleepy')) { if (start > end) { start = (start - 1 + 24) % 24; end = (end + 1) % 24; } else { start = Math.max(0, start - 1); end = Math.min(24, end + 1); } } return { start, end }; }
+        decideProposal(askerName, type) { const rel = this.relationships[askerName]; let chance = rel.love + (this.happiness - 50) / 2; let threshold = 0; if (type === 'date') threshold = 30; if (type === 'confess') threshold = 75; if (type === 'propose') threshold = 90; chance += rand(-10, 10); return chance >= threshold; }
+        calculateWage(baseWage) { let bonus = this.ideology && this.ideology.wageMod ? this.ideology.wageMod : 0; return Math.floor(baseWage * (1 + bonus)); }
+    }
+
+    class Building {
+        constructor(blueprint) { this.id = blueprint.id; this.name = blueprint.name; this.category = blueprint.category || 'fun'; this.totalCost = blueprint.cost; this.currentProgress = 0; this.isBuilt = false; this.effect = blueprint.effect; this.desc = blueprint.desc; this.price = blueprint.price || 0; this.food = blueprint.food || 0; this.open = blueprint.open; this.close = blueprint.close; this.jobs = blueprint.jobs || []; this.staff = []; this.closedDays = blueprint.closedDays || []; this.prostitutes = []; this.sells = blueprint.sells || []; 
+            this.history = [];
+        }
+        addLog(msg) {
+            this.history.unshift(msg);
+            if (this.history.length > 10) this.history.pop();
+        }
+        isOpen(hour, day) { if (!this.isBuilt) return false; if (this.closedDays.includes(day)) return false; if (this.jobs.length > 0 && this.staff.length === 0) return false; if (this.open === 0 && this.close === 24) return true; if (this.close < this.open) return hour >= this.open || hour < this.close; return hour >= this.open && hour < this.close; }
+    }
+
+    class Game {
+        constructor() { 
+            this.chars = []; this.buildings = []; this.townMoney = 0; this.gameTime = 480; this.gameDay = 1; this.autoSaveTimer = 0; this.lastSaveTime = Date.now(); 
+            this.speed = 1500; this.speedLevel = 1; 
+            this.loadOrInit(); this.loopId = setInterval(() => this.tick(), this.speed); 
+        }
+        loadOrInit() { const saveStr = localStorage.getItem('happyTownV2_Save'); if (saveStr) { this.loadFromJSON(saveStr); this.checkAndAddNewChars(); this.log("📂 读取存档成功！"); } else { this.initNewGame(); } this.renderUIStatic(); }
+        checkAndAddNewChars() { let added = false; NAMES.forEach(name => { if (!this.chars.find(c => c.name === name)) { this.chars.push(new Character(name)); this.log(`[🎉新居民] ${name} 入住！`); added = true; } }); if (added) { this.chars.forEach(c1 => { this.chars.forEach(c2 => { if (c1.name !== c2.name && !c1.relationships[c2.name]) { c1.relationships[c2.name] = { love: 0, status: 'stranger' }; } }); }); } }
+        initNewGame() { 
+            this.chars = NAMES.map(n => { let c = new Character(n); NAMES.forEach(target => { if (target !== n) c.relationships[target] = { love: 0, status: 'stranger' }; }); return c; }); 
+            this.buildings = BUILDINGS_BLUEPRINT.map(b => new Building(b)); 
+            const park = this.buildings.find(b => b.id === 'park'); if(park) { park.isBuilt = true; park.currentProgress = park.totalCost; }
+            const baozi = this.buildings.find(b => b.id === 'baozi'); if(baozi) { baozi.isBuilt = true; baozi.currentProgress = baozi.totalCost; }
+        }
+        tick() { this.gameTime += 10; if (this.gameTime >= 1440) { this.gameTime = 0; this.gameDay = (this.gameDay + 1) % 7; } if (this.gameTime % 60 === 0) { this.runElectionsAndHiring(); this.chars.forEach(c => { c.hunger = Math.max(0, c.hunger - 1); if (c.hunger === 0) c.happiness -= 2; }); } this.decideAction(choose(this.chars)); if (Date.now() - this.lastSaveTime > (parseInt(document.getElementById('autosave-rate').value)||30) * 1000) this.saveData(true); this.updateUI(); }
+        
+        getDateTimeStr() {
+            const h = Math.floor(this.gameTime / 60); const m = this.gameTime % 60;
+            return `[${DAYS[this.gameDay]} ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}]`;
+        }
+
+        decideAction(p) {
+            if (p.nextActionOverride) {
+                const cmd = p.nextActionOverride; p.nextActionOverride = null;
+                this.log(`[🕹️强制] 上帝控制 **${p.name}** 去 ${cmd.desc}...`, "tag-build");
+                if (cmd.type === 'work' && p.job) { const b = this.buildings.find(x => x.id === p.job.buildingId); if(b) { this.doWork(p, b); return; } }
+                else if (cmd.type === 'rest') { this.doRest(p, {name:"家", price:0}); return; }
+                else if (cmd.type === 'build') { const b = this.buildings.find(x => x.id === cmd.target); if (b) { this.doBuild(p, b); return; } }
+                else if (cmd.type === 'visit') { const b = this.buildings.find(x => x.id === cmd.target); if (b) { if(b.effect==='food') this.doEat(p, b); else if(b.effect==='shop') this.doShopping(p, b); else this.doRest(p, b); return; } }
+                else if (cmd.type === 'social') { const t = this.chars.find(x => x.name === cmd.target); if (t) { const park = this.buildings.find(b=>b.id==='park'); this.doSocialTarget(p, t, park || {name:"路边", effect:"none"}); return; } }
+            }
+
+            this.breakInteraction(p); const hour = Math.floor(this.gameTime / 60);
+            
+            if (p.hunger < 50) {
+                 const foodId = p.bag.find(id => ITEMS_DB[id] && (ITEMS_DB[id].type === 'food'));
+                 if (foodId) { this.doUseItem(p, foodId); return; }
+            }
+            
+            if (p.hunger < 50) { const restaurants = this.buildings.filter(b => b.isBuilt && b.effect === 'food' && b.isOpen(hour, this.gameDay) && p.money >= b.price); if (restaurants.length > 0) { this.doEat(p, choose(restaurants)); return; } }
+            
+            // --- 犯罪判定 (包含抢劫与新增的劫色) ---
+            const isPoor = p.money < 10; const isGreedy = p.hasTrait('money-loving'); const isMilitant = p.ideology.name === '军国主义';
+            
+            // 劫色判定条件：快乐低(寻求刺激) 或 颜值低(嫉妒) 或 淫乱特性
+            const isHorny = p.hasTrait('promiscuous');
+            const isUgly = p.appearance < 50;
+            const isDepressed = p.happiness < 30;
+            
+            const policeStation = this.buildings.find(b => b.id === 'police'); const hasPolice = policeStation && policeStation.isBuilt && policeStation.staff.length > 0; const deterrent = hasPolice ? 0.02 : 0;
+            
+            // 抢劫概率
+            let robChance = 0; if (isPoor) robChance += 0.02; if (isGreedy) robChance += 0.01; if (isMilitant) robChance += 0.03; robChance = Math.max(0, robChance - deterrent); 
+            
+            // 劫色概率
+            let assaultChance = 0; 
+            if (isHorny) assaultChance += 0.04; 
+            if (isUgly) assaultChance += 0.02; 
+            if (isDepressed) assaultChance += 0.02;
+            assaultChance = Math.max(0, assaultChance - deterrent);
+
+            const roll = Math.random();
+            if (roll < robChance) { 
+                if (this.doRobbery(p)) return; 
+            } else if (roll < robChance + assaultChance) {
+                // --- 触发劫色逻辑 ---
+                if (this.doSexualAssault(p)) return;
+            }
+
+            const sleepSchedule = p.getSleepSchedule(); let isSleepTime = (sleepSchedule.start > sleepSchedule.end) ? (hour >= sleepSchedule.start || hour < sleepSchedule.end) : (hour >= sleepSchedule.start && hour < sleepSchedule.end);
+            if (isSleepTime) { p.currentAction = "😴 睡觉"; let recovery = p.hasTrait('sleepy') ? 4 : 2; p.happiness = Math.min(100, p.happiness + recovery); return; }
+            if (p.job && p.hunger > 0) { const workplace = this.buildings.find(b => b.id === p.job.buildingId); if (workplace && workplace.isOpen(hour, this.gameDay)) { if (workplace.open === 0 && workplace.close === 24 ? Math.random() < 0.7 : true) { this.doWork(p, workplace); return; } } }
+            if (p.prostitute && p.hunger > 0) { const footshop = this.buildings.find(b => b.id === p.prostitute.buildingId); if (footshop && footshop.isBuilt && footshop.isOpen(hour, this.gameDay)) { this.doProstitution(p, footshop); return; } }
+            if (!p.job && p.money < 20 && p.hunger > 0) { if (p.hasTrait('promiscuous') && Math.random() < 0.6) { this.doStreetwalking(p); } else { this.doOddJob(p); } return; }
+            
+            if (p.happiness < 40) {
+                const funItemId = p.bag.find(id => ITEMS_DB[id] && (ITEMS_DB[id].type === 'alcohol' || ITEMS_DB[id].type === 'snack' || ITEMS_DB[id].type === 'drink'));
+                if (funItemId) { this.doUseItem(p, funItemId); return; }
+                this.doRest(p, null); return; 
+            }
+            
+            const multiplier = p.hasTrait('money-loving') ? 2 : 1; 
+            if (p.money > 50 && p.bag.length < 5 && Math.random() < 0.2) {
+                const shops = this.buildings.filter(b => b.isBuilt && b.effect === 'shop' && b.isOpen(hour, this.gameDay));
+                if (shops.length > 0) { this.doShopping(p, choose(shops)); return; }
+            }
+
+            const venues = this.buildings.filter(b => b.isBuilt && b.isOpen(hour, this.gameDay) && (p.money >= b.price * multiplier)); const venue = choose(venues) || { name: "路边", effect: "none", price: 0 }; const pending = this.buildings.find(b => !b.isBuilt);
+            if (roll < 0.3 && p.hunger > 0) { if (pending) { this.doBuild(p, pending); } else if (!p.job) { if (p.hasTrait('promiscuous') && Math.random() < 0.6) this.doStreetwalking(p); else this.doOddJob(p); } else { this.doSocial(p, venue); } } else if (roll < 0.8) { this.doSocial(p, venue); } else { this.doRest(p, venue); }
+        }
+        
+        // --- 新增：劫色逻辑 ---
+        doSexualAssault(p) {
+            // 寻找目标：不是自己，且颜值高 (>70)
+            const targets = this.chars.filter(c => c.name !== p.name && c.appearance >= 70);
+            // 如果没有高颜值目标，随机选一个
+            const victim = targets.length > 0 ? choose(targets) : choose(this.chars.filter(c => c.name !== p.name));
+            if (!victim) return false;
+
+            const policeStation = this.buildings.find(b => b.id === 'police'); 
+            const hasPolice = policeStation && policeStation.isBuilt && policeStation.staff.length > 0;
+            let securityLevel = hasPolice ? policeStation.staff.length * 0.3 : 0;
+            
+            // 基础成功率
+            let successChance = 0.6 - securityLevel;
+            if (p.appearance > 80) successChance += 0.2; // 长得帅/美可能容易得手(误)
+
+            const timeStr = this.getDateTimeStr();
+
+            if (Math.random() < successChance) {
+                // 成功
+                p.happiness = Math.min(100, p.happiness + 40); // 变态的快乐
+                victim.happiness -= 50;
+                
+                const pRel = p.relationships[victim.name];
+                const vRel = victim.relationships[p.name];
+                
+                pRel.status = "enemy"; vRel.status = "enemy";
+                pRel.love = -80; vRel.love = -100;
+
+                // --- 新增：计数 ---
+                p.stat_assault = (p.stat_assault || 0) + 1;
+                victim.stat_be_assaulted = (victim.stat_be_assaulted || 0) + 1;
+                // ----------------
+
+                this.log(`[💋劫色] 震惊！**${p.name}** 对颜值高达 ${victim.appearance} 的 **${victim.name}** 实施了猥亵！${p.name}获得了变态的满足。`, "tag-crime");
+                p.currentAction = `[犯罪] 劫色了 ${victim.name}`;
+                
+                p.addLog(`${timeStr} 劫色了 ${victim.name}`);
+                victim.addLog(`${timeStr} 惨遭 ${p.name} 劫色 (心情-50)`);
+                if(policeStation) policeStation.addLog(`${timeStr} 接到报案：${p.name} 骚扰了 ${victim.name}`);
+                return true;
+            } else {
+                // 失败
+                if (hasPolice) {
+                    p.happiness -= 30; p.money = Math.max(0, p.money - 80); // 罚款更重
+                    this.log(`[👮逮捕] **${p.name}** 试图对 **${victim.name}** 图谋不轨，被警察当场抓获！`, "tag-build");
+                    const copName = choose(policeStation.staff); 
+                    const cop = this.chars.find(c => c.name === copName);
+                    if (cop) { cop.money += 25; }
+                    p.currentAction = `[被捕] 劫色未遂，身败名裂`;
+                    p.addLog(`${timeStr} 劫色 ${victim.name} 失败被捕`);
+                } else {
+                    p.happiness -= 20; p.appearance -= 2; // 被打脸毁容一点点
+                    this.log(`[👊反击] **${p.name}** 想劫色 **${victim.name}**，结果被对方一顿暴揍！`, "tag-reject");
+                    p.currentAction = `[失败] 劫色挨揍，鼻青脸肿`;
+                    p.addLog(`${timeStr} 骚扰 ${victim.name} 反被打`);
+                    victim.addLog(`${timeStr} 痛扁了色狼 ${p.name}`);
+                }
+                return true;
+            }
+        }
+
+        doSocialTarget(p, t, venue) {
+            if (p.name === t.name) return; 
+            const pRel = p.relationships[t.name]; const tRel = t.relationships[p.name];
+            this.breakInteraction(t);
+            
+            if (this.tryGift(p, t, venue)) return;
+
+            const timeStr = this.getDateTimeStr();
+            p.addLog(`${timeStr} 和 ${t.name} 在 ${venue.name} 社交`);
+            t.addLog(`${timeStr} 和 ${p.name} 在 ${venue.name} 社交`);
+            if(venue.addLog) venue.addLog(`${timeStr} ${p.name} 与 ${t.name} 在这里约会/聊天`);
+
+            p.currentAction = `[强制] 和 ${t.name} 在 ${venue.name}`; t.currentAction = `[强制] 和 ${p.name} 在 ${venue.name}`; 
+            p.interactingWith = t.name; t.interactingWith = p.name; p.hunger -= 2; t.hunger -= 2;
+            let chaos = p.personality.chaosBonus + t.personality.chaosBonus + p.ideology.chaosMod + t.ideology.chaosMod;
+            if (Math.random() < Math.max(0, Math.min(1, 0.1 + chaos))) {
+                pRel.love -= 5; tRel.love -= 5; this.log(`[💢争吵] ${p.name} 和 ${t.name} 在 ${venue.name} 吵架了。`, "tag-reject");
+            } else {
+                let boost = rand(1, 3); boost += p.personality.loveGain + t.personality.loveGain + p.ideology.loveMod + t.ideology.loveMod; boost = Math.max(0, Math.round(boost)); pRel.love = Math.min(100, pRel.love + boost); tRel.love = Math.min(100, tRel.love + boost); this.updateRelationshipStatus(p, t, pRel, tRel);
+            }
+        }
+
+        showActionSelect(name) {
+            const c = this.chars.find(x => x.name === name); if (!c) return;
+            const modal = document.getElementById('action-select-modal');
+            const content = document.getElementById('action-select-content');
+            
+            let html = `<p>为 <b>${c.name}</b> 选择下一个行动 (立即生效):</p><div class="action-grid">`;
+            html += `<button class="action-btn" onclick="setOverride('${name}', 'rest', '', '回家休息')">🛌 休息/躺平</button>`;
+            if (c.job) { html += `<button class="action-btn" style="border-color:#f1c40f" onclick="setOverride('${name}', 'work', '', '去上班')">💼 去上班</button>`; }
+            const pendings = this.buildings.filter(b => !b.isBuilt);
+            pendings.forEach(b => { html += `<button class="action-btn" style="border-color:#e67e22" onclick="setOverride('${name}', 'build', '${b.id}', '建设 ${b.name}')">🔨 建设: ${b.name}</button>`; });
+            const venues = this.buildings.filter(b => b.isBuilt);
+            venues.forEach(b => { const icon = b.effect === 'food' ? '🍔' : (b.effect === 'shop' ? '🛍️' : '🎡'); html += `<button class="action-btn" onclick="setOverride('${name}', 'visit', '${b.id}', '去 ${b.name}')">${icon} 去: ${b.name}</button>`; });
+            html += `</div><p style="margin-top:10px;">强制社交 (选择对象):</p><div class="action-grid">`;
+            this.chars.forEach(t => { if (t.name !== c.name) { html += `<button class="action-btn" style="border-color:#ff7675" onclick="setOverride('${name}', 'social', '${t.name}', '找 ${t.name}')">❤ 找: ${t.name}</button>`; } });
+            html += `</div>`;
+            content.innerHTML = html;
+            document.getElementById('char-detail-modal').classList.remove('active');
+            modal.classList.add('active');
+        }
+        setOverride(name, type, target, desc) { const c = this.chars.find(x => x.name === name); if (c) { c.nextActionOverride = { type, target, desc }; document.getElementById('action-select-modal').classList.remove('active'); alert(`已安排 ${name} 下一步：${desc}`); } }
+        closeActionSelect() { document.getElementById('action-select-modal').classList.remove('active'); }
+
+        showTownEvents() {
+            const modal = document.getElementById('town-event-modal');
+            const list = document.getElementById('town-event-list');
+            document.getElementById('event-town-money').innerText = this.townMoney;
+            list.innerHTML = '';
+            TOWN_EVENTS.forEach(ev => {
+                const div = document.createElement('div');
+                div.className = 'event-card';
+                const canAfford = this.townMoney >= ev.cost;
+                div.innerHTML = `
+                    <div class="event-header"><span class="event-name">${ev.name}</span><span class="event-cost">-${ev.cost}</span></div>
+                    <div class="event-desc">${ev.desc}</div>
+                    <button class="event-btn" ${canAfford?'':'disabled'} onclick="triggerTownEvent('${ev.id}')">${canAfford?'🎉 立即举办':'💸 资金不足'}</button>
+                `;
+                list.appendChild(div);
+            });
+            modal.classList.add('active');
+        }
+
+        triggerTownEvent(id) {
+            const ev = TOWN_EVENTS.find(x => x.id === id);
+            if (!ev || this.townMoney < ev.cost) return;
+            this.townMoney -= ev.cost;
+            this.log(`[🎉活动] 镇长斥资 💰${ev.cost} 举办了 **${ev.name}**！`, "tag-event");
+            document.getElementById('town-event-modal').classList.remove('active');
+            if (id === 'concert') {
+                const fail = Math.random() < 0.1;
+                if (fail) { this.log(`[😱意外] 音响设备爆炸了！演唱会效果大打折扣！`, "tag-reject"); this.chars.forEach(c => { c.happiness += 5; }); } else { this.chars.forEach(c => { c.happiness += 20; c.happiness = Math.min(100, c.happiness); }); this.chars.forEach(c1 => { this.chars.forEach(c2 => { if (c1.name !== c2.name && c1.relationships[c2.name]) { c1.relationships[c2.name].love = Math.min(100, c1.relationships[c2.name].love + 5); } }); }); }
+            } else if (id === 'matchmaking') {
+                let pairCount = 0; this.chars.forEach(c => { if (!c.partner) { let bestT = null; let maxL = -100; for(let tName in c.relationships) { const t = this.chars.find(x=>x.name===tName); if (t && !t.partner && c.relationships[tName].love > maxL) { maxL = c.relationships[tName].love; bestT = t; } } if (bestT && maxL > 40 && Math.random() < 0.5) { if (bestT.decideProposal(c.name, 'confess') || Math.random() < 0.3) { c.partner = bestT.name; bestT.partner = c.name; c.relationships[bestT.name].status = 'lover'; bestT.relationships[c.name].status = 'lover'; c.happiness += 20; bestT.happiness += 20; this.log(`[❤️配对] 在相亲大会上，**${c.name}** 和 **${bestT.name}** 牵手成功！`, "tag-love"); pairCount++; } } } }); if (pairCount > 0) { this.chars.forEach(c => c.happiness += 5); } else { this.log(`[🍂尴尬] 相亲大会结束了，似乎没人配对成功...`, "tag-reject"); }
+            } else if (id === 'charity') {
+                let totalRaised = 0; this.chars.forEach(c => { if (c.money > 10) { const donation = Math.min(c.money, rand(5, 20)); c.money -= donation; totalRaised += donation; c.happiness -= 5; this.chars.forEach(other => { if(other.name!==c.name) { c.relationships[other.name].love += 2; } }); } }); this.townMoney += totalRaised; this.log(`[🎗️募捐] 居民们共捐款 💰${totalRaised}，虽然心疼钱但关系更紧密了。`, "tag-build");
+            } else if (id === 'anniversary') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); for(let k in c.relationships) c.relationships[k].love += 2; });
+            } else if (id === 'fireworks') {
+                if (Math.random() < 0.05) { const built = this.buildings.filter(b => b.isBuilt); if (built.length > 0) { const burn = choose(built); burn.isBuilt = false; burn.currentProgress = 0; burn.staff.forEach(sName => { const s = this.chars.find(x=>x.name===sName); if(s) { s.job = null; s.happiness -= 30; } }); burn.staff = []; this.log(`[🔥火灾] 天呐！烟花引燃了 **${burn.name}**！建筑被烧毁，需要重建！`, "tag-crime"); this.chars.forEach(c => c.happiness -= 10); } } else { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 25); for(let k in c.relationships) c.relationships[k].love += 5; }); }
+            } else if (id === 'jobfair') {
+                let hiredCount = 0; this.buildings.forEach(b => { if (b.isBuilt && b.staff.length < b.jobs.length) { const needed = b.jobs.length - b.staff.length; for(let i=0; i<needed; i++) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0 && Math.random() < 0.5) { const worker = choose(candidates); const role = b.jobs[b.staff.length]; worker.job = { buildingId: b.id, role: role }; b.staff.push(worker.name); worker.happiness += 10; this.log(`[🤝入职] **${worker.name}** 在招聘会上找到了 **${b.name}** 的工作！`, "tag-build"); hiredCount++; } } } }); if(hiredCount === 0) this.log("招聘会结束了，似乎没有合适的岗位或求职者。", "tag-reject");
+            }
+            this.updateUI();
+        }
+        closeTownEvents() { document.getElementById('town-event-modal').classList.remove('active'); }
+
+
+        toggleSpeed() { clearInterval(this.loopId); this.speedLevel = (this.speedLevel % 3) + 1; if (this.speedLevel === 1) { this.speed = 1500; document.getElementById('speed-btn').innerText = "⏸ 正常"; } else if (this.speedLevel === 2) { this.speed = 750; document.getElementById('speed-btn').innerText = "⏩ 2x"; } else { this.speed = 500; document.getElementById('speed-btn').innerText = "⏩ 3x"; } this.loopId = setInterval(() => this.tick(), this.speed); }
+        accelerateBuild(buildId) { const b = this.buildings.find(x => x.id === buildId); if (!b || b.isBuilt) return; if (this.townMoney >= 50) { this.townMoney -= 50; b.currentProgress += 20; this.log(`[💸加速] 镇长斥资加速 **${b.name}** 建设。`, "tag-build"); if (b.currentProgress >= b.totalCost) { b.isBuilt = true; this.log(`[🔨竣工] **${b.name}** 建成了！`, "tag-build"); this.distributeConstructionReward(b); } this.updateUI(); } else { alert("镇库资金不足 (需要50)！"); } }
+        runElectionsAndHiring() { /* ... 同前 ... */ this.buildings.forEach(b => { if (!b.isBuilt || b.jobs.length === 0) return; if (b.staff.length === 0) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0) { const votes = {}; candidates.forEach(c => votes[c.name] = 0); this.chars.forEach(voter => { let bestC = null; let maxLove = -999; candidates.forEach(c => { let love = (c.name !== voter.name) ? (voter.relationships[c.name]?.love || 0) : 50; love += rand(-20, 20); if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) votes[bestC.name]++; }); let winner = candidates[0]; let maxVotes = -1; for (let name in votes) { if (votes[name] > maxVotes) { maxVotes = votes[name]; winner = candidates.find(c => c.name === name); } } if (winner) { const roleName = b.jobs[0]; winner.job = { buildingId: b.id, role: roleName }; b.staff.push(winner.name); this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build"); } } } else if (b.staff.length < b.jobs.length) { const managerName = b.staff[0]; const manager = this.chars.find(c => c.name === managerName); if (manager) { const roleName = b.jobs[b.staff.length]; const candidates = this.chars.filter(c => !c.job); let bestC = null; let maxLove = -999; candidates.forEach(c => { const rel = manager.relationships[c.name]; let love = rel ? rel.love : 0; if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) { bestC.job = { buildingId: b.id, role: roleName }; b.staff.push(bestC.name); this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${roleName}。`); } } } if (b.id === 'footshop' && b.isBuilt && b.staff.length > 0) { const bossName = b.staff[0]; const boss = this.chars.find(c => c.name === bossName); if (boss && b.prostitutes.length < 3) { const candidates = this.chars.filter(c => !c.job && !c.prostitute && c.hasTrait('promiscuous')); if (candidates.length > 0 && Math.random() < 0.1) { const target = choose(candidates); target.prostitute = { buildingId: b.id }; b.prostitutes.push(target.name); this.log(`[💋拉皮条] **${boss.name}** 说服了 **${target.name}** 在洗脚店卖银...`, "tag-drama"); } } } }); }
+        
+        doRobbery(p) { 
+            /* ... 同前 ... */ 
+            const targets = this.chars.filter(c => c.name !== p.name && c.money > 20); if (targets.length === 0) return false; const victim = choose(targets); const policeStation = this.buildings.find(b => b.id === 'police'); const hasPolice = policeStation && policeStation.isBuilt && policeStation.staff.length > 0; let securityLevel = hasPolice ? policeStation.staff.length * 0.3 : 0; let successChance = 0.5; if (p.ideology.name === '军国主义') successChance += 0.2; successChance -= securityLevel; 
+            
+            const timeStr = this.getDateTimeStr();
+            if (Math.random() < successChance) { 
+                const stolen = Math.floor(victim.money * rand(0.3, 0.6)); victim.money -= stolen; p.money += stolen; victim.happiness -= 30; 
+                const pRel = p.relationships[victim.name]; const vRel = victim.relationships[p.name]; 
+                if (['lover', 'spouse', 'mistress'].includes(pRel.status)) { pRel.status = "ex"; vRel.status = "ex"; } else { pRel.status = "enemy"; vRel.status = "enemy"; } 
+                pRel.love = -50; vRel.love = -50; 
+
+                // --- 新增：计数 ---
+                p.stat_rob = (p.stat_rob || 0) + 1;
+                victim.stat_be_robbed = (victim.stat_be_robbed || 0) + 1;
+                // ----------------
+
+                this.log(`[🔪抢劫] 天呐！**${p.name}** 抢劫了 **${victim.name}**，抢走 💰${stolen}！两人反目成仇！`, "tag-crime"); 
+                p.currentAction = `[犯罪] 抢劫了 ${victim.name}`; 
+                
+                p.addLog(`${timeStr} 抢劫了 ${victim.name} 💰${stolen}`);
+                victim.addLog(`${timeStr} 被 ${p.name} 抢劫了 💰${stolen}`);
+                if(policeStation) policeStation.addLog(`${timeStr} 接到报案：${p.name} 抢劫了 ${victim.name}`);
+                return true; 
+            } else { 
+                if (hasPolice) { 
+                    p.happiness -= 20; p.money = Math.max(0, p.money - 50); 
+                    this.log(`[👮逮捕] **${p.name}** 抢劫 **${victim.name}** 失败！被警察逮捕并罚款！`, "tag-build"); 
+                    const copName = choose(policeStation.staff); const cop = this.chars.find(c => c.name === copName); 
+                    if (cop) { cop.money += 15; this.log(`[🚓治安] 警官 **${cop.name}** 因制止犯罪获得奖金 💰15。`, "tag-build"); } 
+                    p.currentAction = `[被捕] 抢劫失败，反省中...`; 
+                    
+                    p.addLog(`${timeStr} 抢劫 ${victim.name} 失败，被捕`);
+                    if(policeStation) policeStation.addLog(`${timeStr} 警察逮捕了抢劫犯 ${p.name}`);
+                } else { 
+                    p.happiness -= 10; this.log(`[💨失败] **${p.name}** 试图抢劫 **${victim.name}**，但被对方一脚踹飞了！`, "tag-reject"); 
+                    p.currentAction = `[失败] 抢劫未遂，落荒而逃`; 
+                    p.addLog(`${timeStr} 试图抢劫 ${victim.name} 但被打飞`);
+                } 
+                return true; 
+            } 
+        }
+        
+        doWork(p, b) { 
+            p.money += p.calculateWage(getBaseJobWage(p.job.role)); p.happiness -= 1; p.hunger -= 3; p.currentAction = `[打工] 在 ${b.name} 当${p.job.role}`; 
+            const timeStr = this.getDateTimeStr();
+            p.addLog(`${timeStr} 在 ${b.name} 打工`);
+            b.addLog(`${timeStr} 员工 ${p.name} 在此工作`);
+        }
+        
+        doOddJob(p) { 
+            const job = choose(ODD_JOBS); 
+            if (job.name === "躺平" && p.money < 3) { 
+                p.money += 4; p.happiness -= 3; p.hunger -= 4; p.currentAction = `[零工] 没钱躺平，被迫搬砖`; 
+                p.addLog(`${this.getDateTimeStr()} 被迫去工地搬砖`);
+                return; 
+            } 
+            let wage = job.wage > 0 ? p.calculateWage(job.wage) : job.wage; p.money += wage; p.happiness += job.mood; p.happiness = Math.min(100, Math.max(0, p.happiness)); p.hunger -= (job.name === "躺平" ? 1 : 4); 
+            p.currentAction = job.name === "躺平" ? `[生活] 在家 躺平` : `[零工] 正在 ${job.name}`; 
+            p.addLog(`${this.getDateTimeStr()} 正在做零工: ${job.name}`);
+        }
+        
+        doEat(p, r) { 
+            const timeStr = this.getDateTimeStr();
+            if (p.money >= r.price) { 
+                p.money -= r.price; p.hunger = Math.min(100, p.hunger + r.food); p.happiness = Math.min(100, p.happiness + 5); this.townMoney += r.price; p.currentAction = `[吃饭] 在 ${r.name} 吃得饱饱`; 
+                p.addLog(`${timeStr} 在 ${r.name} 吃饭`);
+                r.addLog(`${timeStr} 顾客 ${p.name} 在此用餐`);
+            } else { 
+                p.currentAction = `[吃饭] 没钱去 ${r.name}，路边啃馒头`; p.hunger += 10; 
+                p.addLog(`${timeStr} 没钱吃饭，路边啃馒头`);
+            } 
+        }
+        
+        doProstitution(p, s) { 
+            const w = p.calculateWage(rand(15, 25)); const ps = Math.floor(w * 0.7); const bs = w - ps; p.money += ps; p.happiness -= 2; p.hunger -= 4; if (s.staff.length > 0) { const boss = this.chars.find(c => c.name === s.staff[0]); if (boss) boss.money += bs; } p.currentAction = `[💋卖银] 在 ${s.name} 接客`; 
+            const timeStr = this.getDateTimeStr();
+            p.addLog(`${timeStr} 在 ${s.name} 接客`);
+            s.addLog(`${timeStr} ${p.name} 在此提供服务`);
+        }
+        
+        doStreetwalking(p) { 
+            p.money += p.calculateWage(rand(8, 15)); p.happiness -= 4; p.hunger -= 5; 
+            
+            // --- 新增：计数 ---
+            p.stat_streetwalk = (p.stat_streetwalk || 0) + 1;
+            // ----------------
+
+            p.currentAction = `[💋站街] 在路边拉客`; 
+            p.addLog(`${this.getDateTimeStr()} 在路边拉客`);
+        }
+        
+        doBuild(p, b) { 
+            b.currentProgress += rand(5, 15); p.money += 5; p.happiness -= 2; p.hunger -= 5; p.currentAction = `建设: ${b.name}`; if (!p.constructionContribution[b.id]) p.constructionContribution[b.id] = 0; p.constructionContribution[b.id] += 10; 
+            const timeStr = this.getDateTimeStr();
+            p.addLog(`${timeStr} 参与建设 ${b.name}`);
+            b.addLog(`${timeStr} ${p.name} 参与了建设`);
+            if (b.currentProgress >= b.totalCost && !b.isBuilt) { b.isBuilt = true; this.log(`[🔨竣工] **${b.name}** 建成了！`, "tag-build"); this.distributeConstructionReward(b); } 
+        }
+        
+        doRest(p, v) { 
+            const timeStr = this.getDateTimeStr();
+            if (v && v.price > 0) { 
+                if (p.money >= v.price * (p.hasTrait('money-loving')?2:1)) { 
+                    p.money -= v.price; this.townMoney += v.price; 
+                    if (v.effect === 'food') { p.hunger = Math.min(100, p.hunger + v.food); p.currentAction = `在 ${v.name} 大吃一顿`; } 
+                    else p.currentAction = `在 ${v.name} 放松`; 
+                    
+                    p.addLog(`${timeStr} 在 ${v.name} 消费休息`);
+                    v.addLog(`${timeStr} 顾客 ${p.name} 在此消费`);
+                } else { 
+                    p.currentAction = `在 路边 闲逛`; 
+                    p.addLog(`${timeStr} 在路边闲逛`);
+                    return; 
+                } 
+            } else {
+                if (v) {
+                     p.currentAction = `在 ${v.name} 放松`; 
+                     p.addLog(`${timeStr} 在 ${v.name} 休息`);
+                     v.addLog(`${timeStr} ${p.name} 来访`);
+                } else {
+                     p.currentAction = `在 路边 闲逛`;
+                     p.addLog(`${timeStr} 在路边闲逛`);
+                }
+            }
+            p.happiness = Math.min(100, p.happiness + rand(5, 10)); p.hunger -= 1; 
+        }
+
+        doShopping(p, shop) {
+            const timeStr = this.getDateTimeStr();
+            if (shop.sells.length > 0 && p.money >= 5) { 
+                const affordableItems = shop.sells.filter(id => ITEMS_DB[id] && p.money >= ITEMS_DB[id].price);
+                if (affordableItems.length > 0) {
+                    const itemId = choose(affordableItems);
+                    const itemInfo = ITEMS_DB[itemId];
+                    p.money -= itemInfo.price;
+                    this.townMoney += itemInfo.price;
+                    p.bag.push(itemId);
+                    p.happiness += 5;
+                    p.currentAction = `[购物] 在 ${shop.name} 买了 ${itemInfo.name}`;
+                    
+                    p.addLog(`${timeStr} 在 ${shop.name} 买了 ${itemInfo.name}`);
+                    shop.addLog(`${timeStr} 顾客 ${p.name} 购买了 ${itemInfo.name}`);
+                } else {
+                    this.doRest(p, shop); 
+                }
+            } else {
+                this.doRest(p, shop);
+            }
+        }
+
+        doUseItem(p, itemId) {
+            const item = ITEMS_DB[itemId];
+            if (!item) return;
+            const idx = p.bag.indexOf(itemId);
+            if (idx > -1) p.bag.splice(idx, 1);
+            if (item.hungerBonus) p.hunger = Math.min(100, p.hunger + item.hungerBonus);
+            if (item.happinessBonus) p.happiness = Math.min(100, p.happiness + item.happinessBonus);
+            let actionVerb = "使用";
+            if (item.type === 'food' || item.type === 'snack') actionVerb = "吃";
+            if (item.type === 'drink' || item.type === 'alcohol') actionVerb = "喝";
+            p.currentAction = `[${actionVerb}] 享用了 ${item.name}`;
+            
+            p.addLog(`${this.getDateTimeStr()} ${actionVerb}了 ${item.name}`);
+        }
+
+        tryGift(p, t, venue) {
+            const giftIndex = p.bag.findIndex(id => ITEMS_DB[id] && ITEMS_DB[id].type === 'gift');
+            if (giftIndex !== -1) {
+                const giftId = p.bag[giftIndex];
+                const gift = ITEMS_DB[giftId];
+                p.bag.splice(giftIndex, 1);
+                const pRel = p.relationships[t.name];
+                const tRel = t.relationships[p.name];
+                const bonus = gift.loveBonus || 10;
+                pRel.love = Math.min(100, pRel.love + bonus);
+                tRel.love = Math.min(100, tRel.love + bonus);
+                p.currentAction = `[🎁送礼] 送了 ${t.name} ${gift.name}`;
+                t.currentAction = `[🎁收礼] 收到了 ${p.name} 的礼物`;
+                this.log(`[🎁送礼] **${p.name}** 在 ${venue.name} 送给了 **${t.name}** 一个 ${gift.name}，感情升温了！`, "tag-item");
+                
+                const timeStr = this.getDateTimeStr();
+                p.addLog(`${timeStr} 送给 ${t.name} 一个 ${gift.name}`);
+                t.addLog(`${timeStr} 收到了 ${p.name} 的 ${gift.name}`);
+                if(venue.addLog) venue.addLog(`${timeStr} ${p.name} 在此送礼给 ${t.name}`);
+
+                this.updateRelationshipStatus(p, t, pRel, tRel);
+                this.checkRomanceEvent(p, t, pRel, tRel, venue); 
+                return true;
+            }
+            return false;
+        }
+        
+        doSocial(p, v) { 
+            const timeStr = this.getDateTimeStr();
+            if (v.price > 0) { if (p.money < v.price) { this.doRest(p, {name:"路边",price:0}); return; } p.money -= v.price; this.townMoney += v.price; } 
+            const t = choose(this.chars.filter(c => c.name !== p.name)); const pRel = p.relationships[t.name]; const tRel = t.relationships[p.name]; this.breakInteraction(t); 
+            
+            if (this.tryGift(p, t, v)) return;
+
+            p.addLog(`${timeStr} 和 ${t.name} 在 ${v.name} 社交`);
+            t.addLog(`${timeStr} 和 ${p.name} 在 ${v.name} 社交`);
+            v.addLog(`${timeStr} ${p.name} 与 ${t.name} 来访`);
+
+            p.currentAction = `和 ${t.name} 在 ${v.name}`; t.currentAction = `和 ${p.name} 在 ${v.name}`; p.interactingWith = t.name; t.interactingWith = p.name; p.hunger -= 2; t.hunger -= 2; 
+            if (this.checkRomanceEvent(p, t, pRel, tRel, v)) return; 
+            let chaos = p.personality.chaosBonus + t.personality.chaosBonus + p.ideology.chaosMod + t.ideology.chaosMod; if (v.effect === 'chaos') chaos += 0.2; if (v.effect === 'ntr') chaos += 0.4; if (Math.random() < Math.max(0, Math.min(1, 0.1 + chaos))) { pRel.love -= 5; tRel.love -= 5; this.log(`[💢争吵] ${p.name} 和 ${t.name} 在 ${v.name} 吵架了。`, "tag-reject"); } else { let boost = rand(1, 3); if (v.effect === 'romance') boost += 2; boost += p.personality.loveGain + t.personality.loveGain + p.ideology.loveMod + t.ideology.loveMod; boost = Math.max(0, Math.round(boost)); pRel.love = Math.min(100, pRel.love + boost); tRel.love = Math.min(100, tRel.love + boost); this.updateRelationshipStatus(p, t, pRel, tRel); } 
+        }
+
+        distributeConstructionReward(b) { let total = 0; this.chars.forEach(c => total += (c.constructionContribution[b.id] || 0)); if (total === 0) return; const reward = Math.floor(b.totalCost * 0.3); this.chars.forEach(c => { const share = c.constructionContribution[b.id] || 0; if (share > 0) { const m = Math.floor(reward * (share / total)); c.money += m; if(m>0) this.log(`[💰奖励] **${c.name}** 获建设奖励 💰${m}`, "tag-build"); } }); }
+        updateRelationshipStatus(p, t, pRel, tRel) { if (pRel.status === 'stranger' && pRel.love > 10) { pRel.status = 'friend'; tRel.status = 'friend'; } else if (pRel.status === 'friend' && pRel.love > 60 && !['lover','spouse','mistress','enemy','ex'].includes(pRel.status)) { pRel.status = 'bestfriend'; tRel.status = 'bestfriend'; } }
+        checkRomanceEvent(p, t, pRel, tRel, v) { if (!p.partner && !t.partner && pRel.love > 70 && pRel.status !== 'spouse') { if (Math.random() < 0.2) { if (t.decideProposal(p.name, 'confess')) { p.partner = t.name; t.partner = p.name; pRel.status = "lover"; tRel.status = "lover"; p.happiness += 20; t.happiness += 20; this.log(`[❤️表白] ${p.name} 向 ${t.name} 表白成功！`, "tag-love"); } else { p.happiness -= 20; pRel.love -= 10; this.log(`[💔拒绝] ${p.name} 表白失败...`, "tag-reject"); } return true; } } return false; }
+        breakInteraction(c) { if (c.interactingWith) { const partner = this.chars.find(x => x.name === c.interactingWith); if (partner) { partner.interactingWith = null; partner.currentAction = "发呆"; } c.interactingWith = null; } }
+        saveData(isAuto = false) { const data = { chars: this.chars, buildings: this.buildings, townMoney: this.townMoney, gameTime: this.gameTime, gameDay: this.gameDay, ts: Date.now() }; localStorage.setItem('happyTownV2_Save', JSON.stringify(data)); this.lastSaveTime = Date.now(); if (!isAuto) alert("✅ 存档成功！"); }
+        
+        loadFromJSON(jsonStr) { 
+            try { 
+                const data = JSON.parse(jsonStr); 
+                this.townMoney = data.townMoney || 0; 
+                this.gameTime = data.gameTime || 480; 
+                this.gameDay = data.gameDay !== undefined ? data.gameDay : 1; 
+                this.buildings = data.buildings.map(bData => { 
+                    const bp = BUILDINGS_BLUEPRINT.find(x => x.id === bData.id); 
+                    let b = bp ? new Building(bp) : new Building(bData); 
+                    if (bData.currentProgress !== undefined) b.currentProgress = bData.currentProgress; 
+                    if (bData.isBuilt !== undefined) b.isBuilt = bData.isBuilt; 
+                    if (bData.staff !== undefined) b.staff = bData.staff; 
+                    if (!b.staff) b.staff = []; 
+                    if (bData.prostitutes !== undefined) b.prostitutes = bData.prostitutes; 
+                    if (!b.prostitutes) b.prostitutes = []; 
+                    if(bData.history) b.history = bData.history; 
+                    return b; 
+                }); 
+                this.chars = data.chars.map(cData => { 
+                    let c = new Character(cData.name); 
+                    Object.assign(c, cData); 
+                    if (c.money === undefined) c.money = 0; 
+                    if (!c.personality) c.personality = choose(PERSONALITIES); 
+                    if (!c.ideology) c.ideology = choose(IDEOLOGIES); 
+                    if (!c.gender) c.gender = Math.random() > 0.5 ? '♂ 男' : '♀ 女'; 
+                    if (c.hunger === undefined) c.hunger = 80; 
+                    if (c.nextActionOverride === undefined) c.nextActionOverride = null; 
+                    if(!c.bag) c.bag = []; 
+                    if(!c.history) c.history = []; 
+                    
+                    // --- 新增：防止旧存档报错，给予默认值 0 ---
+                    if (c.stat_rob === undefined) c.stat_rob = 0;
+                    if (c.stat_be_robbed === undefined) c.stat_be_robbed = 0;
+                    if (c.stat_streetwalk === undefined) c.stat_streetwalk = 0;
+                    if (c.stat_assault === undefined) c.stat_assault = 0;
+                    if (c.stat_be_assaulted === undefined) c.stat_be_assaulted = 0;
+                    // ----------------------------------------
+
+                    if (!c.traits || c.traits.length === 0) { 
+                        c.traits = []; 
+                        const traitCount = rand(0, 2); 
+                        for (let i = 0; i < traitCount; i++) { 
+                            const availableTraits = TRAITS.filter(t => !c.traits.find(tt => tt.id === t.id)); 
+                            if (availableTraits.length > 0) c.traits.push(choose(availableTraits)); 
+                        } 
+                    } 
+                    if (!c.constructionContribution) c.constructionContribution = {}; 
+                    if (c.prostitute === undefined) c.prostitute = null; 
+                    if(c.appearance === undefined) c.appearance = rand(40, 80); 
+                    for (let name in c.relationships) { 
+                        const rel = c.relationships[name]; 
+                        if (!rel.status || !['stranger', 'friend', 'bestfriend', 'lover', 'spouse', 'mistress', 'ex','enemy'].includes(rel.status)) { 
+                            rel.status = rel.love > 10 ? 'friend' : 'stranger'; 
+                        } 
+                        if (rel.intimacyCount === undefined) rel.intimacyCount = 0; 
+                    } 
+                    return c; 
+                }); 
+                this.runElectionsAndHiring(); 
+            } catch(e) { 
+                console.error("存档损坏", e); 
+                this.initNewGame(); 
+            } 
+        }
+
+        log(msg, type = "") { const el = document.getElementById('game-log'); const div = document.createElement('div'); div.className = `log-entry ${type}`; div.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${msg}`; el.prepend(div); if (el.children.length > 60) el.lastChild.remove(); }
+        
+        // --- 新增方法：添加新居民 ---
+        addNewResident(name) {
+            // 检查名字重复
+            if (this.chars.some(c => c.name === name)) {
+                alert(`居民 "${name}" 已经住在小镇里了！`);
+                return;
+            }
+
+            // 创建新角色 (Character 构造函数会自动随机生成性格、特性、性别等)
+            const newChar = new Character(name);
+
+            // 初始化人际关系 (重要：新人与旧人的双向关系)
+            this.chars.forEach(existingChar => {
+                newChar.relationships[existingChar.name] = { love: 0, status: 'stranger' };
+                existingChar.relationships[newChar.name] = { love: 0, status: 'stranger' };
+            });
+
+            // 加入数组
+            this.chars.push(newChar);
+            
+            // 给初始资金
+            newChar.money = 50; 
+
+            // 记录日志
+            this.log(`[🚍入住] 欢迎新居民 **${name}** 搬入快乐小镇！大家热烈欢迎！`, "tag-event");
+            newChar.addLog(`[${this.getDateTimeStr()}] 刚刚搬进快乐小镇`);
+
+            this.updateUI();
+            
+            // 滚动到底部
+            setTimeout(() => {
+                const charList = document.getElementById('char-list');
+                if(charList) charList.scrollTop = charList.scrollHeight;
+            }, 100);
+        }
+
+        renderUIStatic() { 
+            const bList = document.getElementById('build-list'); bList.innerHTML = ''; 
+            const categories = ['food', 'fun', 'service', 'shop'];
+            categories.forEach(cat => {
+                const catHeader = document.createElement('div');
+                catHeader.className = 'category-header';
+                catHeader.innerText = CATEGORY_NAMES[cat] || cat;
+                bList.appendChild(catHeader);
+
+                this.buildings.filter(b => b.category === cat).forEach(b => { 
+                    const div = document.createElement('div'); div.className = 'build-card'; div.id = `build-${b.id}`; 
+                    div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') gameInstance.showBuildingDetail(b.id); };
+                    let btnHtml = ''; if (!b.isBuilt && b.currentProgress > 0) { btnHtml = `<button class="btn accelerate" onclick="gameInstance.accelerateBuild('${b.id}')">💸 资金加速 (50)</button>`; }
+                    div.innerHTML = `<div><div style="font-weight:bold; font-size:1.05rem">${b.name}</div><div style="font-size:0.8rem; color:#666">${b.desc}</div></div><div><div class="bar-container"><div class="bar-fill" style="background:#00b894; width:0%"></div></div><div class="build-prog">未建成</div>${btnHtml}</div>`; bList.appendChild(div); 
+                });
+            });
+        }
+        
+        showEmbezzle() { document.getElementById('embezzle-town-money').innerText = this.townMoney; const list = document.getElementById('embezzle-list'); list.innerHTML = ''; this.chars.forEach(c => { const div = document.createElement('div'); div.className = 'fund-item'; div.innerHTML = `${c.name} <small>(💰${c.money})</small>`; div.onclick = () => { document.querySelectorAll('.fund-item').forEach(el=>el.classList.remove('selected')); div.classList.add('selected'); window.selectedFundTarget = c.name; }; list.appendChild(div); }); document.getElementById('embezzle-modal').classList.add('active'); }
+        doEmbezzle() { const name = window.selectedFundTarget; const amt = parseInt(document.getElementById('embezzle-amount').value); if (!name || isNaN(amt) || amt <= 0) return alert("请选择居民并输入有效金额"); if (this.townMoney < amt) return alert("镇库资金不足！"); const c = this.chars.find(x => x.name === name); if (c) { c.money += amt; this.townMoney -= amt; this.log(`[💸拨款] 镇长向 **${c.name}** 拨款 💰${amt}。`, "tag-build"); this.updateUI(); this.closeEmbezzle(); } }
+        closeEmbezzle() { document.getElementById('embezzle-modal').classList.remove('active'); }
+        
+        showJobBoard() {
+            const list = document.getElementById('jobboard-list'); list.innerHTML = '';
+            const oddHeader = document.createElement('div'); oddHeader.className = 'job-section-header'; oddHeader.style.borderLeftColor = '#3498db'; oddHeader.innerText = "🛠 临时零工 / 自由职业"; list.appendChild(oddHeader);
+            ODD_JOBS.forEach(job => { const item = document.createElement('div'); item.className = 'job-item'; item.innerHTML = `<div><div class="job-name">${job.name}</div><div class="job-loc" style="font-size:0.8em; color:gray;">Mood: ${job.mood}</div></div><div class="job-wage" style="color:${job.wage<0?'#e74c3c':'#27ae60'}">💰 ${job.wage}</div>`; list.appendChild(item); });
+            const hookerItem = document.createElement('div'); hookerItem.className = 'job-item'; hookerItem.innerHTML = `<div><div class="job-name">💋 站街</div></div><div class="job-wage">💰 8-15</div>`; list.appendChild(hookerItem);
+            const formalHeader = document.createElement('div'); formalHeader.className = 'job-section-header'; formalHeader.style.borderLeftColor = '#f1c40f'; formalHeader.innerText = "🏢 企业 / 机构岗位"; list.appendChild(formalHeader);
+            this.buildings.forEach(b => { if (b.jobs.length > 0) { b.jobs.forEach(role => { const item = document.createElement('div'); item.className = 'job-item'; item.innerHTML = `<div><div class="job-name">👔 ${role}</div><div class="job-loc">${b.name}</div></div><div class="job-wage">💰 ${getJobWage(role)}</div>`; list.appendChild(item); }); } });
+            document.getElementById('jobboard-modal').classList.add('active');
+        }
+
+        showCharacterDetail(name) {
+            const c = this.chars.find(x => x.name === name); if (!c) return;
+            const modal = document.getElementById('char-detail-modal');
+            const content = document.getElementById('detail-content'); document.getElementById('detail-name').innerText = `${c.name} 的个人档案`;
+            let jobText = c.prostitute ? "失足" : (c.job ? `${c.job.role}` : "无业");
+            let wage = c.job ? c.calculateWage(getBaseJobWage(c.job.role)) : 0;
+            let traitsHtml = c.traits.map(t => `<div class="trait-tag" title="${t.desc}">${t.name}</div>`).join('') || "无";
+            const ideology = c.ideology || { name: "无", color: "#999", desc: "", chaosMod:0, loveMod:0, wageMod:0 };
+            
+            let bagHtml = '<div style="color:#999; font-size:0.85rem;">背包空空如也</div>';
+            if (c.bag && c.bag.length > 0) {
+                bagHtml = '<div class="bag-grid">';
+                
+                // 修改后的背包渲染逻辑
+                c.bag.forEach(itemId => { 
+                    const item = ITEMS_DB[itemId]; 
+                    if(item) {
+                        const tooltipText = getItemTooltipText(itemId);
+                        bagHtml += `<div class="bag-item tooltip-item" data-tip="${tooltipText}">${item.name}</div>`; 
+                    }
+                });
+
+                bagHtml += '</div>';
+            }
+
+            // 新增：足迹列表生成
+            let historyHtml = '<div class="history-list">';
+            if (!c.history || c.history.length === 0) {
+                historyHtml += '<div class="history-item">暂无活动记录</div>';
+            } else {
+                c.history.forEach(h => { historyHtml += `<div class="history-item">${h}</div>`; });
+            }
+            historyHtml += '</div>';
+
+            const ideologyHtml = `
+                <div class="ideology-box">
+                    <div style="color:${ideology.color}; font-weight:bold; font-size:1.1rem;">${ideology.name}</div>
+                    <div style="font-size:0.9rem; color:#555; margin:4px 0;">${ideology.desc}</div>
+                    <div style="font-size:0.85rem;">
+                        <span class="stat-positive">❤ +${ideology.loveMod} 好感</span> | 
+                        <span class="stat-positive">💢 ${Math.floor(ideology.chaosMod * 100)}% 吵架</span> |
+                        <span class="stat-positive">💰 ${Math.floor(ideology.wageMod * 100)}% 工资</span>
+                    </div>
+                </div>
+            `;
+
+            content.innerHTML = `
+                <div class="detail-group">
+                    <div class="detail-label">基本状态 <button class="edit-btn" onclick="editGender('${c.name}')">[修改性别]</button></div>
+                    <div class="detail-val">性别: ${c.gender} | 💰 ${c.money} | ❤ ${Math.floor(c.happiness)} | 🍗 ${Math.floor(c.hunger)}</div>
+                    <div class="detail-val" style="margin-top:5px; color:#8e44ad">✨ 颜值: ${Math.floor(c.appearance)}</div>
+                    <div class="detail-val" style="margin-top:5px;">👷 ${jobText} <span style="color:#27ae60;font-size:0.9em">(日薪:💰${wage})</span></div>
+                    <button class="btn control" onclick="showActionSelect('${c.name}')">🕹️ 强制安排活动</button>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">👣 最近足迹</div>
+                    ${historyHtml}
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">🎒 背包</div>
+                    ${bagHtml}
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">性格 <button class="edit-btn" onclick="editPersonality('${c.name}')">[修改]</button></div>
+                    <div class="detail-val">${c.personality.name}</div><div class="detail-desc">${c.personality.desc}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">特性 <button class="edit-btn" onclick="editTraits('${c.name}')">[重置]</button></div>
+                    <div>${traitsHtml}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">信仰 <button class="edit-btn" onclick="editIdeology('${c.name}')">[修改]</button></div>
+                    ${ideologyHtml}
+                </div>
+            `;
+            modal.classList.add('active');
+        }
+        
+        showBuildingDetail(bid) {
+            const b = this.buildings.find(x => x.id === bid);
+            if (!b) return;
+            const modal = document.getElementById('building-detail-modal');
+            document.getElementById('b-detail-name').innerText = b.name;
+            const content = document.getElementById('b-detail-content');
+            
+            let statusHtml = b.isBuilt ? `<span style="color:#27ae60">✅ 营业中</span>` : `<span style="color:#e67e22">🚧 建设中 (${Math.floor(b.currentProgress/b.totalCost*100)}%)</span>`;
+            let staffListHtml = '';
+            if (b.jobs.length === 0) {
+                staffListHtml = '<div style="padding:10px; color:#999;">此建筑不提供工作岗位</div>';
+            } else {
+                b.jobs.forEach((role, index) => {
+                    const workerName = b.staff[index] || "【空缺】";
+                    const wage = getJobWage(role);
+                    const color = b.staff[index] ? "#0984e3" : "#ccc";
+                    staffListHtml += `
+                        <div class="staff-list-item">
+                            <div><span class="staff-role">${role}</span><div style="font-size:0.8rem; color:#666;">日薪: 💰${wage}</div></div>
+                            <div style="font-weight:bold; color:${color}; display:flex; align-items:center;">${workerName}</div>
+                        </div>`;
+                });
+            }
+            if (b.id === 'footshop' && b.prostitutes.length > 0) {
+                 staffListHtml += `<div style="margin-top:10px; font-weight:bold; color:#e056fd;">💋 特殊服务人员:</div>`;
+                 b.prostitutes.forEach(name => { staffListHtml += `<div class="staff-list-item"><span class="staff-role">技师</span><span class="staff-name" style="color:#e056fd">${name}</span></div>`; });
+            }
+
+            let sellsHtml = '';
+            if (b.sells && b.sells.length > 0) {
+                sellsHtml = `<div style="margin-top:10px; font-weight:bold;">🛍️ 售卖商品:</div><div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">`;
+                
+                // 修改后的商店商品渲染逻辑
+                b.sells.forEach(itemId => { 
+                    const item = ITEMS_DB[itemId]; 
+                    if (item) {
+                        const tooltipText = getItemTooltipText(itemId);
+                        sellsHtml += `<span class="tooltip-item" data-tip="${tooltipText}" style="cursor:help; background:#fff5f0; border:1px solid #e17055; color:#d35400; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${item.name} (💰${item.price})</span>`; 
+                    }
+                });
+
+                sellsHtml += `</div>`;
+            }
+
+            // 新增：访客记录列表
+            let historyHtml = '<div class="history-list">';
+            if (!b.history || b.history.length === 0) {
+                historyHtml += '<div class="history-item">暂无访客记录</div>';
+            } else {
+                b.history.forEach(h => { historyHtml += `<div class="history-item">${h}</div>`; });
+            }
+            historyHtml += '</div>';
+
+            content.innerHTML = `
+                <div style="margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #eee;">
+                    <div style="font-size:0.9rem; color:#666; margin-bottom:5px;">${b.desc}</div>
+                    <div>状态: ${statusHtml}</div>
+                    <div>消费价格: 💰${b.price}</div>
+                    <div>营业时间: ${b.open}:00 - ${b.close}:00</div>
+                    ${sellsHtml}
+                </div>
+                <div style="font-weight:bold; margin-bottom:5px;">👣 最近访客记录</div>
+                ${historyHtml}
+                <div style="font-weight:bold; margin-bottom:5px; margin-top:10px;">👥 岗位与员工</div>
+                <div style="border:1px solid #eee; border-radius:6px; overflow:hidden;">${staffListHtml}</div>
+            `;
+            modal.classList.add('active');
+        }
+
+        editGender(name) { const c = this.chars.find(x=>x.name===name); if(c){ c.gender = c.gender==='♂ 男'?'♀ 女':'♂ 男'; this.showCharacterDetail(name); } }
+        editPersonality(name) { const c = this.chars.find(x=>x.name===name); if(c){ const n = prompt("输入性格(易怒/沉着/开朗/内向/温柔/刻薄/幽默/严肃):"); const p = PERSONALITIES.find(x=>x.name===n); if(p){c.personality=p;this.showCharacterDetail(name);}else alert("无效"); } }
+        editIdeology(name) { const c = this.chars.find(x=>x.name===name); if(c){ const n = prompt("输入信仰(共产主义/社会主义/民主主义/资本主义/君主立宪/军国主义):"); const i = IDEOLOGIES.find(x=>x.name.includes(n)); if(i){c.ideology=i;this.showCharacterDetail(name);}else alert("无效"); } }
+        editTraits(name) { const c = this.chars.find(x=>x.name===name); if(c){ c.traits=[]; const count=rand(0,2); for(let i=0;i<count;i++){ const t=TRAITS.filter(x=>!c.traits.includes(x)); if(t.length) c.traits.push(choose(t)); } this.showCharacterDetail(name); } }
+        
+        updateUI() {
+            document.getElementById('town-money').innerText = this.townMoney;
+            const h = Math.floor(this.gameTime / 60); const m = this.gameTime % 60;
+            document.getElementById('game-time').innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+            document.getElementById('game-day').innerText = DAYS[this.gameDay];
+            document.getElementById('resident-count').innerText = this.chars.length;
+            const charList = document.getElementById('char-list'); charList.innerHTML = ''; 
+            this.chars.forEach(c => {
+                let lovedOne = "无"; let maxL = 0; for(let name in c.relationships) { if(c.relationships[name].love > maxL) { maxL = c.relationships[name].love; lovedOne = name; } }
+                let statusHtml = c.partner ? `<span style="color:var(--love)">❤ ${c.partner}</span>` : `<span style="color:#999">喜欢: ${lovedOne}</span>`;
+                
+                let actionClass = "";
+                if (c.currentAction.includes("建设")) actionClass = "action-build";
+                else if (c.currentAction.includes("工作") || c.currentAction.includes("打工") || c.currentAction.includes("卖银")) actionClass = "action-work";
+                else if (c.currentAction.includes("躺平")) actionClass = "action-lieflat";
+                else if (c.currentAction.includes("吃") || c.currentAction.includes("享用")) actionClass = "action-eat";
+                else if (c.currentAction.includes("犯罪") || c.currentAction.includes("抢劫") || c.currentAction.includes("劫色")) actionClass = "action-crime";
+                else if (c.currentAction.includes("购物") || c.currentAction.includes("送礼")) actionClass = "action-shop";
+                else if (c.currentAction.includes("使用")) actionClass = "action-use";
+                else actionClass = "action-social";
+
+                let jobInfo = c.job ? `<span style="font-size:0.8em;color:#666;background:#eee;padding:2px 4px;border-radius:4px;">${c.job.role}</span>` : `<span style="font-size:0.8em;color:#aaa">无业</span>`;
+                const div = document.createElement('div'); div.className = `char-card ${actionClass}`; div.onclick = () => gameInstance.showCharacterDetail(c.name);
+                div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div><strong>${c.name}</strong> <span style="font-size:0.75em;color:#888;">${c.gender}</span> ${jobInfo}</div><div style="text-align:right; font-size:0.85rem;"><span style="color:#f39c12">💰${c.money}</span></div></div><div style="font-size:0.8em; margin-bottom:5px;">${statusHtml}</div><div class="bar-container" title="心情"><div class="bar-fill hp-fill" style="width:${c.happiness}%"></div></div><div class="bar-container" title="饱食" style="height:3px;margin-top:2px;"><div class="bar-fill food-fill" style="width:${c.hunger}%"></div></div><div style="color:#555;margin-top:2px; font-size:0.85rem">${c.currentAction}</div>`;
+                charList.appendChild(div);
+            });
+            this.buildings.forEach(b => {
+                const el = document.getElementById(`build-${b.id}`);
+                if (el) {
+                    const pct = Math.min(100, (b.currentProgress / b.totalCost) * 100); el.querySelector('.bar-fill').style.width = `${pct}%`;
+                    let staffHtml = ""; if (b.jobs.length > 0) staffHtml = `<div style="font-size:0.75rem; color:#666; margin-top:4px;">员工: ${b.staff.length}/${b.jobs.length}</div>`;
+                    if (b.isBuilt) { el.classList.add('built'); el.classList.remove('building'); el.querySelector('.build-prog').innerHTML = `✅ 营业中 Price: 💰${b.price} ${staffHtml}`; } 
+                    else if (b.currentProgress > 0) { el.classList.add('building'); el.querySelector('.build-prog').innerText = `🚧 建设中: ${Math.floor(pct)}%`; } 
+                    else { el.querySelector('.build-prog').innerText = `未建成 (💰${b.price})`; }
+                    if(!b.isBuilt && b.currentProgress > 0) {
+                        if(!el.querySelector('.accelerate')) {
+                           el.innerHTML = `<div><div style="font-weight:bold; font-size:1.05rem">${b.name}</div><div style="font-size:0.8rem; color:#666">${b.desc}</div></div><div><div class="bar-container"><div class="bar-fill" style="background:#00b894; width:${pct}%"></div></div><div class="build-prog">🚧 建设中: ${Math.floor(pct)}%</div><button class="btn accelerate" onclick="gameInstance.accelerateBuild('${b.id}')">💸 资金加速 (50)</button></div>`;
+                           el.classList.add('building');
+                        } else {
+                            el.querySelector('.bar-fill').style.width = `${pct}%`;
+                            el.querySelector('.build-prog').innerText = `🚧 建设中: ${Math.floor(pct)}%`;
+                        }
+                    }
+                }
+            });
+            if (isRelViewOpen) this.renderRelations();
+        }
+
+        renderRelations() {
+            if (!isRelViewOpen) return;
+            try {
+                const incomingLove = {}; 
+                this.chars.forEach(c => incomingLove[c.name] = 0);
+                this.chars.forEach(c => { for(let tName in c.relationships) if(incomingLove[tName] !== undefined) incomingLove[tName] += c.relationships[tName].love; });
+                const sortedChars = [...this.chars].sort((a,b) => (incomingLove[b.name]||0) - (incomingLove[a.name]||0));
+                if (sortedChars.length > 0) { 
+                    const topName = sortedChars[0].name; const botName = sortedChars[sortedChars.length - 1].name;
+                    document.getElementById('stat-pop').innerHTML = `${topName} <small>(${incomingLove[topName]||0}❤)</small>`; 
+                    document.getElementById('stat-lonely').innerHTML = `${botName} <small>(${incomingLove[botName]||0}❤)</small>`; 
+                }
+            } catch(e) { console.error("Stats Error:", e); }
+
+            try {
+                const listEl = document.getElementById('rel-list'); listEl.innerHTML = '';
+                this.chars.forEach(c => {
+                    const div = document.createElement('div'); div.className = 'rel-item';
+                    let rels = Object.entries(c.relationships).map(([name, data]) => ({ name, ...data })).sort((a, b) => b.love - a.love).filter(r => r.love > 0 || r.status !== 'stranger');
+                    let relHtml = rels.map(r => {
+                        let tagClass = "tag-friend"; 
+                        if (r.status === 'spouse') tagClass = 'tag-spouse'; else if (r.status === 'lover') tagClass = 'tag-lover'; else if (r.status === 'mistress') tagClass = 'tag-mistress'; else if (r.status === 'bestfriend') tagClass = 'tag-bestfriend'; else if (r.status === 'ex') tagClass = 'tag-ex'; else if (r.status === 'enemy') tagClass = 'tag-enemy';
+                        const cnStatus = REL_TRANSLATE[r.status] || r.status;
+                        return `<div style="margin-top:4px;"><span class="rel-tag ${tagClass}">${cnStatus}</span><b>${r.name}</b> <span style="color:#999">(${r.love})</span></div>`;
+                    }).join('');
+                    if(!relHtml) relHtml = `<div style="color:#ccc;font-size:0.8rem">暂无特别关系</div>`;
+                    div.innerHTML = `<strong>${c.name}</strong>${relHtml}`; listEl.appendChild(div);
+                });
+
+                const canvas = document.getElementById('rel-canvas'); const container = document.getElementById('rel-graph-container');
+                const w = container.clientWidth || 800; const h = container.clientHeight || 600;
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d'); const cx = w / 2; const cy = h / 2; const r = Math.min(cx, cy) - 50; 
+                ctx.clearRect(0, 0, w, h);
+                const points = {}; this.chars.forEach((c, i) => { const angle = (i / this.chars.length) * Math.PI * 2 - Math.PI / 2; points[c.name] = { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r }; });
+
+                this.chars.forEach(c => {
+                     const p1 = points[c.name];
+                     for (let tName in c.relationships) {
+                         const rel = c.relationships[tName];
+                         if ((rel.love > 40 || (rel.status !== 'stranger' && rel.status !== 'friend')) && points[tName]) {
+                             const p2 = points[tName];
+                             ctx.beginPath(); 
+                             const dx = p2.x - p1.x; const dy = p2.y - p1.y; const dist = Math.sqrt(dx*dx + dy*dy);
+                             const midX = (p1.x + p2.x) / 2; const midY = (p1.y + p2.y) / 2;
+                             const offset = 20; const angle = Math.atan2(dy, dx);
+                             const cpX = midX - Math.sin(angle) * offset; const cpY = midY + Math.cos(angle) * offset;
+                             ctx.moveTo(p1.x, p1.y); ctx.quadraticCurveTo(cpX, cpY, p2.x, p2.y);
+                             let color = 'rgba(200,200,200,0.2)'; let width = 1; let dash = [];
+                             if(rel.status === 'spouse') { color = 'rgba(232,67,147,0.8)'; width = 3; }
+                             else if(rel.status === 'lover') { color = 'rgba(255,107,107,0.7)'; width = 2; }
+                             else if(rel.status === 'mistress') { color = 'rgba(255,140,0,0.7)'; width = 2; dash = [5, 5]; }
+                             else if(rel.status === 'bestfriend') { color = 'rgba(52,152,219,0.6)'; width = 2; }
+                             else if(rel.status === 'ex') { color = 'rgba(99,110,114,0.5)'; width = 1.5; dash = [2, 2]; }
+                             else if(rel.status === 'enemy') { color = 'rgba(192, 57, 43, 0.8)'; width = 2; } 
+                             ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.stroke(); ctx.setLineDash([]);
+                             const arrowAngle = Math.atan2(p2.y - cpY, p2.x - cpX); const arrowLen = 8;
+                             ctx.beginPath(); const endX = p2.x - Math.cos(arrowAngle) * 22; const endY = p2.y - Math.sin(arrowAngle) * 22;
+                             ctx.moveTo(endX, endY); ctx.lineTo(endX - arrowLen * Math.cos(arrowAngle - Math.PI / 6), endY - arrowLen * Math.sin(arrowAngle - Math.PI / 6)); ctx.lineTo(endX - arrowLen * Math.cos(arrowAngle + Math.PI / 6), endY - arrowLen * Math.sin(arrowAngle + Math.PI / 6)); ctx.fillStyle = color; ctx.fill();
+                         }
+                     }
+                });
+                this.chars.forEach(c => {
+                    const p = points[c.name];
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill(); ctx.strokeStyle = c.partner ? "#ff6b6b" : "#4a90e2"; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.fillStyle = "#333"; ctx.font = "11px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(c.name, p.x, p.y);
+                });
+            } catch(e) { console.error("Render Error:", e); }
+        }
+    }
+
+    // --- 全局函数 ---
+    function switchTab(tabName) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(`tab-${tabName}`).classList.add('active'); document.querySelectorAll('.col-view').forEach(v => v.classList.remove('active-view')); document.getElementById(`view-${tabName}`).classList.add('active-view'); }
+    let gameInstance = null; let isRelViewOpen = false;
+    function toggleRelationView() { const main = document.getElementById('main-view'); const rel = document.getElementById('relation-view'); isRelViewOpen = !isRelViewOpen; if (isRelViewOpen) { main.style.display = 'none'; rel.classList.add('active'); setTimeout(() => { if (gameInstance) gameInstance.renderRelations(); }, 50); } else { main.style.display = 'flex'; rel.classList.remove('active'); } }
+    function showLeaderboard() { renderLeaderboard('money'); document.getElementById('leaderboard-modal').classList.add('active'); }
+    function closeLeaderboard() { document.getElementById('leaderboard-modal').classList.remove('active'); }
+    function showJobBoard() { if(gameInstance) gameInstance.showJobBoard(); }
+    function closeJobBoard() { document.getElementById('jobboard-modal').classList.remove('active'); }
+    
+    function renderLeaderboard(type) { 
+        if (!gameInstance) return; 
+        const list = document.getElementById('leaderboard-list'); 
+        list.innerHTML = ''; 
+        let sorted = [...gameInstance.chars];
+        
+        if (type === 'money') { 
+            sorted.sort((a, b) => b.money - a.money); 
+        } else if (type === 'happiness') { 
+            sorted.sort((a, b) => b.happiness - a.happiness); 
+        } else if (type === 'popularity') {
+             const popMap = {}; 
+             gameInstance.chars.forEach(c => popMap[c.name] = 0);
+             gameInstance.chars.forEach(source => { 
+                 for(let target in source.relationships) { 
+                     if(popMap[target] !== undefined) popMap[target] += source.relationships[target].love; 
+                 } 
+             });
+             sorted.sort((a, b) => popMap[b.name] - popMap[a.name]);
+             sorted.forEach(c => c._tempPop = popMap[c.name]);
+        } 
+        // --- 新增排序逻辑 ---
+        else if (type === 'robbery') {
+            sorted.sort((a, b) => (b.stat_rob || 0) - (a.stat_rob || 0));
+        } else if (type === 'streetwalk') {
+            sorted.sort((a, b) => (b.stat_streetwalk || 0) - (a.stat_streetwalk || 0));
+        } else if (type === 'assault') {
+            sorted.sort((a, b) => (b.stat_assault || 0) - (a.stat_assault || 0));
+        }
+        // ------------------
+
+        sorted.forEach((c, index) => { 
+            // 简单的过滤：如果没有数据且不是前5名，就不显示（防止列表过长全是0）
+            if (type === 'robbery' && (c.stat_rob||0) === 0 && (c.stat_be_robbed||0) === 0 && index > 5) return;
+            if (type === 'streetwalk' && (c.stat_streetwalk||0) === 0 && index > 5) return;
+            if (type === 'assault' && (c.stat_assault||0) === 0 && (c.stat_be_assaulted||0) === 0 && index > 5) return;
+
+            const item = document.createElement('div'); 
+            item.className = 'rank-item'; 
+            let rankClass = ''; 
+            if (index === 0) rankClass = 'rank-1'; 
+            else if (index === 1) rankClass = 'rank-2'; 
+            else if (index === 2) rankClass = 'rank-3'; 
+            
+            let valText = '';
+            if(type==='money') valText = `💰 ${c.money}`;
+            else if(type==='happiness') valText = `❤ ${Math.floor(c.happiness)}`;
+            else if(type==='popularity') valText = `🔥 ${c._tempPop}`;
+            
+            // --- 新增显示文本 ---
+            else if(type==='robbery') {
+                valText = `<span style="color:#2d3436">🔪 抢:${c.stat_rob||0}</span> | <span style="color:#999">被抢:${c.stat_be_robbed||0}</span>`;
+            }
+            else if(type==='streetwalk') {
+                valText = `<span style="color:#e056fd">💋 站街: ${c.stat_streetwalk||0} 次</span>`;
+            }
+            else if(type==='assault') {
+                valText = `<span style="color:#c0392b">😈 劫:${c.stat_assault||0}</span> | <span style="color:#999">受害:${c.stat_be_assaulted||0}</span>`;
+            }
+            // ------------------
+
+            item.innerHTML = `<div class="rank-num ${rankClass}">${index + 1}</div><div class="rank-info"><div class="rank-name">${c.name}</div></div><div class="rank-val" style="font-size:0.9rem">${valText}</div>`; 
+            list.appendChild(item); 
+        }); 
+    }
+    
+    function showPersonalityInfo() { document.getElementById('personality-modal').classList.add('active'); const list = document.getElementById('personality-list'); list.innerHTML = ''; PERSONALITIES.forEach(p => { const item = document.createElement('div'); item.className = 'personality-item'; if (p.chaosBonus > 0.1) item.classList.add('chaos'); else if (p.chaosBonus < -0.1) item.classList.add('peace'); else item.classList.add('neutral'); const chaosText = p.chaosBonus > 0 ? `<span class="stat-negative">+${(p.chaosBonus * 100).toFixed(0)}% 吵架率</span>` : `<span class="stat-positive">${(p.chaosBonus * 100).toFixed(0)}% 吵架率</span>`; const loveText = p.loveGain > 0 ? `<span class="stat-positive">+${p.loveGain.toFixed(1)} 好感增长</span>` : p.loveGain < 0 ? `<span class="stat-negative">${p.loveGain.toFixed(1)} 好感增长</span>` : `<span>0 好感增长</span>`; item.innerHTML = `<div class="personality-name">${p.name}</div><div class="personality-desc">${p.desc}</div><div class="personality-stats"><div class="stat-item">${chaosText}</div><div class="stat-item">${loveText}</div></div>`; list.appendChild(item); }); }
+    function closePersonalityInfo() { document.getElementById('personality-modal').classList.remove('active'); }
+    function closeCharDetail() { document.getElementById('char-detail-modal').classList.remove('active'); }
+    
+    function showEmbezzle() { if (gameInstance) gameInstance.showEmbezzle(); }
+    function doEmbezzle() { if (gameInstance) gameInstance.doEmbezzle(); }
+    function closeEmbezzle() { if (gameInstance) gameInstance.closeEmbezzle(); }
+    function toggleSpeed() { if (gameInstance) gameInstance.toggleSpeed(); }
+    function showActionSelect(name) { if(gameInstance) gameInstance.showActionSelect(name); }
+    function setOverride(name, type, target, desc) { if(gameInstance) gameInstance.setOverride(name, type, target, desc); }
+    function closeActionSelect() { if(gameInstance) gameInstance.closeActionSelect(); }
+    function editGender(name) { if(gameInstance) gameInstance.editGender(name); }
+    function editPersonality(name) { if(gameInstance) gameInstance.editPersonality(name); }
+    function editTraits(name) { if(gameInstance) gameInstance.editTraits(name); }
+    function editIdeology(name) { if(gameInstance) gameInstance.editIdeology(name); }
+
+    function showTownEvents() { if(gameInstance) gameInstance.showTownEvents(); }
+    function triggerTownEvent(id) { if(gameInstance) gameInstance.triggerTownEvent(id); }
+    function closeTownEvents() { if(gameInstance) gameInstance.closeTownEvents(); }
+    
+    function showBuildingDetail(bid) { if(gameInstance) gameInstance.showBuildingDetail(bid); }
+    function closeBuildingDetail() { document.getElementById('building-detail-modal').classList.remove('active'); }
+
+    function inputNewResident() {
+        if (!gameInstance) return;
+        const name = prompt("请输入新居民的名字：\n(性格、性别、特质将由系统随机生成)");
+        if (name && name.trim() !== "") {
+            const cleanName = name.trim().substring(0, 8); 
+            gameInstance.addNewResident(cleanName);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { 
+        document.getElementById('personality-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('personality-modal')) closePersonalityInfo(); }); 
+        document.getElementById('char-detail-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('char-detail-modal')) closeCharDetail(); }); 
+        document.getElementById('leaderboard-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('leaderboard-modal')) closeLeaderboard(); }); 
+        document.getElementById('jobboard-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('jobboard-modal')) closeJobBoard(); }); 
+        document.getElementById('embezzle-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('embezzle-modal')) closeEmbezzle(); }); 
+        document.getElementById('action-select-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('action-select-modal')) closeActionSelect(); }); 
+        document.getElementById('town-event-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('town-event-modal')) closeTownEvents(); });
+        document.getElementById('building-detail-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('building-detail-modal')) closeBuildingDetail(); });
+    });
+    function manualSave() { if (gameInstance) gameInstance.saveData(); }
+    function resetData() { if(confirm("确定要删除存档并重置所有进度吗？")) { localStorage.removeItem('happyTownV2_Save'); location.reload(); } }
+    window.onload = () => { gameInstance = new Game(); };
+</script>
+</body>
+</html>
