@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>猫の模拟小镇 Ver 2.7.0 - 天气物语版</title>
+    <title>猫の模拟小镇 Ver 2.8.0 - 成就与新建筑版</title>
     <style>
         :root { --bg: #f0f2f5; --card: #fff; --primary: #4a90e2; --love: #ff6b6b; --text: #333; --dark: #2d3436; --crime: #8e44ad; --item: #e17055; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
@@ -22,6 +22,7 @@
         .btn.speed { background: #e67e22; font-weight: bold; width: 80px; }
         .btn.create { background: #e17055; color: white; font-weight: bold; }
         .btn.create:hover { background: #d35400; }
+        .btn.achieve { background: #34495e; color: #fff; font-weight: bold; }
 
         .btn.fund { background: #9b59b6; font-size: 0.8rem; padding: 2px 6px; margin-left: 5px; } 
         .btn.accelerate { background: #2ecc71; color: white; font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: 100%; border: 1px solid #27ae60; }
@@ -232,6 +233,16 @@
         .filter-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
         .filter-btn:hover { color:#666; }
 
+        /* 成就系统样式 */
+        .achieve-list { display: flex; flex-direction: column; gap: 10px; }
+        .achieve-item { display: flex; align-items: center; background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #eee; opacity: 0.5; filter: grayscale(1); transition: 0.3s; }
+        .achieve-item.unlocked { opacity: 1; filter: grayscale(0); border-left: 5px solid #f1c40f; background: #fffff0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .achieve-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; }
+        .achieve-info { flex: 1; }
+        .achieve-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 4px; color: #2c3e50; }
+        .achieve-desc { font-size: 0.9rem; color: #7f8c8d; }
+        .achieve-reward { font-size: 0.85rem; color: #e67e22; margin-top: 4px; font-weight: bold; }
+
     </style>
 <link rel="stylesheet" href="/index.css">
 </head>
@@ -239,7 +250,7 @@
 
 <header>
     <div class="header-group">
-        <h1>🏡 猫の模拟小镇 <small>Ver 2.7.0</small></h1>
+        <h1>🏡 猫の模拟小镇 <small>Ver 2.8.0</small></h1>
         <div style="font-size: 0.9rem;">
             <span id="calendar-display">📅 1月1日 (冬)</span> <span id="weather-display" style="margin-left:5px; color:#0984e3;"></span> |
             <span id="game-day">周一</span> |
@@ -251,7 +262,8 @@
     <div class="header-group">
         <button class="btn create" onclick="inputNewResident()">➕ 入住新居民</button>
         <button class="btn purple" onclick="showTownEvents()">🎉 举办活动</button>
-        <button class="btn gold" onclick="showLeaderboard()">🏆 排行榜</button>
+        <button class="btn achieve" onclick="showAchievements()">🏆 成就</button>
+        <button class="btn gold" onclick="showLeaderboard()">📊 排行榜</button>
         <button class="btn cyan" onclick="showJobBoard()">📋 工作榜</button>
         <button class="btn" onclick="showPersonalityInfo()">📖 性格说明</button>
         <button class="btn" onclick="toggleRelationView()">❤ 关系谱</button>
@@ -278,7 +290,7 @@
     </div>
 
     <div class="col-right" id="game-log">
-        <div class="log-entry">✨ 游戏开始。Ver 2.7.0 天气物语版。</div>
+        <div class="log-entry">✨ 游戏开始。Ver 2.8.0 成就与新建筑版。</div>
     </div>
 </div>
 
@@ -303,7 +315,7 @@
 <div class="modal-overlay" id="leaderboard-modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>🏆 小镇排行榜</h3>
+            <h3>📊 小镇排行榜</h3>
             <button class="modal-close" onclick="closeLeaderboard()">×</button>
         </div>
         <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap: wrap;">
@@ -315,6 +327,16 @@
             <button class="btn" onclick="renderLeaderboard('assault')" style="background:#c0392b; color:white;">😈 劫色榜</button>
         </div>
         <div id="leaderboard-list" class="rank-list"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="achievements-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🏆 荣誉成就馆</h3>
+            <button class="modal-close" onclick="closeAchievements()">×</button>
+        </div>
+        <div id="achievements-list" class="achieve-list"></div>
     </div>
 </div>
 
@@ -336,7 +358,7 @@
 
 <script>
     // --- 配置数据 ---
-    const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "斗罗", "CPU0", "闪柠", "小格蕾修"];
+    const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "斗罗", "CPU0", "闪柠", "氘镉殆", "空零", "小格蕾修"];
     
     const ITEMS_DB = {
         "rose": { name: "🌹 玫瑰", price: 50, type: "gift", loveBonus: 15, desc: "赠人玫瑰，手有余香" },
@@ -375,6 +397,15 @@
         'Foggy': { name: '🌫 大雾', mood: -0.5, health: -0.5, desc: '能见度低，空气不好' }
     };
 
+    const ACHIEVEMENTS_DB = [
+        { id: 'first_build', name: '🏗️ 奠基人', desc: '建成小镇的第一座建筑', reward: 500, icon: '🏗️' },
+        { id: 'first_marriage', name: '👩‍❤️‍💋‍👨 神仙眷侣', desc: '诞生第一对确认关系的情侣', reward: 300, icon: '❤️' },
+        { id: 'first_crime', name: '😈 罪恶都市', desc: '发生了第一起抢劫或骚扰案件', reward: 200, icon: '😈' },
+        { id: 'rich_town', name: '💰 小康社会', desc: '镇库资金达到 5000', reward: 1000, icon: '💰' },
+        { id: 'first_gym', name: '💪 自律达人', desc: '建成健身房，开始全民健身', reward: 300, icon: '💪' },
+        { id: 'culture_hub', name: '🏛 文化中心', desc: '建成博物馆，提升小镇文化底蕴', reward: 400, icon: '🏛' }
+    ];
+
     function getItemTooltipText(itemId) {
         const item = ITEMS_DB[itemId];
         if (!item) return "";
@@ -402,8 +433,8 @@
     
     function getJobSkillType(role) {
         if (role.includes("厨") || role.includes("拉面") || role.includes("花艺") || role.includes("早点") || role.includes("技师")) return 'craft';
-        if (role.includes("医") || role.includes("老师") || role.includes("神父") || role.includes("图书") || role.includes("网管")) return 'intel';
-        if (role.includes("警") || role.includes("保安") || role.includes("搬砖") || role.includes("保洁") || role.includes("跑堂") || role.includes("外卖")) return 'strength';
+        if (role.includes("医") || role.includes("老师") || role.includes("神父") || role.includes("图书") || role.includes("网管") || role.includes("讲解")) return 'intel';
+        if (role.includes("警") || role.includes("保安") || role.includes("搬砖") || role.includes("保洁") || role.includes("跑堂") || role.includes("外卖") || role.includes("教练") || role.includes("检票")) return 'strength';
         return 'social'; 
     }
 
@@ -419,6 +450,9 @@
         { id: "ramen", name: "🍜 兰州拉面", category: "food", cost: 250, desc: "正宗牛肉面，管饱", effect: "food", price: 12, food: 35, open: 7, close: 22, jobs: ["拉面师傅"] },
         { id: "711", name: "🏪 7-11便利店", category: "food", cost: 300, desc: "24小时营业", effect: "shop", price: 0, open: 0, close: 24, jobs: ["收银员"], sells: ["water_wahaha", "water_ganten", "noodle_beef", "chips_lays", "cola_pepsi", "coffee_instant", "sushi_box", "beer_tsingtao", "beer_laoshan"] },
         { id: "kfc", name: "🍗 肯德基", category: "food", cost: 600, desc: "疯狂星期四", effect: "food", price: 30, food: 50, open: 10, close: 22, jobs: ["前台", "炸鸡厨师"] },
+        { id: "gym", name: "💪 健身房", category: "fun", cost: 800, desc: "挥洒汗水，提升颜值与健康", effect: "beauty", price: 50, open: 6, close: 22, jobs: ["健身教练", "保洁"] },
+        { id: "amusement", name: "🎡 游乐场", category: "fun", cost: 2000, desc: "充满尖叫与欢笑的地方", effect: "fun_high", price: 100, open: 9, close: 20, jobs: ["检票员", "玩偶扮演"] },
+        { id: "museum", name: "🏛 博物馆", category: "fun", cost: 1200, desc: "历史的沉淀，增长见识", effect: "study", price: 40, open: 9, close: 17, jobs: ["讲解员", "保安"], closedDays: [1] },
         { id: "police", name: "👮 派出所", category: "service", cost: 800, desc: "维护小镇治安", effect: "security", price: 0, open: 0, close: 24, jobs: ["警察", "警察"] }, 
         { id: "hospital", name: "🏥 综合医院", category: "service", cost: 1500, desc: "设备先进的医疗中心", effect: "health", price: 80, open: 0, close: 24, jobs: ["主治医师", "护士", "保洁"] },
         { id: "clinic", name: "💊 社区诊所", category: "service", cost: 400, desc: "方便快捷的小诊所", effect: "shop", price: 0, open: 8, close: 20, jobs: ["社区医生", "护士"], sells: ["bandage", "painkiller", "digestion_tablets", "cold_medicine", "anti_inflammatory", "fever_medicine"] },
@@ -473,13 +507,13 @@ const TOWN_EVENTS = [
 
     function getJobWage(role) { 
         if (role.includes("老板") || role.includes("主治医师")) return 35; 
-        if (role.includes("神父") || role.includes("社区医生")) return 25; 
-        if (role.includes("警察") || role.includes("老师")) return 22; 
+        if (role.includes("神父") || role.includes("社区医生") || role.includes("讲解")) return 25; 
+        if (role.includes("警察") || role.includes("老师") || role.includes("教练")) return 22; 
         if (role.includes("卖银")) return 20; 
-        if (role.includes("大厨") || role.includes("护士")) return 18; 
+        if (role.includes("大厨") || role.includes("护士") || role.includes("玩偶")) return 18; 
         if (role.includes("花艺") || role.includes("炸鸡")) return 16; 
         if (role.includes("网管") || role.includes("保安")) return 15; 
-        if (role.includes("前台") || role.includes("图书管理员")) return 14; 
+        if (role.includes("前台") || role.includes("图书管理员") || role.includes("检票")) return 14; 
         if (role.includes("拉面")) return 13; 
         if (role.includes("收银") || role.includes("售票")) return 12; 
         if (role.includes("网吧保洁") || role.includes("保洁") || role.includes("跑堂") || role.includes("早点")) return 10; 
@@ -554,6 +588,7 @@ const TOWN_EVENTS = [
             this.dateMonth = 1;
             this.dateDay = 1;
             this.weather = 'Sunny';
+            this.achievements = []; // 存储已解锁的成就ID
             
             this.loadOrInit(); 
             if(!this.weather) this.generateDailyWeather();
@@ -607,8 +642,8 @@ const TOWN_EVENTS = [
         initNewGame() { 
             this.chars = NAMES.map(n => { let c = new Character(n); NAMES.forEach(target => { if (target !== n) c.relationships[target] = { love: 0, status: 'stranger' }; }); return c; }); 
             this.buildings = BUILDINGS_BLUEPRINT.map(b => new Building(b)); 
+            // Baozi shop is NO LONGER pre-built to allow for fair election and first build achievement
             const park = this.buildings.find(b => b.id === 'park'); if(park) { park.isBuilt = true; park.currentProgress = park.totalCost; }
-            const baozi = this.buildings.find(b => b.id === 'baozi'); if(baozi) { baozi.isBuilt = true; baozi.currentProgress = baozi.totalCost; }
             const clinic = this.buildings.find(b => b.id === 'clinic'); if(clinic) { clinic.isBuilt = true; clinic.currentProgress = clinic.totalCost; }
         }
         tick() { 
@@ -625,6 +660,8 @@ const TOWN_EVENTS = [
                 this.generateDailyWeather();
             } 
             
+            if (this.townMoney >= 5000) this.unlockAchievement('rich_town');
+
             // 每小时逻辑
             if (this.gameTime % 60 === 0) { 
                 this.runElectionsAndHiring(); 
@@ -678,6 +715,16 @@ const TOWN_EVENTS = [
                 this.log(`[⭐晋升] 恭喜 **${c.name}** 的 ${type} 技能突破！晋升为 **${newLevelInfo.title}** 级别！`, "tag-promote");
                 c.happiness = Math.min(100, c.happiness + 20);
             }
+        }
+
+        unlockAchievement(id) {
+            if (this.achievements.includes(id)) return;
+            const ach = ACHIEVEMENTS_DB.find(a => a.id === id);
+            if (!ach) return;
+            this.achievements.push(id);
+            this.townMoney += ach.reward;
+            this.log(`[🏆成就] 恭喜解锁成就：**${ach.name}** (${ach.desc})！奖励资金 💰${ach.reward}`, "tag-promote");
+            alert(`🏆 成就解锁：${ach.name}\n${ach.desc}\n获得奖励: 💰${ach.reward}`);
         }
 
         decideAction(p) {
@@ -774,6 +821,8 @@ const TOWN_EVENTS = [
                 victim = targets.length > 0 ? choose(targets) : choose(this.chars.filter(c => c.name !== p.name));
             }
             if (!victim) return false;
+            
+            this.unlockAchievement('first_crime');
 
             const policeStation = this.buildings.find(b => b.id === 'police'); 
             const hasPolice = policeStation && policeStation.isBuilt && policeStation.staff.length > 0;
@@ -960,7 +1009,7 @@ const TOWN_EVENTS = [
                     }); 
                 }
             } else if (id === 'matchmaking') {
-                let pairCount = 0; this.chars.forEach(c => { if (!c.partner) { let bestT = null; let maxL = -100; for(let tName in c.relationships) { const t = this.chars.find(x=>x.name===tName); if (t && !t.partner && c.relationships[tName].love > maxL) { maxL = c.relationships[tName].love; bestT = t; } } if (bestT && maxL > 40 && Math.random() < 0.5) { if (bestT.decideProposal(c.name, 'confess') || Math.random() < 0.3) { c.partner = bestT.name; bestT.partner = c.name; c.relationships[bestT.name].status = 'lover'; bestT.relationships[c.name].status = 'lover'; c.happiness += 20; bestT.happiness += 20; this.log(`[❤️配对] 在相亲大会上，**${c.name}** 和 **${bestT.name}** 牵手成功！`, "tag-love"); pairCount++; } } } }); if (pairCount > 0) { this.chars.forEach(c => c.happiness += 5); } else { this.log(`[🍂尴尬] 相亲大会结束了，似乎没人配对成功...`, "tag-reject"); }
+                let pairCount = 0; this.chars.forEach(c => { if (!c.partner) { let bestT = null; let maxL = -100; for(let tName in c.relationships) { const t = this.chars.find(x=>x.name===tName); if (t && !t.partner && c.relationships[tName].love > maxL) { maxL = c.relationships[tName].love; bestT = t; } } if (bestT && maxL > 40 && Math.random() < 0.5) { if (bestT.decideProposal(c.name, 'confess') || Math.random() < 0.3) { c.partner = bestT.name; bestT.partner = c.name; c.relationships[bestT.name].status = 'lover'; bestT.relationships[c.name].status = 'lover'; c.happiness += 20; bestT.happiness += 20; this.unlockAchievement('first_marriage'); this.log(`[❤️配对] 在相亲大会上，**${c.name}** 和 **${bestT.name}** 牵手成功！`, "tag-love"); pairCount++; } } } }); if (pairCount > 0) { this.chars.forEach(c => c.happiness += 5); } else { this.log(`[🍂尴尬] 相亲大会结束了，似乎没人配对成功...`, "tag-reject"); }
             } else if (id === 'charity') {
                 let totalRaised = 0; this.chars.forEach(c => { if (c.money > 10) { const donation = Math.min(c.money, rand(5, 20)); c.money -= donation; totalRaised += donation; c.happiness -= 5; this.chars.forEach(other => { if(other.name!==c.name) { c.relationships[other.name].love += 2; } }); } }); this.townMoney += totalRaised; this.log(`[🎗️募捐] 居民们共捐款 💰${totalRaised}，虽然心疼钱但关系更紧密了。`, "tag-build");
             } else if (id === 'anniversary') { 
@@ -1055,6 +1104,7 @@ const TOWN_EVENTS = [
                              const t = choose(available);
                              c.partner = t.name; t.partner = c.name;
                              c.relationships[t.name].status = 'lover'; t.relationships[c.name].status = 'lover';
+                             this.unlockAchievement('first_marriage');
                              this.log(`[🎇浪漫] 烟花下，**${c.name}** 和 **${t.name}** 确立了关系！`, "tag-love");
                              pairs++;
                          }
@@ -1096,8 +1146,8 @@ const TOWN_EVENTS = [
                 this.loopId = setInterval(() => this.tick(), this.speed); 
             }
         }
-        accelerateBuild(buildId) { const b = this.buildings.find(x => x.id === buildId); if (!b || b.isBuilt) return; if (this.townMoney >= 50) { this.townMoney -= 50; b.currentProgress += 20; this.log(`[💸加速] 镇长斥资加速 **${b.name}** 建设。`, "tag-build"); if (b.currentProgress >= b.totalCost) { b.isBuilt = true; this.log(`[🔨竣工] **${b.name}** 建成了！`, "tag-build"); this.distributeConstructionReward(b); } this.updateUI(); } else { alert("镇库资金不足 (需要50)！"); } }
-        runElectionsAndHiring() { /* ... 同前 ... */ this.buildings.forEach(b => { if (!b.isBuilt || b.jobs.length === 0) return; if (b.staff.length === 0) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0) { const votes = {}; candidates.forEach(c => votes[c.name] = 0); this.chars.forEach(voter => { let bestC = null; let maxLove = -999; candidates.forEach(c => { let love = (c.name !== voter.name) ? (voter.relationships[c.name]?.love || 0) : 50; love += rand(-20, 20); if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) votes[bestC.name]++; }); let winner = candidates[0]; let maxVotes = -1; for (let name in votes) { if (votes[name] > maxVotes) { maxVotes = votes[name]; winner = candidates.find(c => c.name === name); } } if (winner) { const roleName = b.jobs[0]; winner.job = { buildingId: b.id, role: roleName }; b.staff.push(winner.name); this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build"); } } } else if (b.staff.length < b.jobs.length) { const managerName = b.staff[0]; const manager = this.chars.find(c => c.name === managerName); if (manager) { const roleName = b.jobs[b.staff.length]; const candidates = this.chars.filter(c => !c.job); let bestC = null; let maxLove = -999; candidates.forEach(c => { const rel = manager.relationships[c.name]; let love = rel ? rel.love : 0; if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) { bestC.job = { buildingId: b.id, role: roleName }; b.staff.push(bestC.name); this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${roleName}。`); } } } if (b.id === 'footshop' && b.isBuilt && b.staff.length > 0) { const bossName = b.staff[0]; const boss = this.chars.find(c => c.name === bossName); if (boss && b.prostitutes.length < 3) { const candidates = this.chars.filter(c => !c.job && !c.prostitute && c.hasTrait('promiscuous')); if (candidates.length > 0 && Math.random() < 0.1) { const target = choose(candidates); target.prostitute = { buildingId: b.id }; b.prostitutes.push(target.name); this.log(`[💋拉皮条] **${boss.name}** 说服了 **${target.name}** 在洗脚店卖银...`, "tag-drama"); } } } }); }
+        accelerateBuild(buildId) { const b = this.buildings.find(x => x.id === buildId); if (!b || b.isBuilt) return; if (this.townMoney >= 50) { this.townMoney -= 50; b.currentProgress += 20; this.log(`[💸加速] 镇长斥资加速 **${b.name}** 建设。`, "tag-build"); if (b.currentProgress >= b.totalCost) { b.isBuilt = true; this.log(`[🔨竣工] **${b.name}** 建成了！`, "tag-build"); this.unlockAchievement('first_build'); if(b.id==='gym') this.unlockAchievement('first_gym'); if(b.id==='museum') this.unlockAchievement('culture_hub'); this.distributeConstructionReward(b); } this.updateUI(); } else { alert("镇库资金不足 (需要50)！"); } }
+        runElectionsAndHiring() { /* ... 同前 ... */ this.buildings.forEach(b => { if (!b.isBuilt || b.jobs.length === 0) return; if (b.staff.length === 0) { const candidates = this.chars.filter(c => !c.job).sort(() => Math.random() - 0.5); if (candidates.length > 0) { const votes = {}; candidates.forEach(c => votes[c.name] = 0); this.chars.forEach(voter => { let bestC = null; let maxLove = -999; candidates.forEach(c => { let love = (c.name !== voter.name) ? (voter.relationships[c.name]?.love || 0) : 50; love += rand(-20, 20); if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) votes[bestC.name]++; }); let winner = candidates[0]; let maxVotes = -1; for (let name in votes) { if (votes[name] > maxVotes) { maxVotes = votes[name]; winner = candidates.find(c => c.name === name); } } if (winner) { const roleName = b.jobs[0]; winner.job = { buildingId: b.id, role: roleName }; b.staff.push(winner.name); this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build"); } } } else if (b.staff.length < b.jobs.length) { const managerName = b.staff[0]; const manager = this.chars.find(c => c.name === managerName); if (manager) { const roleName = b.jobs[b.staff.length]; const candidates = this.chars.filter(c => !c.job); let bestC = null; let maxLove = -999; candidates.forEach(c => { const rel = manager.relationships[c.name]; let love = rel ? rel.love : 0; if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) { bestC.job = { buildingId: b.id, role: roleName }; b.staff.push(bestC.name); this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${roleName}。`); } } } if (b.id === 'footshop' && b.isBuilt && b.staff.length > 0) { const bossName = b.staff[0]; const boss = this.chars.find(c => c.name === bossName); if (boss && b.prostitutes.length < 3) { const candidates = this.chars.filter(c => !c.job && !c.prostitute && c.hasTrait('promiscuous')); if (candidates.length > 0 && Math.random() < 0.1) { const target = choose(candidates); target.prostitute = { buildingId: b.id }; b.prostitutes.push(target.name); this.log(`[💋拉皮条] **${boss.name}** 说服了 **${target.name}** 在洗脚店卖银...`, "tag-drama"); } } } }); }
         
         doRobbery(p, target = null) { 
             let victim = target;
@@ -1107,6 +1157,8 @@ const TOWN_EVENTS = [
                 victim = choose(targets); 
             }
             
+            this.unlockAchievement('first_crime');
+
             const policeStation = this.buildings.find(b => b.id === 'police'); const hasPolice = policeStation && policeStation.isBuilt && policeStation.staff.length > 0; let securityLevel = hasPolice ? policeStation.staff.length * 0.3 : 0; let successChance = 0.5; if (p.ideology.name === '军国主义') successChance += 0.2; successChance -= securityLevel; 
             
             const timeStr = this.getDateTimeStr();
@@ -1224,7 +1276,7 @@ const TOWN_EVENTS = [
             const timeStr = this.getDateTimeStr();
             p.addLog(`${timeStr} 参与建设 ${b.name}`);
             b.addLog(`${timeStr} ${p.name} 参与了建设`);
-            if (b.currentProgress >= b.totalCost && !b.isBuilt) { b.isBuilt = true; this.log(`[🔨竣工] **${b.name}** 建成了！`, "tag-build"); this.distributeConstructionReward(b); } 
+            if (b.currentProgress >= b.totalCost && !b.isBuilt) { b.isBuilt = true; this.log(`[🔨竣工] **${b.name}** 建成了！`, "tag-build"); this.unlockAchievement('first_build'); if(b.id==='gym') this.unlockAchievement('first_gym'); if(b.id==='museum') this.unlockAchievement('culture_hub'); this.distributeConstructionReward(b); } 
             
             // 建设增加技能
             this.improveSkill(p, 'craft', 0.3);
@@ -1242,6 +1294,22 @@ const TOWN_EVENTS = [
                         p.happiness = Math.min(100, p.happiness + 5); 
                         p.currentAction = `[治疗] 在 ${v.name} 看病疗伤`; 
                     } 
+                    else if (v.effect === 'beauty') {
+                        p.health = Math.min(100, p.health + 5);
+                        p.appearance = Math.min(100, p.appearance + 2);
+                        p.happiness = Math.min(100, p.happiness + 10);
+                        p.currentAction = `[健身] 在 ${v.name} 撸铁塑形`;
+                        this.improveSkill(p, 'strength', 0.2);
+                    }
+                    else if (v.effect === 'fun_high') {
+                        p.happiness = Math.min(100, p.happiness + 30); // 大幅增加快乐
+                        p.currentAction = `[游玩] 在 ${v.name} 尽情尖叫`;
+                    }
+                    else if (v.effect === 'study') {
+                        p.happiness = Math.min(100, p.happiness + 5);
+                        p.currentAction = `[参观] 在 ${v.name} 增长见闻`;
+                        this.improveSkill(p, 'intel', 0.5);
+                    }
                     else p.currentAction = `在 ${v.name} 放松`; 
                     
                     p.addLog(`${timeStr} 在 ${v.name} 消费休息`);
@@ -1365,9 +1433,9 @@ const TOWN_EVENTS = [
 
         distributeConstructionReward(b) { let total = 0; this.chars.forEach(c => total += (c.constructionContribution[b.id] || 0)); if (total === 0) return; const reward = Math.floor(b.totalCost * 0.3); this.chars.forEach(c => { const share = c.constructionContribution[b.id] || 0; if (share > 0) { const m = Math.floor(reward * (share / total)); c.money += m; if(m>0) this.log(`[💰奖励] **${c.name}** 获建设奖励 💰${m}`, "tag-build"); } }); }
         updateRelationshipStatus(p, t, pRel, tRel) { if (pRel.status === 'stranger' && pRel.love > 10) { pRel.status = 'friend'; tRel.status = 'friend'; } else if (pRel.status === 'friend' && pRel.love > 60 && !['lover','spouse','mistress','enemy','ex'].includes(pRel.status)) { pRel.status = 'bestfriend'; tRel.status = 'bestfriend'; } }
-        checkRomanceEvent(p, t, pRel, tRel, v) { if (!p.partner && !t.partner && pRel.love > 70 && pRel.status !== 'spouse') { if (Math.random() < 0.2) { if (t.decideProposal(p.name, 'confess')) { p.partner = t.name; t.partner = p.name; pRel.status = "lover"; tRel.status = "lover"; p.happiness += 20; t.happiness += 20; this.log(`[❤️表白] ${p.name} 向 ${t.name} 表白成功！`, "tag-love"); } else { p.happiness -= 20; pRel.love -= 10; this.log(`[💔拒绝] ${p.name} 表白失败...`, "tag-reject"); } return true; } } return false; }
+        checkRomanceEvent(p, t, pRel, tRel, v) { if (!p.partner && !t.partner && pRel.love > 70 && pRel.status !== 'spouse') { if (Math.random() < 0.2) { if (t.decideProposal(p.name, 'confess')) { p.partner = t.name; t.partner = p.name; pRel.status = "lover"; tRel.status = "lover"; p.happiness += 20; t.happiness += 20; this.unlockAchievement('first_marriage'); this.log(`[❤️表白] ${p.name} 向 ${t.name} 表白成功！`, "tag-love"); } else { p.happiness -= 20; pRel.love -= 10; this.log(`[💔拒绝] ${p.name} 表白失败...`, "tag-reject"); } return true; } } return false; }
         breakInteraction(c) { if (c.interactingWith) { const partner = this.chars.find(x => x.name === c.interactingWith); if (partner) { partner.interactingWith = null; partner.currentAction = "发呆"; } c.interactingWith = null; } }
-        saveData(isAuto = false) { const data = { chars: this.chars, buildings: this.buildings, townMoney: this.townMoney, gameTime: this.gameTime, gameDay: this.gameDay, dateMonth: this.dateMonth, dateDay: this.dateDay, weather: this.weather, ts: Date.now() }; localStorage.setItem('happyTownV2_Save', JSON.stringify(data)); this.lastSaveTime = Date.now(); if (!isAuto) alert("✅ 存档成功！"); }
+        saveData(isAuto = false) { const data = { chars: this.chars, buildings: this.buildings, townMoney: this.townMoney, gameTime: this.gameTime, gameDay: this.gameDay, dateMonth: this.dateMonth, dateDay: this.dateDay, weather: this.weather, achievements: this.achievements, ts: Date.now() }; localStorage.setItem('happyTownV2_Save', JSON.stringify(data)); this.lastSaveTime = Date.now(); if (!isAuto) alert("✅ 存档成功！"); }
         
         loadFromJSON(jsonStr) { 
             try { 
@@ -1378,6 +1446,7 @@ const TOWN_EVENTS = [
                 this.dateMonth = data.dateMonth || 1;
                 this.dateDay = data.dateDay || 1;
                 this.weather = data.weather || 'Sunny';
+                this.achievements = data.achievements || [];
 
                 this.buildings = data.buildings.map(bData => { 
                     const bp = BUILDINGS_BLUEPRINT.find(x => x.id === bData.id); 
@@ -1499,6 +1568,28 @@ const TOWN_EVENTS = [
             this.buildings.forEach(b => { if (b.jobs.length > 0) { b.jobs.forEach(role => { const item = document.createElement('div'); item.className = 'job-item'; item.innerHTML = `<div><div class="job-name">👔 ${role}</div><div class="job-loc">${b.name}</div></div><div class="job-wage">💰 ${getJobWage(role)}</div>`; list.appendChild(item); }); } });
             document.getElementById('jobboard-modal').classList.add('active');
         }
+        
+        showAchievements() {
+            const modal = document.getElementById('achievements-modal');
+            const list = document.getElementById('achievements-list');
+            list.innerHTML = '';
+            ACHIEVEMENTS_DB.forEach(ach => {
+                const isUnlocked = this.achievements.includes(ach.id);
+                const div = document.createElement('div');
+                div.className = `achieve-item ${isUnlocked ? 'unlocked' : ''}`;
+                div.innerHTML = `
+                    <div class="achieve-icon">${ach.icon}</div>
+                    <div class="achieve-info">
+                        <div class="achieve-title">${ach.name} ${isUnlocked ? '✅' : ''}</div>
+                        <div class="achieve-desc">${isUnlocked ? ach.desc : '??? (继续探索小镇以解锁)'}</div>
+                        ${isUnlocked ? `<div class="achieve-reward">奖励: 💰${ach.reward}</div>` : ''}
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            modal.classList.add('active');
+        }
+        closeAchievements() { document.getElementById('achievements-modal').classList.remove('active'); }
 
         showCharacterDetail(name) {
             const c = this.chars.find(x => x.name === name); if (!c) return;
@@ -1860,6 +1951,8 @@ const TOWN_EVENTS = [
     function toggleRelationView() { const main = document.getElementById('main-view'); const rel = document.getElementById('relation-view'); isRelViewOpen = !isRelViewOpen; if (isRelViewOpen) { main.style.display = 'none'; rel.classList.add('active'); setTimeout(() => { if (gameInstance) gameInstance.renderRelations(); }, 50); } else { main.style.display = 'flex'; rel.classList.remove('active'); } }
     function showLeaderboard() { renderLeaderboard('money'); document.getElementById('leaderboard-modal').classList.add('active'); }
     function closeLeaderboard() { document.getElementById('leaderboard-modal').classList.remove('active'); }
+    function showAchievements() { if(gameInstance) gameInstance.showAchievements(); }
+    function closeAchievements() { if(gameInstance) gameInstance.closeAchievements(); }
     function showJobBoard() { if(gameInstance) gameInstance.showJobBoard(); }
     function closeJobBoard() { document.getElementById('jobboard-modal').classList.remove('active'); }
     
@@ -1965,6 +2058,7 @@ const TOWN_EVENTS = [
         document.getElementById('action-select-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('action-select-modal')) closeActionSelect(); }); 
         document.getElementById('town-event-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('town-event-modal')) closeTownEvents(); });
         document.getElementById('building-detail-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('building-detail-modal')) closeBuildingDetail(); });
+        document.getElementById('achievements-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('achievements-modal')) closeAchievements(); });
     });
     function manualSave() { if (gameInstance) gameInstance.saveData(); }
     function resetData() { if(confirm("确定要删除存档并重置所有进度吗？")) { localStorage.removeItem('happyTownV2_Save'); location.reload(); } }
