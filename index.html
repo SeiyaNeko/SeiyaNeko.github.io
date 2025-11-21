@@ -2164,6 +2164,54 @@ const TOWN_EVENTS = [
         
         ctx.clearRect(0,0,w,h);
         
+        // Draw lines
+        chars.forEach((c, i) => {
+            const p1 = positions[i];
+            chars.forEach((t, j) => {
+                if (i >= j) return;
+                const rel = c.relationships[t.name];
+                if (rel && (Math.abs(rel.love) > 25 || rel.status !== 'stranger')) {
+                    const p2 = positions[j];
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    
+                    let color = `rgba(200, 200, 200, 0.1)`;
+                    let width = 1;
+                    let label = "";
+
+                    if (rel.status === 'spouse') { color = '#e84393'; width = 3; label = "❤"; }
+                    else if (rel.status === 'lover') { color = '#ff7675'; width = 3; label = "❤"; }
+                    else if (rel.status === 'enemy') { color = '#c0392b'; width = 2.5; label = "⚔️"; }
+                    else if (rel.status === 'bestfriend') { color = '#3498db'; width = 2; }
+                    else if (rel.love > 50) { color = 'rgba(46, 204, 113, 0.6)'; width = 1.5; }
+                    else if (rel.love < -30) { color = 'rgba(231, 76, 60, 0.6)'; width = 1.5; }
+                    else {
+                         const opacity = Math.min(0.5, Math.abs(rel.love)/150);
+                         color = rel.love > 0 ? `rgba(52, 152, 219, ${opacity})` : `rgba(231, 76, 60, ${opacity})`;
+                    }
+
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = width;
+                    ctx.stroke();
+                    
+                    if(label) {
+                        const mx = (p1.x + p2.x)/2;
+                        const my = (p1.y + p2.y)/2;
+                        ctx.fillStyle = '#fff';
+                        ctx.beginPath();
+                        ctx.arc(mx, my, 8, 0, Math.PI*2);
+                        ctx.fill();
+                        ctx.fillStyle = color;
+                        ctx.font = "12px Arial";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(label, mx, my);
+                    }
+                }
+            });
+        });
+        
         // Draw nodes
         positions.forEach((p, i) => {
             ctx.beginPath();
@@ -2226,5 +2274,3 @@ const TOWN_EVENTS = [
     window.onload = () => { new Game(); };
 </script>
 <script type="module" src="/index.tsx"></script>
-</body>
-</html>
