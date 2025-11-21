@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>猫の模拟小镇 Ver 3.7.5 - 修复版</title>
+    <title>猫の模拟小镇 Ver 3.8.0 - 居民接入DeepSeek互动</title>
     <style>
         :root { --bg: #f0f2f5; --card: #fff; --primary: #4a90e2; --love: #ff6b6b; --text: #333; --dark: #2d3436; --crime: #8e44ad; --item: #e17055; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
@@ -317,7 +317,7 @@
 
 <header>
     <div class="header-group">
-        <h1>🏡 猫の模拟小镇 <small>Ver 3.7.5 修复版</small></h1>
+        <h1>🏡 猫の模拟小镇 <small>Ver 3.8.0 居民接入DeepSeek互动</small></h1>
         <div style="font-size: 0.9rem;">
             <span id="calendar-display" onclick="gameInstance.showCalendar()" title="点击查看全年日历">📅 1月1日 (冬)</span> <span id="weather-display" style="margin-left:5px; color:#0984e3;"></span> |
             <span id="game-day">周一</span> |
@@ -357,7 +357,7 @@
         <div class="log-container">
             <div class="log-header">📡 系统公告</div>
             <div id="game-log">
-                <div class="log-entry">✨ 游戏开始。Ver 3.7.5 更新！修复居民UI显示，优化排行榜显示，完善关系谱详情。</div>
+                <div class="log-entry">✨ 游戏开始。Ver 3.8.0 更新！居民现在接入大模型了！</div>
             </div>
         </div>
         <div class="log-container" id="interaction-log-container">
@@ -1635,7 +1635,7 @@ const TOWN_EVENTS = [
                 const generatedText = data.choices[0].message.content.trim();
 
                 // 记录到互动日志
-                this.logInteraction(`[🤖AI互动] ${generatedText}`, "tag-ai");
+                this.logInteraction(`[💬居民互动] ${generatedText}`, "tag-ai");
 
                 // 额外增加好感度
                 const boost = rand(1, 3);
