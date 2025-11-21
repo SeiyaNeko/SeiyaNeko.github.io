@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -113,6 +112,7 @@
         .tag-weather { color: #74b9ff; font-style: italic; }
         .tag-gov { color: #f39c12; font-weight: bold; border: 1px solid #f39c12; padding: 1px 4px; border-radius: 3px; }
         .tag-gossip { color: #6c5ce7; font-style: italic; }
+        .tag-ai { color: #00b894; font-weight: bold; }
 
         @media (max-width: 800px) { 
             .game-container { flex-direction: column; overflow-y: auto; } 
@@ -933,6 +933,12 @@ const TOWN_EVENTS = [
             
             this.votingInProgress = false;
             this.voteTimer = null;
+            
+            // DeepSeek API 配置
+            this.deepseekApiKey = 'sk-b1bd6106f5824ace86bca34c1402717e';
+            this.deepseekApiUrl = 'https://api.deepseek.com/v1/chat/completions';
+            this.aiInteractionEnabled = true; // 是否启用AI互动
+            this.aiInteractionProbability = 0.4; // AI互动概率
 
             this.loadOrInit(); 
             if(!this.weather) this.generateDailyWeather();
@@ -1346,7 +1352,7 @@ const TOWN_EVENTS = [
             if (poorList.length === 0) { alert("小镇已经全面脱贫，无需执行此政策！"); return; }
             let totalPool = 0; let msg = "🎩 镇长发起 [共同富裕] 运动：\n";
             richList.forEach(c => { const tax = Math.floor(c.money * 0.2); if (tax > 0) { c.money -= tax; totalPool += tax; c.happiness -= 10; c.addLog(`[💸被劫富] 被强制收缴了 💰${tax} 用于共同富裕`); msg += `- 向富豪 ${c.name} 征收 💰${tax}\n`; } });
-            if (totalPool > 0) { const share = Math.floor(totalPool / poorList.length); poorList.forEach(c => { c.money += share; c.happiness += 10; c.addLog(`[💰济贫] 收到了共同富裕分红 💰${share}`); }); msg += `\n💰 共计收缴 ${totalPool}，平分给 ${poorList.length} 位困难户 (每人得 ${share})。`; this.log(`[⚖️决策] 镇长执行了“共同富裕”决策！向富人征税补贴穷人。`, "tag-gov"); alert(msg); this.updateUI(); } else { alert("富豪们也没钱了，榨不出油水！"); }
+            if (totalPool > 0) { const share = Math.floor(totalPool / poorList.length); poorList.forEach(c => { c.money += share; c.happiness += 10; c.addLog(`[💰济贫] 收到了共同富裕分红 💰${share}`); }); msg += `\n💰 共计收缴 ${totalPool}，平分给 ${poorList.length} 位困难户 (每人得 ${share})。`; this.log(`[⚖️决策] 镇长执行了"共同富裕"决策！向富人征税补贴穷人。`, "tag-gov"); alert(msg); this.updateUI(); } else { alert("富豪们也没钱了，榨不出油水！"); }
         }
 
         togglePolicy(type) { if (type === 'social') this.policySocialSecurity = document.getElementById('policy-social-security').checked; if (type === 'housing') this.policyHousing = document.getElementById('policy-housing').checked; if (type === 'food') this.policyFood = document.getElementById('policy-food').checked; }
@@ -1449,7 +1455,7 @@ const TOWN_EVENTS = [
             else if (id === 'matsuri') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 25); }); let pairs = 0; this.chars.forEach(c => { if (!c.partner && Math.random() < 0.2) { const available = this.chars.filter(t => t.name !== c.name && !t.partner && c.relationships[t.name].love > 30); if (available.length > 0) { const t = choose(available); c.partner = t.name; t.partner = c.name; c.relationships[t.name].status = 'lover'; t.relationships[c.name].status = 'lover'; this.unlockAchievement('first_marriage'); this.logInteraction(`[🎇浪漫] 烟花下，**${c.name}** 和 **${t.name}** 确立了关系！`, "tag-love"); pairs++; } } }); }
             else if (id === 'snowfest' || id === 'christmas') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); c.health = Math.min(100, c.health + 10); c.hunger = Math.min(100, c.hunger + 10); }); }
             else if (id === 'new_year') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); c.money = Math.floor(c.money * 1.1); }); this.log("新年新气象，大家心情大好，存款似乎也变多了？", "tag-promote"); }
-            else if (id === 'fools_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); }); if(Math.random()<0.5) { const v = choose(this.chars); v.happiness -= 15; this.logInteraction(`[🤡恶搞] **${v.name}** 被人贴了“我是笨蛋”的纸条，气得不行！`, "tag-reject"); } }
+            else if (id === 'fools_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); }); if(Math.random()<0.5) { const v = choose(this.chars); v.happiness -= 15; this.logInteraction(`[🤡恶搞] **${v.name}** 被人贴了"我是笨蛋"的纸条，气得不行！`, "tag-reject"); } }
             else if (id === 'labor_day') { this.chars.forEach(c => { if(c.job) { c.money += 50; c.addLog(`获得劳动节奖金 💰50`); } else { c.happiness += 5; } }); this.log("劳动节快乐！所有在职员工获得了50奖金。", "tag-build"); }
             else if (id === 'children_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 15); }); }
             else if (id === 'harvest') { this.chars.forEach(c => { c.hunger = Math.min(100, c.hunger + 30); }); this.log("丰收节大餐！所有人饱食度大幅提升！", "tag-eat"); }
@@ -1593,6 +1599,56 @@ const TOWN_EVENTS = [
             return false;
         }
         
+        // DeepSeek AI 互动函数
+        async generateAIInteraction(p, t, venue) {
+            if (!this.aiInteractionEnabled || !this.deepseekApiKey) return false;
+            
+            try {
+                const prompt = `
+                你是一个模拟小镇的居民，请根据以下信息生成一段简短的互动对话（不超过50字）：
+                居民A：${p.name}，性格：${p.personality.name}，当前心情：${Math.floor(p.happiness)}，当前饱食度：${Math.floor(p.hunger)}，当前健康：${Math.floor(p.health)}
+                居民B：${t.name}，性格：${t.personality.name}，当前心情：${Math.floor(t.happiness)}，当前饱食度：${Math.floor(t.hunger)}，当前健康：${Math.floor(t.health)}
+                互动地点：${venue.name}
+                两人关系：${p.relationships[t.name].status}，好感度：${Math.floor(p.relationships[t.name].love)}
+                请生成一段两人在${venue.name}的互动对话，要求简短、自然，符合角色性格和当前状态。
+                `;
+
+                const response = await fetch(this.deepseekApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.deepseekApiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [{ role: "user", content: prompt }],
+                        max_tokens: 100,
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const generatedText = data.choices[0].message.content.trim();
+
+                // 记录到互动日志
+                this.logInteraction(`[🤖AI互动] ${generatedText}`, "tag-ai");
+
+                // 额外增加好感度
+                const boost = rand(1, 3);
+                p.relationships[t.name].love = Math.min(100, p.relationships[t.name].love + boost);
+                t.relationships[p.name].love = Math.min(100, t.relationships[p.name].love + boost);
+
+                return true;
+            } catch (error) {
+                console.error("调用DeepSeek API失败:", error);
+                return false;
+            }
+        }
+        
         doSocial(p, v) { 
             p.consecutiveWork = 0; const timeStr = this.getDateTimeStr();
             if (v.price > 0) { if (p.money < v.price) { this.doRest(p, {name:"路边",price:0}); return; } p.money -= v.price; this.townMoney += v.price; } 
@@ -1616,6 +1672,11 @@ const TOWN_EVENTS = [
                 let boost = rand(1, 3); if (v.effect === 'romance') boost += 2; boost += p.personality.loveGain + t.personality.loveGain + p.ideology.loveMod + t.ideology.loveMod; boost = Math.max(0, Math.round(boost)); pRel.love = Math.min(100, pRel.love + boost); tRel.love = Math.min(100, tRel.love + boost); p.addLog(`${timeStr} 和 ${t.name} 互动 (${boost}好感)`); t.addLog(`${timeStr} 和 ${p.name} 互动 (${boost}好感)`); this.updateRelationshipStatus(p, t, pRel, tRel); 
             } 
             if(v.addLog) v.addLog(`${timeStr} ${p.name} 与 ${t.name} 来访`);
+            
+            // 异步调用AI生成互动（按概率）
+            if (Math.random() < this.aiInteractionProbability) {
+                this.generateAIInteraction(p, t, v);
+            }
         }
 
         distributeConstructionReward(b) { let total = 0; this.chars.forEach(c => total += (c.constructionContribution[b.id] || 0)); if (total === 0) return; const reward = Math.floor(b.totalCost * 0.3); this.chars.forEach(c => { const share = c.constructionContribution[b.id] || 0; if (share > 0) { const m = Math.floor(reward * (share / total)); c.money += m; if(m>0) this.log(`[💰奖励] **${c.name}** 获建设奖励 💰${m}`, "tag-build"); } }); }
@@ -2274,3 +2335,5 @@ const TOWN_EVENTS = [
     window.onload = () => { new Game(); };
 </script>
 <script type="module" src="/index.tsx"></script>
+</body>
+</html>
