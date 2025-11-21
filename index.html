@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>猫の模拟小镇 Ver 3.4.2 - 和平修正版</title>
+    <title>猫の模拟小镇 Ver 3.6.0 - 缤纷四季</title>
     <style>
         :root { --bg: #f0f2f5; --card: #fff; --primary: #4a90e2; --love: #ff6b6b; --text: #333; --dark: #2d3436; --crime: #8e44ad; --item: #e17055; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
@@ -33,6 +33,9 @@
         .btn.control { background: #34495e; width: 100%; margin-top: 10px; }
         .btn.upgrade { background: #8e44ad; color: white; border:none; padding:5px 10px; border-radius:4px; font-size:0.85rem; cursor:pointer; }
         .btn.train { background: #e67e22; color: white; border:none; padding:5px 10px; border-radius:4px; font-size:0.85rem; cursor:pointer; margin-left:5px; }
+
+        #calendar-display { cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
+        #calendar-display:hover { background: #e1e4e8; }
 
         input[type="number"] { width: 50px; padding: 4px; }
         select { padding: 6px; border-radius: 4px; border: 1px solid #ddd; }
@@ -246,6 +249,7 @@
         .tab-filter { display:flex; gap:5px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; }
         .filter-btn { background:none; border:none; cursor:pointer; padding:5px 10px; font-weight:bold; color:#999; border-bottom:3px solid transparent; transition:0.2s; }
         .filter-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+        .filter-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
         .filter-btn:hover { color:#666; }
 
         /* 成就系统样式 */
@@ -285,6 +289,21 @@
         .vote-bar-container { height: 10px; background: #eee; border-radius: 5px; margin-top: 8px; overflow: hidden; }
         .vote-bar-fill { height: 100%; background: #3498db; width: 0%; transition: width 0.3s; }
         .voting-log { max-height: 100px; overflow-y: auto; font-size: 0.85rem; background: #333; color: #fff; padding: 8px; border-radius: 6px; font-family: monospace; margin-top: 15px; }
+        
+        /* 日历样式 */
+        .calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+        .month-card { background: #fff; border: 1px solid #eee; border-radius: 6px; padding: 5px; }
+        .month-title { text-align: center; font-weight: bold; background: #f0f2f5; padding: 4px; border-radius: 4px; margin-bottom: 5px; font-size: 0.9rem; color: #2c3e50; }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.7rem; text-align: center; }
+        .day-cell { padding: 2px 0; border-radius: 3px; position: relative; }
+        .day-cell.today { background: var(--primary); color: white; font-weight: bold; }
+        .day-cell.event-day { background: #ff7675; color: white; cursor: help; }
+        .day-cell.event-day:hover::after {
+            content: attr(data-evt);
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 4px 6px; border-radius: 4px;
+            white-space: nowrap; z-index: 10;
+        }
 
     </style>
 <link rel="stylesheet" href="/index.css">
@@ -293,9 +312,9 @@
 
 <header>
     <div class="header-group">
-        <h1>🏡 猫の模拟小镇 <small>Ver 3.4.2 Peace</small></h1>
+        <h1>🏡 猫の模拟小镇 <small>Ver 3.6.0 缤纷四季</small></h1>
         <div style="font-size: 0.9rem;">
-            <span id="calendar-display">📅 1月1日 (冬)</span> <span id="weather-display" style="margin-left:5px; color:#0984e3;"></span> |
+            <span id="calendar-display" onclick="showCalendar()" title="点击查看全年日历">📅 1月1日 (冬)</span> <span id="weather-display" style="margin-left:5px; color:#0984e3;"></span> |
             <span id="game-day">周一</span> |
             <span>🕒 <span id="game-time">08:00</span></span> <button class="btn speed" onclick="toggleSpeed()" id="speed-btn">⏸ 正常</button>
         </div>
@@ -333,7 +352,7 @@
         <div class="log-container">
             <div class="log-header">📡 系统公告</div>
             <div id="game-log">
-                <div class="log-entry">✨ 游戏开始。Ver 3.4.2 和平修正版：大幅降低了各主义的冲突概率。</div>
+                <div class="log-entry">✨ 游戏开始。Ver 3.6.0 缤纷四季更新！点击左上角日历查看全年节日。</div>
             </div>
         </div>
         <div class="log-container" id="interaction-log-container">
@@ -519,16 +538,33 @@
         <div class="modal-header"><h3>🎉 活动策划部</h3><button class="modal-close" onclick="closeTownEvents()">×</button></div>
         <div class="tab-filter">
             <button class="filter-btn active" id="evt-tab-normal" onclick="switchEventTab('normal')">常规活动</button>
-            <button class="filter-btn" id="evt-tab-season" onclick="switchEventTab('season')">季节限定</button>
+            <button class="filter-btn" id="evt-tab-season" onclick="switchEventTab('season')">🗓️ 今日节日/限定</button>
         </div>
-        <p style="color:#666; font-size:0.9rem; margin-bottom:15px;">当前镇库: <span id="event-town-money" style="font-weight:bold; color:#f1c40f; font-size:1.1rem;">0</span> (当前季节: <span id="event-season-name"></span>)</p>
+        <p style="color:#666; font-size:0.9rem; margin-bottom:15px;">当前镇库: <span id="event-town-money" style="font-weight:bold; color:#f1c40f; font-size:1.1rem;">0</span> (当前日期: <span id="event-season-name"></span>)</p>
         <div id="town-event-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px;"></div>
     </div>
 </div>
 <div class="modal-overlay" id="building-detail-modal"><div class="modal-content"><div class="modal-header"><h3 id="b-detail-name">建筑详情</h3><button class="modal-close" onclick="closeBuildingDetail()">×</button></div><div id="b-detail-content"></div></div></div>
 
+<!-- 日历模态框 -->
+<div class="modal-overlay" id="calendar-modal">
+    <div class="modal-content" style="max-width:800px;">
+        <div class="modal-header">
+            <h3>📅 小镇年历</h3>
+            <button class="modal-close" onclick="closeCalendar()">×</button>
+        </div>
+        <div style="margin-bottom:10px; color:#666; font-size:0.9rem;">
+            鼠标悬停红色日期可查看节日名称。特定节日当天可在活动中心举办庆典。
+        </div>
+        <div id="calendar-container" class="calendar-grid"></div>
+    </div>
+</div>
+
 <script>
     const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "斗罗", "CPU0", "闪柠", "氘镉殆", "空零", "猫猫", "小格蕾修"];
+    
+    // 定义每个月的天数 (0是占位符)
+    const MONTH_DAYS = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     
     const ITEMS_DB = {
         "rose": { name: "🌹 玫瑰", price: 50, type: "gift", loveBonus: 15, desc: "赠人玫瑰，手有余香" },
@@ -539,6 +575,7 @@
         "water_ganten": { name: "💧 百岁山", price: 4, type: "drink", hungerBonus: 2, happinessBonus: 3, desc: "水中贵族" },
         "noodle_beef": { name: "🍜 康师傅", price: 5, type: "food", hungerBonus: 30, desc: "红烧牛肉面，就是这个味" },
         "chips_lays": { name: "🥔 乐事薯片", price: 6, type: "snack", hungerBonus: 5, happinessBonus: 5, desc: "原味最经典" },
+        "chocolate": { name: "🍫 德芙巧克力", price: 8, type: "snack", hungerBonus: 3, happinessBonus: 8, desc: "纵享丝滑" },
         "cola_pepsi": { name: "🥤 日本生可乐", price: 5, type: "drink", hungerBonus: 3, happinessBonus: 4, desc: "听说很好喝" },
         "coffee_instant": { name: "☕ 速溶咖啡", price: 6, type: "drink", hungerBonus: 2, happinessBonus: 5, desc: "提神醒脑" },
         "sushi_box": { name: "🍱 寿司拼盘", price: 12, type: "food", hungerBonus: 35, happinessBonus: 3, desc: "便利店的高级货" },
@@ -636,7 +673,7 @@
     const BUILDINGS_BLUEPRINT = [
         { id: "baozi", name: "🥯 包子铺", category: "food", cost: 100, desc: "物美价廉的早餐店", effect: "shop", price: 0, open: 5, close: 14, jobs: ["早点工"], sells: ["baozi_tofu", "baozi_pork", "baozi_beef"], isBuilt: true }, 
         { id: "ramen", name: "🍜 兰州拉面", category: "food", cost: 250, desc: "正宗牛肉面，管饱", effect: "food", price: 12, food: 35, open: 7, close: 22, jobs: ["拉面师傅"] },
-        { id: "711", name: "🏪 7-11便利店", category: "food", cost: 300, desc: "24小时营业", effect: "shop", price: 0, open: 0, close: 24, jobs: ["收银员"], sells: ["water_wahaha", "water_ganten", "noodle_beef", "chips_lays", "cola_pepsi", "coffee_instant", "sushi_box", "beer_tsingtao", "beer_laoshan"] },
+        { id: "711", name: "🏪 7-11便利店", category: "food", cost: 300, desc: "24小时营业", effect: "shop", price: 0, open: 0, close: 24, jobs: ["收银员"], sells: ["water_wahaha", "water_ganten", "noodle_beef", "chips_lays", "chocolate", "cola_pepsi", "coffee_instant", "sushi_box", "beer_tsingtao", "beer_laoshan"] },
         { id: "kfc", name: "🍗 肯德基", category: "food", cost: 600, desc: "疯狂星期四", effect: "food", price: 30, food: 50, open: 10, close: 22, jobs: ["前台", "炸鸡厨师"] },
         { id: "gym", name: "💪 健身房", category: "fun", cost: 800, desc: "挥洒汗水，提升颜值与健康", effect: "beauty", price: 50, open: 6, close: 22, jobs: ["健身教练", "保洁"] },
         { id: "amusement", name: "🎡 游乐场", category: "fun", cost: 2000, desc: "充满尖叫与欢笑的地方", effect: "fun_high", price: 100, open: 9, close: 20, jobs: ["检票员", "玩偶扮演"] },
@@ -725,9 +762,25 @@ const TOWN_EVENTS = [
         { id: 'artfest', name: '🎨 艺术节', cost: 300, desc: '全员快乐+15，关系+3。10%概率发生艺术品失窃。', emoji: '🎨' },
         { id: 'marathon', name: '🏃 全民马拉松', cost: 200, desc: '快乐+10，饱食-10。5%概率有人受伤(快乐-20)。', emoji: '🏃' },
         { id: 'reading', name: '📚 读书会', cost: 100, desc: '快乐+5，关系+2。20%概率树苗枯死效果减半。', emoji: '📚' },
-        { id: 'planting', name: '🌳 植树节', cost: 150, desc: '快乐+5，关系+3。10%概率树苗枯死效果减半。', emoji: '🌳' },
-        { id: 'shopping', name: '🛍️ 购物节', cost: 0, desc: '居民前往商店，根据自己的资产购买物品放入背包。', emoji: '🛍️' },
-        { id: 'matsuri', name: '🏮 夏日祭', cost: 400, desc: '全员穿浴衣庆祝夏天！快乐大幅提升，单身狗容易脱单。', emoji: '🏮', season: 'Summer' },
+        { id: 'shopping', name: '🛍️ 购物节 (双11)', cost: 0, desc: '双11狂欢！居民疯狂购物，镇库获得全额商品收入！', emoji: '🛍️' },
+        
+        // 节日 / 特定日期
+        { id: 'new_year', name: '🧨 元旦佳节', cost: 300, desc: '新年新气象！全员快乐+20，消费欲望提升。', emoji: '🧨', date: {m:1, d:1} },
+        { id: 'cat_return', name: '🐱 猫咪报恩日', cost: 0, desc: '传说中猫神显灵的日子，每位居民都会遇到随机好事！', emoji: '🐱', date: {m:2, d:22} },
+        { id: 'sakura', name: '🌸 樱花祭', cost: 200, desc: '粉色的浪漫季节。单身居民在树下更容易坠入爱河。', emoji: '🌸', date: {m:3, d:1} },
+        { id: 'planting', name: '🌳 植树节', cost: 150, desc: '快乐+5，关系+3。10%概率树苗枯死效果减半。', emoji: '🌳', date: {m:3, d:12} },
+        { id: 'fools_day', name: '🤡 愚人节', cost: 100, desc: '小心恶作剧！全员快乐+10，但容易发生争吵。', emoji: '🤡', date: {m:4, d:1} },
+        { id: 'labor_day', name: '🛠️ 劳动节', cost: 200, desc: '劳动最光荣！今日工作收益提升20%。', emoji: '🛠️', date: {m:5, d:1} },
+        { id: 'children_day', name: '🎈 儿童节', cost: 250, desc: '童心未泯。游乐场效果翻倍。', emoji: '🎈', date: {m:6, d:1} },
+        { id: 'music_fest', name: '🎵 音乐节', cost: 400, desc: '露天音乐狂欢！全员心情大幅提升，压力释放。', emoji: '🎵', date: {m:6, d:21} },
+        { id: 'matsuri', name: '🏮 夏日祭', cost: 400, desc: '全员穿浴衣庆祝夏天！快乐大幅提升，单身狗容易脱单。', emoji: '🏮', date: {m:7, d:15} },
+        { id: 'charity_day', name: '💝 国际慈善日', cost: 0, desc: '鼓励居民通过捐款帮助他人，提升社会责任感。', emoji: '💝', date: {m:9, d:5} },
+        { id: 'harvest', name: '🌾 丰收节', cost: 300, desc: '庆祝丰收！餐厅食物价格半价(由镇库补贴)，居民饱食度容易恢复。', emoji: '🌾', date: {m:9, d:23} },
+        { id: 'halloween', name: '🎃 万圣节', cost: 350, desc: '互换糖果，捣蛋鬼出没！快乐+15，获得随机零食。', emoji: '🎃', date: {m:10, d:31} },
+        { id: 'christmas', name: '🎄 圣诞节', cost: 500, desc: '互送礼物，全员快乐+20，健康+10。', emoji: '🎄', date: {m:12, d:25} },
+        { id: 'new_year_eve', name: '🎆 跨年晚会', cost: 600, desc: '辞旧迎新！全员聚集倒计时，快乐与关系大幅提升。', emoji: '🎆', date: {m:12, d:31} },
+        
+        // 季节性 (无特定日期，整个季节都可能出现)
         { id: 'snowfest', name: '☃️ 冰雪节', cost: 350, desc: '堆雪人、吃火锅！快乐+15，健康+10，饱食+10。', emoji: '☃️', season: 'Winter' }
     ];
 
@@ -949,10 +1002,24 @@ const TOWN_EVENTS = [
                 this.gameTime = 0; 
                 this.gameDay = (this.gameDay + 1) % 7; 
                 this.dateDay++;
-                if (this.dateDay > 30) { this.dateDay = 1; this.dateMonth++; if (this.dateMonth > 12) this.dateMonth = 1; }
+                
+                // Update Month logic based on MONTH_DAYS
+                const daysInMonth = MONTH_DAYS[this.dateMonth];
+                if (this.dateDay > daysInMonth) { 
+                    this.dateDay = 1; 
+                    this.dateMonth++; 
+                    if (this.dateMonth > 12) this.dateMonth = 1; 
+                }
+                
                 this.runDailyPolicies();
                 this.chars.forEach(c => { c.dailySleepOffset = rand(-2, 4); c.stayUpLate = Math.random() < 0.05; });
                 this.generateDailyWeather();
+                
+                // 检查今日是否有节日
+                const todayEvent = TOWN_EVENTS.find(ev => ev.date && ev.date.m === this.dateMonth && ev.date.d === this.dateDay);
+                if (todayEvent) {
+                    this.log(`[🗓️节日] 随着日出，**${todayEvent.name}** 到了！请前往活动策划部举办庆典！`, "tag-event");
+                }
             } 
             
             if (this.townMoney >= 5000) this.unlockAchievement('rich_town');
@@ -1268,7 +1335,7 @@ const TOWN_EVENTS = [
             const modal = document.getElementById('town-event-modal');
             document.getElementById('event-town-money').innerText = this.townMoney;
             const seasonName = this.getSeasonName();
-            document.getElementById('event-season-name').innerText = seasonName;
+            document.getElementById('event-season-name').innerText = `${seasonName} (${this.dateMonth}月${this.dateDay}日)`;
             this.switchEventTab('normal');
             modal.classList.add('active');
         }
@@ -1280,8 +1347,21 @@ const TOWN_EVENTS = [
             document.getElementById(`evt-tab-${tab}`).classList.add('active');
             const currentSeason = this.getSeason();
             let eventsToShow = [];
-            if (tab === 'normal') eventsToShow = TOWN_EVENTS.filter(ev => !ev.season); else eventsToShow = TOWN_EVENTS.filter(ev => ev.season === currentSeason);
-            if (eventsToShow.length === 0) { list.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#999;">当前季节暂无特别活动。</div>`; return; }
+            
+            if (tab === 'normal') {
+                // 常规活动：无季节，无日期
+                eventsToShow = TOWN_EVENTS.filter(ev => !ev.season && !ev.date);
+            } else {
+                // 季节限定：匹配季节 OR 匹配今日日期
+                eventsToShow = TOWN_EVENTS.filter(ev => {
+                    if (ev.date) {
+                        return ev.date.m === this.dateMonth && ev.date.d === this.dateDay;
+                    }
+                    return ev.season === currentSeason;
+                });
+            }
+            
+            if (eventsToShow.length === 0) { list.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#999;">当前时段暂无特殊活动。</div>`; return; }
             eventsToShow.forEach(ev => { const div = document.createElement('div'); div.className = 'event-card'; const canAfford = this.townMoney >= ev.cost; div.innerHTML = `<div class="event-header"><span class="event-name">${ev.name}</span><span class="event-cost">-${ev.cost}</span></div><div class="event-desc">${ev.desc}</div><button class="event-btn" ${canAfford?'':'disabled'} onclick="triggerTownEvent('${ev.id}')">${canAfford?'🎉 立即举办':'💸 资金不足'}</button>`; list.appendChild(div); });
         }
 
@@ -1290,8 +1370,51 @@ const TOWN_EVENTS = [
             this.townMoney -= ev.cost; this.log(`[🎉活动] 镇长斥资 💰${ev.cost} 举办了 **${ev.name}**！`, "tag-event");
             document.getElementById('town-event-modal').classList.remove('active');
             if (id === 'concert') { const fail = Math.random() < 0.1; if (fail) { this.logInteraction(`[😱意外] 音响设备爆炸了！演唱会效果大打折扣！`, "tag-reject"); this.chars.forEach(c => { c.happiness += 5; }); } else { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); }); this.chars.forEach(c1 => { this.chars.forEach(c2 => { if (c1.name !== c2.name && c1.relationships[c2.name]) { c1.relationships[c2.name].love = Math.min(100, c1.relationships[c2.name].love + 5); } }); }); } }
-            else if (id === 'matchmaking') { let pairCount = 0; this.chars.forEach(c => { if (!c.partner) { let bestT = null; let maxL = -100; for(let tName in c.relationships) { const t = this.chars.find(x=>x.name===tName); if (t && !t.partner && c.relationships[tName].love > maxL) { maxL = c.relationships[tName].love; bestT = t; } } if (bestT && maxL > 40 && Math.random() < 0.5) { if (bestT.decideProposal(c.name, 'confess') || Math.random() < 0.3) { c.partner = bestT.name; bestT.partner = c.name; c.relationships[bestT.name].status = 'lover'; bestT.relationships[c.name].status = 'lover'; c.happiness += 20; bestT.happiness += 20; this.unlockAchievement('first_marriage'); this.logInteraction(`[❤️配对] 在相亲大会上，**${c.name}** 和 **${bestT.name}** 牵手成功！`, "tag-love"); pairCount++; } } } }); if (pairCount > 0) { this.chars.forEach(c => c.happiness += 5); } else { this.logInteraction(`[🍂尴尬] 相亲大会结束了，似乎没人配对成功...`, "tag-reject"); } }
-            else if (id === 'charity') { let totalRaised = 0; this.chars.forEach(c => { if (c.money > 10) { const donation = Math.min(c.money, rand(5, 20)); c.money -= donation; totalRaised += donation; c.happiness -= 5; this.chars.forEach(other => { if(other.name!==c.name) { c.relationships[other.name].love += 2; } }); } }); this.townMoney += totalRaised; this.logInteraction(`[🎗️募捐] 居民们共捐款 💰${totalRaised}，虽然心疼钱但关系更紧密了。`, "tag-build"); }
+            else if (id === 'matchmaking' || id === 'sakura' || id === 'valentines') { 
+                let pairCount = 0; 
+                this.chars.forEach(c => { 
+                    if (!c.partner) { 
+                        let bestT = null; let maxL = -100; 
+                        for(let tName in c.relationships) { 
+                            const t = this.chars.find(x=>x.name===tName); 
+                            if (t && !t.partner && c.relationships[tName].love > maxL) { maxL = c.relationships[tName].love; bestT = t; } 
+                        } 
+                        // 樱花祭门槛较低
+                        const threshold = (id === 'sakura' || id === 'valentines') ? 25 : 40;
+                        if (bestT && maxL > threshold && Math.random() < 0.5) { 
+                            if (bestT.decideProposal(c.name, 'confess') || Math.random() < (id!=='matchmaking'?0.4:0.3)) { 
+                                c.partner = bestT.name; bestT.partner = c.name; 
+                                c.relationships[bestT.name].status = 'lover'; bestT.relationships[c.name].status = 'lover'; 
+                                c.happiness += 20; bestT.happiness += 20; 
+                                this.unlockAchievement('first_marriage'); 
+                                const action = id === 'sakura' ? '在樱花树下' : (id === 'valentines' ? '在情人节' : '在活动中');
+                                this.logInteraction(`[❤️浪漫] ${action}，**${c.name}** 和 **${bestT.name}** 互诉衷肠，确立了关系！`, "tag-love"); 
+                                pairCount++; 
+                            } 
+                        } 
+                    } 
+                }); 
+                if (pairCount > 0) { this.chars.forEach(c => c.happiness += 5); } 
+                else { this.logInteraction(`[🍂平静] 虽有美景良辰，但似乎没人配对成功...`, "tag-reject"); } 
+                if (id === 'sakura') this.chars.forEach(c => c.happiness += 10); 
+            }
+            else if (id === 'charity' || id === 'charity_day') { 
+                let totalRaised = 0; 
+                const isSpecialDay = id === 'charity_day';
+                this.chars.forEach(c => { 
+                    if (c.money > 10) { 
+                        // 慈善日捐款更多
+                        const base = isSpecialDay ? 50 : 20;
+                        const donation = Math.min(c.money, rand(5, base)); 
+                        c.money -= donation; totalRaised += donation; 
+                        c.happiness = isSpecialDay ? c.happiness + 5 : c.happiness - 5; // 慈善日大家乐于助人
+                        this.chars.forEach(other => { if(other.name!==c.name) { c.relationships[other.name].love += 2; } }); 
+                        if (isSpecialDay) c.addLog(`[💝慈善日] 捐款 💰${donation} 帮助他人`);
+                    } 
+                }); 
+                this.townMoney += totalRaised; 
+                this.logInteraction(`[🎗️募捐] 居民们共捐款 💰${totalRaised}，${isSpecialDay?'爱心充满了小镇！':'虽然心疼钱但关系更紧密了。'}`, "tag-build"); 
+            }
             else if (id === 'anniversary') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); for(let k in c.relationships) c.relationships[k].love += 2; }); }
             else if (id === 'fireworks') { if (Math.random() < 0.05) { const built = this.buildings.filter(b => b.isBuilt); if (built.length > 0) { const burn = choose(built); burn.isBuilt = false; burn.currentProgress = 0; burn.staff.forEach(sName => { const s = this.chars.find(x=>x.name===sName); if(s) { s.job = null; s.happiness -= 30; } }); burn.staff = []; this.log(`[🔥火灾] 天呐！烟花引燃了 **${burn.name}**！建筑被烧毁，需要重建！`, "tag-crime"); this.chars.forEach(c => c.happiness -= 10); } } else { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 25); for(let k in c.relationships) c.relationships[k].love += 5; }); } }
             else if (id === 'jobfair') { let hiredCount = 0; this.buildings.forEach(b => { if (b.isBuilt && b.staff.length < b.jobs.length) { const needed = b.jobs.length - b.staff.length; for(let i=0; i<needed; i++) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0 && Math.random() < 0.5) { const worker = choose(candidates); const role = b.jobs[b.staff.length]; worker.job = { buildingId: b.id, role: role }; b.staff.push(worker.name); worker.happiness += 10; this.logInteraction(`[🤝入职] **${worker.name}** 在招聘会上找到了 **${b.name}** 的工作！`, "tag-build"); hiredCount++; } } } }); if(hiredCount === 0) this.log("招聘会结束了，似乎没有合适的岗位或求职者。", "tag-reject"); }
@@ -1301,12 +1424,44 @@ const TOWN_EVENTS = [
             else if (id === 'planting') { let success = true; if (Math.random() < 0.1) { success = false; this.log(`[🍂枯萎] 哎呀，由于天气原因，一半的树苗没能存活...效果减半。`, "tag-reject"); } const happyBonus = success ? 5 : 2; const relBonus = success ? 3 : 1; this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + happyBonus); for(let k in c.relationships) c.relationships[k].love += relBonus; }); }
             else if (id === 'shopping') {
                 const shops = this.buildings.filter(b => b.isBuilt && b.effect === 'shop' && b.sells.length > 0); if (shops.length === 0) { this.log("⚠️ 镇上没有营业的商店，购物节取消了。", "tag-reject"); return; }
-                let shopperCount = 0; let totalSpent = 0; let totalTax = 0;
-                this.chars.forEach(c => { if (c.money >= 10) { const shop = choose(shops); const affordables = shop.sells.filter(sid => ITEMS_DB[sid] && ITEMS_DB[sid].price <= c.money); if (affordables.length > 0) { const itemId = choose(affordables); const item = ITEMS_DB[itemId]; c.money -= item.price; this.townMoney += Math.floor(item.price * 0.2); c.bag.push(itemId); c.happiness = Math.min(100, c.happiness + 15); totalSpent += item.price; totalTax += Math.floor(item.price * 0.2); shopperCount++; c.addLog(`[🛍️购物节] 在 ${shop.name} 抢购了 ${item.name}`); } } });
-                if (shopperCount > 0) { this.logInteraction(`[🛍️狂欢] 购物节圆满结束！${shopperCount} 位居民抢购了商品，总消费 💰${totalSpent}。`, "tag-item"); this.log(`[💰税收] 镇库从交易税中获得了 💰${totalTax} 的收入！`, "tag-build"); } else { this.logInteraction(`[🌬️冷清] 购物节大家囊中羞涩，无人消费...`, "tag-lonely"); }
+                let shopperCount = 0; let totalSpent = 0;
+                this.chars.forEach(c => { if (c.money >= 10) { const shop = choose(shops); const affordables = shop.sells.filter(sid => ITEMS_DB[sid] && ITEMS_DB[sid].price <= c.money); if (affordables.length > 0) { const itemId = choose(affordables); const item = ITEMS_DB[itemId]; c.money -= item.price; 
+                this.townMoney += item.price; // 全额纳入镇库
+                c.bag.push(itemId); c.happiness = Math.min(100, c.happiness + 15); totalSpent += item.price; shopperCount++; c.addLog(`[🛍️购物节] 在 ${shop.name} 抢购了 ${item.name}`); } } });
+                if (shopperCount > 0) { this.logInteraction(`[🛍️狂欢] 购物节圆满结束！${shopperCount} 位居民抢购了商品，镇库收入 💰${totalSpent}。`, "tag-item"); } else { this.logInteraction(`[🌬️冷清] 购物节大家囊中羞涩，无人消费...`, "tag-lonely"); }
             }
             else if (id === 'matsuri') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 25); }); let pairs = 0; this.chars.forEach(c => { if (!c.partner && Math.random() < 0.2) { const available = this.chars.filter(t => t.name !== c.name && !t.partner && c.relationships[t.name].love > 30); if (available.length > 0) { const t = choose(available); c.partner = t.name; t.partner = c.name; c.relationships[t.name].status = 'lover'; t.relationships[c.name].status = 'lover'; this.unlockAchievement('first_marriage'); this.logInteraction(`[🎇浪漫] 烟花下，**${c.name}** 和 **${t.name}** 确立了关系！`, "tag-love"); pairs++; } } }); }
-            else if (id === 'snowfest') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 15); c.health = Math.min(100, c.health + 10); c.hunger = Math.min(100, c.hunger + 10); }); }
+            else if (id === 'snowfest' || id === 'christmas') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); c.health = Math.min(100, c.health + 10); c.hunger = Math.min(100, c.hunger + 10); }); }
+            else if (id === 'new_year') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); c.money = Math.floor(c.money * 1.1); }); this.log("新年新气象，大家心情大好，存款似乎也变多了？", "tag-promote"); }
+            else if (id === 'fools_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); }); if(Math.random()<0.5) { const v = choose(this.chars); v.happiness -= 15; this.logInteraction(`[🤡恶搞] **${v.name}** 被人贴了“我是笨蛋”的纸条，气得不行！`, "tag-reject"); } }
+            else if (id === 'labor_day') { this.chars.forEach(c => { if(c.job) { c.money += 50; c.addLog(`获得劳动节奖金 💰50`); } else { c.happiness += 5; } }); this.log("劳动节快乐！所有在职员工获得了50奖金。", "tag-build"); }
+            else if (id === 'children_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 15); }); }
+            else if (id === 'harvest') { this.chars.forEach(c => { c.hunger = Math.min(100, c.hunger + 30); }); this.log("丰收节大餐！所有人饱食度大幅提升！", "tag-eat"); }
+            else if (id === 'halloween') { 
+                this.chars.forEach(c => { 
+                    c.happiness = Math.min(100, c.happiness + 15); 
+                    if(c.bag.length < 5) { c.bag.push('chocolate'); c.addLog("🎃 获得了万圣节糖果 (巧克力)"); }
+                }); 
+                if(Math.random()<0.3) { this.townMoney = Math.max(0, this.townMoney - 100); this.log("不给糖就捣蛋！一群熊孩子从镇库拿走了一些糖果钱...", "tag-crime"); } 
+            }
+            else if (id === 'music_fest') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 30); }); this.log("🎵 音乐节嗨翻全场！大家的压力都消失了。", "tag-event"); }
+            else if (id === 'cat_return') { 
+                this.chars.forEach(c => {
+                    const r = Math.random();
+                    if(r < 0.33) { c.money += 100; c.addLog("🐱 猫神显灵，捡到了 💰100"); }
+                    else if(r < 0.66) { c.health = 100; c.happiness = 100; c.addLog("🐱 猫神显灵，身体恢复了最佳状态！"); }
+                    else { c.bag.push('rose'); c.addLog("🐱 猫神显灵，背包里多了一朵玫瑰！"); }
+                });
+                this.log("🐱 猫咪报恩日，神奇的事情在小镇各地发生！", "tag-promote");
+            }
+            else if (id === 'new_year_eve') {
+                this.chars.forEach(c => { 
+                    c.happiness = 100; 
+                    for(let k in c.relationships) c.relationships[k].love += 10; 
+                });
+                this.log("🎆 5..4..3..2..1.. 新年快乐！所有人欢聚一堂，关系大幅增进！", "tag-event");
+            }
+            
             this.updateUI();
         }
         closeTownEvents() { document.getElementById('town-event-modal').classList.remove('active'); }
@@ -1547,7 +1702,7 @@ const TOWN_EVENTS = [
         
         showJobBoard() {
             const list = document.getElementById('jobboard-list'); list.innerHTML = '';
-            const oddHeader = document.createElement('div'); oddHeader.className = 'job-section-header'; oddHeader.style.borderLeftColor = '#3498db'; oddHeader.innerText = "������ 临时零工 / 自由职业"; list.appendChild(oddHeader);
+            const oddHeader = document.createElement('div'); oddHeader.className = 'job-section-header'; oddHeader.style.borderLeftColor = '#3498db'; oddHeader.innerText = "🛠 临时零工 / 自由职业"; list.appendChild(oddHeader);
             ODD_JOBS.forEach(job => { const item = document.createElement('div'); item.className = 'job-item'; item.innerHTML = `<div><div class="job-name">${job.name}</div><div class="job-loc" style="font-size:0.8em; color:gray;">Mood: ${job.mood}</div></div><div class="job-wage" style="color:${job.wage<0?'#e74c3c':'#27ae60'}">💰 ${job.wage}</div>`; list.appendChild(item); });
             const hookerItem = document.createElement('div'); hookerItem.className = 'job-item'; hookerItem.innerHTML = `<div><div class="job-name">💋 站街</div></div><div class="job-wage">💰 8-15</div>`; list.appendChild(hookerItem);
             const formalHeader = document.createElement('div'); formalHeader.className = 'job-section-header'; formalHeader.style.borderLeftColor = '#f1c40f'; formalHeader.innerText = "🏢 企业 / 机构岗位"; list.appendChild(formalHeader);
@@ -1680,6 +1835,43 @@ const TOWN_EVENTS = [
         editPersonality(name) { openEditModal("修改性格", PERSONALITIES.map(p=>p.name), this.chars.find(x=>x.name===name)?.personality.name, 'personality', name); }
         editIdeology(name) { openEditModal("修改信仰", IDEOLOGIES.map(i=>i.name), this.chars.find(x=>x.name===name)?.ideology.name, 'ideology', name); }
         editTraits(name) { const c = this.chars.find(x=>x.name===name); if(c){ c.traits=[]; const count=rand(0,2); for(let i=0;i<count;i++){ const t=TRAITS.filter(x=>!c.traits.includes(x)); if(t.length) c.traits.push(choose(t)); } this.showCharacterDetail(name); } }
+        
+        // --- Calendar System ---
+        showCalendar() {
+            const modal = document.getElementById('calendar-modal');
+            this.renderCalendar();
+            modal.classList.add('active');
+        }
+        closeCalendar() { document.getElementById('calendar-modal').classList.remove('active'); }
+        
+        renderCalendar() {
+            const container = document.getElementById('calendar-container');
+            container.innerHTML = '';
+            const curM = this.dateMonth; const curD = this.dateDay;
+            
+            for(let m=1; m<=12; m++) {
+                const mCard = document.createElement('div');
+                mCard.className = 'month-card';
+                let season = ''; if(m>=3 && m<=5) season='(春)'; else if(m>=6 && m<=8) season='(夏)'; else if(m>=9 && m<=11) season='(秋)'; else season='(冬)';
+                
+                let gridHtml = '<div class="days-grid">';
+                // 使用 MONTH_DAYS 数组决定天数
+                const totalDays = MONTH_DAYS[m];
+                for(let d=1; d<=totalDays; d++) {
+                    const isToday = (m === curM && d === curD);
+                    const evt = TOWN_EVENTS.find(e => e.date && e.date.m === m && e.date.d === d);
+                    let classes = 'day-cell';
+                    if(isToday) classes += ' today';
+                    if(evt) classes += ' event-day';
+                    
+                    gridHtml += `<div class="${classes}" ${evt ? `data-evt="${evt.name}"` : ''}>${d}</div>`;
+                }
+                gridHtml += '</div>';
+                
+                mCard.innerHTML = `<div class="month-title">${m}月 ${season}</div>${gridHtml}`;
+                container.appendChild(mCard);
+            }
+        }
         
         updateUI() {
             const townMoneyEl = document.getElementById('town-money');
@@ -1834,6 +2026,11 @@ const TOWN_EVENTS = [
     function switchEventTab(tab) { if(gameInstance) gameInstance.switchEventTab(tab); }
     function showBuildingDetail(bid) { if(gameInstance) gameInstance.showBuildingDetail(bid); }
     function closeBuildingDetail() { document.getElementById('building-detail-modal').classList.remove('active'); }
+    
+    // --- Calendar Functions ---
+    function showCalendar() { if(gameInstance) gameInstance.showCalendar(); }
+    function closeCalendar() { document.getElementById('calendar-modal').classList.remove('active'); }
+    
     function inputNewResident() { if (!gameInstance) return; const name = prompt("请输入新居民的名字：\n(性格、性别、特质将由系统随机生成)"); if (name && name.trim() !== "") { const cleanName = name.trim().substring(0, 8); gameInstance.addNewResident(cleanName); } }
 
     document.addEventListener('DOMContentLoaded', () => { 
@@ -1848,11 +2045,11 @@ const TOWN_EVENTS = [
         document.getElementById('building-detail-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('building-detail-modal')) closeBuildingDetail(); });
         document.getElementById('achievements-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('achievements-modal')) closeAchievements(); });
         document.getElementById('gov-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('gov-modal')) closeGov(); });
+        document.getElementById('calendar-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('calendar-modal')) closeCalendar(); });
     });
     function manualSave() { if (gameInstance) gameInstance.saveData(); }
     function resetData() { if(confirm("确定要删除存档并重置所有进度吗？")) { localStorage.removeItem('happyTownV2_Save'); location.reload(); } }
     window.onload = () => { gameInstance = new Game(); };
-</script>
-<script type="module" src="/index.tsx"></script>
+</script><script type="module" src="/index.tsx"></script>
 </body>
 </html>
