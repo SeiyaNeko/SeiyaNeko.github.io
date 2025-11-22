@@ -967,6 +967,9 @@ const TOWN_EVENTS = [
             this.name = name; this.gender = Math.random() > 0.5 ? '♂ 男' : '♀ 女'; 
             // 生理需求
             this.happiness = 60; this.hunger = 80; this.health = 100; this.stamina = 100;
+            // 属性上限（可通过建筑互动提升）
+            this.staminaMax = 100;
+            this.healthMax = 100;
             
             this.money = 0; this.job = null; this.currentAction = "发呆"; this.relationships = {}; this.partner = null; this.interactingWith = null; 
             this.traits = []; this.ideology = choose(IDEOLOGIES);
@@ -1193,7 +1196,7 @@ const TOWN_EVENTS = [
                 this.buildings.forEach(b => {
                     if (b.isBuilt && b.category === 'landmark') {
                         this.townMoney += b.price; 
-                        if (b.effect === 'tourist_high') { this.chars.forEach(c => c.happiness = Math.min(100, c.happiness + 0.5)); } else if (b.effect === 'tourist_health') { this.chars.forEach(c => c.health = Math.min(100, c.health + 0.5)); }
+                        if (b.effect === 'tourist_high') { this.chars.forEach(c => c.happiness = Math.min(100, c.happiness + 0.5)); } else if (b.effect === 'tourist_health') { this.chars.forEach(c => c.health = Math.min(c.healthMax || 100, c.health + 0.5)); }
                     }
                 });
                 
@@ -1249,8 +1252,8 @@ const TOWN_EVENTS = [
                     if (c.hasTrait('healthy') && healthDecay < 0) healthDecay *= 0.5; // 养生：健康下降减半
                     
                     c.happiness = Math.min(100, Math.max(0, c.happiness + moodDecay));
-                    c.health = Math.min(100, Math.max(0, c.health + healthDecay));
-                    c.stamina = Math.max(0, Math.min(100, c.stamina - 0.15));
+                    c.health = Math.min(c.healthMax || 100, Math.max(0, c.health + healthDecay));
+                    c.stamina = Math.max(0, Math.min(c.staminaMax || 100, c.stamina - 0.15));
                     
                     if (Math.random() < 0.001) { c.health = Math.max(0, c.health - rand(5, 15)); this.log(`[🚑生病] **${c.name}** 突然感觉身体不适，健康度下降了。`, "tag-reject"); }
                 }); 
@@ -1882,13 +1885,165 @@ const TOWN_EVENTS = [
                     p.money -= cost; this.townMoney += cost; 
                     
                     let happyGain = 0;
-                    if (v.effect === 'food') { p.hunger = Math.min(100, p.hunger + v.food); p.lastMealTime = this.gameTime; staminaGain += 5; p.currentAction = `在 ${v.name} 大吃一顿`; }
-                    else if (v.effect === 'health' || v.effect === 'tourist_health') { p.health = Math.min(100, p.health + 40); happyGain = 5; staminaGain += 5; p.currentAction = `[治疗] 在 ${v.name} 看病疗伤`; } 
-                    else if (v.effect === 'beauty') { p.health = Math.min(100, p.health + 5); p.appearance = Math.min(100, p.appearance + 2); happyGain = 10; staminaGain += 10; p.currentAction = `[健身] 在 ${v.name} 撸铁塑形`; }
-                    else if (v.effect === 'fun_high' || v.effect === 'tourist_high') { happyGain = 30; staminaGain += 5; p.currentAction = `[游玩] 在 ${v.name} 尽情尖叫`; }
-                    else if (v.effect === 'study') { happyGain = 5; staminaGain += 5; p.currentAction = `[参观] 在 ${v.name} 增长见闻`; this.improveSkill(p, 'culture', 0.5); }
-                    else if (v.effect === 'tourist') { happyGain = 10; p.currentAction = `[打卡] 在 ${v.name} 拍照留念`; }
-                    else { p.currentAction = `在 ${v.name} 放松`; happyGain = 5; }
+                    const buildingId = v.id;
+                    
+                    // 根据建筑ID添加特殊效果
+                    if (buildingId === 'school') {
+                        // 学校：上课提升文化、社交
+                        happyGain = 8;
+                        staminaGain += 5;
+                        p.currentAction = `[📚上课] 在 ${v.name} 认真学习`;
+                        this.improveSkill(p, 'culture', 1.5);
+                        this.improveSkill(p, 'social', 0.3);
+                        p.hunger -= 2; // 学习消耗体力
+                    }
+                    else if (buildingId === 'gym') {
+                        // 健身房：锻炼提升体力上限、健康、颜值
+                        p.health = Math.min(p.healthMax || 100, p.health + 8);
+                        p.appearance = Math.min(100, p.appearance + 3);
+                        happyGain = 12;
+                        staminaGain += 15;
+                        p.currentAction = `[💪锻炼] 在 ${v.name} 挥洒汗水`;
+                        // 长期锻炼可能提升体力上限
+                        if (Math.random() < 0.1 && p.staminaMax < 120) {
+                            p.staminaMax = Math.min(120, p.staminaMax + 1);
+                            p.addLog(`${timeStr} 长期锻炼，体力上限提升了！`);
+                        }
+                        // 长期锻炼可能提升健康上限
+                        if (Math.random() < 0.05 && p.healthMax < 120) {
+                            p.healthMax = Math.min(120, p.healthMax + 1);
+                            p.addLog(`${timeStr} 身体更健康了，健康上限提升了！`);
+                        }
+                        p.hunger -= 3; // 锻炼消耗体力
+                    }
+                    else if (buildingId === 'library') {
+                        // 图书馆：阅读提升文化
+                        happyGain = 6;
+                        staminaGain += 5;
+                        p.currentAction = `[📖阅读] 在 ${v.name} 静心读书`;
+                        this.improveSkill(p, 'culture', 1.2);
+                        this.improveSkill(p, 'integrity', 0.2); // 阅读提升诚信
+                    }
+                    else if (buildingId === 'museum') {
+                        // 博物馆：参观提升文化
+                        happyGain = 8;
+                        staminaGain += 5;
+                        p.currentAction = `[🏛参观] 在 ${v.name} 增长见闻`;
+                        this.improveSkill(p, 'culture', 1.0);
+                        this.improveSkill(p, 'social', 0.2);
+                    }
+                    else if (buildingId === 'hospital') {
+                        // 医院：治疗恢复健康，可能提升健康上限
+                        p.health = Math.min(p.healthMax || 100, p.health + 50);
+                        happyGain = 5;
+                        staminaGain += 5;
+                        p.currentAction = `[🏥治疗] 在 ${v.name} 看病疗伤`;
+                        // 定期体检可能提升健康上限
+                        if (Math.random() < 0.05 && p.healthMax < 120) {
+                            p.healthMax = Math.min(120, p.healthMax + 1);
+                            p.addLog(`${timeStr} 体检发现身体更健康了！`);
+                        }
+                    }
+                    else if (buildingId === 'hotspring') {
+                        // 温泉：疗养提升健康上限、恢复健康
+                        p.health = Math.min(p.healthMax || 100, p.health + 30);
+                        happyGain = 15;
+                        staminaGain += 20;
+                        p.currentAction = `[♨️疗养] 在 ${v.name} 泡温泉放松`;
+                        // 温泉疗养可能提升健康上限
+                        if (Math.random() < 0.15 && p.healthMax < 120) {
+                            p.healthMax = Math.min(120, p.healthMax + 1);
+                            p.addLog(`${timeStr} 温泉疗养，身体更健康了！`);
+                        }
+                    }
+                    else if (buildingId === 'church') {
+                        // 教堂：祈祷提升诚信，降低恶意
+                        happyGain = 10;
+                        staminaGain += 5;
+                        p.currentAction = `[⛪祈祷] 在 ${v.name} 虔诚祷告`;
+                        this.improveSkill(p, 'integrity', 1.0);
+                        p.skills.malice = Math.max(0, (p.skills.malice || 0) - 0.5);
+                    }
+                    else if (buildingId === 'netcafe') {
+                        // 网吧：游戏提升心情，但可能降低文化
+                        happyGain = 20;
+                        staminaGain += 5;
+                        p.currentAction = `[🎮游戏] 在 ${v.name} 通宵开黑`;
+                        if (Math.random() < 0.3) {
+                            p.skills.culture = Math.max(0, (p.skills.culture || 0) - 0.2);
+                        }
+                        p.hunger -= 2;
+                    }
+                    else if (buildingId === 'cinema') {
+                        // 电影院：观影提升心情和社交
+                        happyGain = 18;
+                        staminaGain += 5;
+                        p.currentAction = `[🎬观影] 在 ${v.name} 看电影`;
+                        this.improveSkill(p, 'social', 0.5);
+                    }
+                    else if (buildingId === 'bar') {
+                        // 酒吧：喝酒提升心情，但降低健康
+                        happyGain = 25;
+                        staminaGain += 5;
+                        p.currentAction = `[🍺买醉] 在 ${v.name} 喝酒`;
+                        p.health = Math.max(0, p.health - 3);
+                        p.skills.integrity = Math.max(0, (p.skills.integrity || 0) - 0.3);
+                    }
+                    else if (buildingId === 'amusement') {
+                        // 游乐场：游玩大幅提升心情
+                        happyGain = 35;
+                        staminaGain += 10;
+                        p.currentAction = `[🎡游玩] 在 ${v.name} 尽情尖叫`;
+                        this.improveSkill(p, 'social', 0.8);
+                        p.hunger -= 2;
+                    }
+                    else if (buildingId === 'park') {
+                        // 公园：免费休闲，提升心情和社交
+                        happyGain = 8;
+                        staminaGain += 10;
+                        p.currentAction = `[🌳散步] 在 ${v.name} 悠闲漫步`;
+                        this.improveSkill(p, 'social', 0.3);
+                        this.improveSkill(p, 'integrity', 0.1);
+                    }
+                    else if (v.effect === 'food') { 
+                        p.hunger = Math.min(100, p.hunger + v.food); 
+                        p.lastMealTime = this.gameTime; 
+                        staminaGain += 5; 
+                        p.currentAction = `在 ${v.name} 大吃一顿`; 
+                    }
+                    else if (v.effect === 'health' || v.effect === 'tourist_health') { 
+                        p.health = Math.min(p.healthMax || 100, p.health + 40); 
+                        happyGain = 5; 
+                        staminaGain += 5; 
+                        p.currentAction = `[治疗] 在 ${v.name} 看病疗伤`; 
+                    } 
+                    else if (v.effect === 'beauty') { 
+                        p.health = Math.min(p.healthMax || 100, p.health + 5); 
+                        p.appearance = Math.min(100, p.appearance + 2); 
+                        happyGain = 10; 
+                        staminaGain += 10; 
+                        p.currentAction = `[健身] 在 ${v.name} 撸铁塑形`; 
+                        // 健身房效果已在上面处理，这里作为后备
+                    }
+                    else if (v.effect === 'fun_high' || v.effect === 'tourist_high') { 
+                        happyGain = 30; 
+                        staminaGain += 5; 
+                        p.currentAction = `[游玩] 在 ${v.name} 尽情尖叫`; 
+                    }
+                    else if (v.effect === 'study') { 
+                        happyGain = 5; 
+                        staminaGain += 5; 
+                        p.currentAction = `[参观] 在 ${v.name} 增长见闻`; 
+                        this.improveSkill(p, 'culture', 0.5); 
+                    }
+                    else if (v.effect === 'tourist') { 
+                        happyGain = 10; 
+                        p.currentAction = `[打卡] 在 ${v.name} 拍照留念`; 
+                    }
+                    else { 
+                        p.currentAction = `在 ${v.name} 放松`; 
+                        happyGain = 5; 
+                    }
                     
                     if (v.studyBonus) this.improveSkill(p, 'culture', v.studyBonus);
                     
@@ -1896,12 +2051,41 @@ const TOWN_EVENTS = [
                     if (p.hasTrait('lavish')) happyGain *= 1.5; 
                     
                     p.happiness = Math.min(100, p.happiness + happyGain);
-                    p.stamina = Math.min(100, p.stamina + staminaGain);
-                    p.addLog(`${timeStr} 在 ${v.name} 消费休息`); v.addLog(`${timeStr} 顾客 ${p.name} 在此消费`);
+                    p.stamina = Math.min(p.staminaMax || 100, p.stamina + staminaGain);
+                    p.health = Math.min(p.healthMax || 100, p.health);
+                    p.addLog(`${timeStr} 在 ${v.name} 消费休息`); 
+                    v.addLog(`${timeStr} 顾客 ${p.name} 在此消费`);
                 } else { p.currentAction = `在 路边 闲逛`; p.addLog(`${timeStr} 在路边闲逛`); return; } 
             } else {
                 if (v) { 
-                    if (v.effect === 'study') { 
+                    const buildingId = v.id;
+                    
+                    if (buildingId === 'school') {
+                        // 学校：免费上课
+                        p.happiness = Math.min(100, p.happiness + 10); 
+                        staminaGain += 5;
+                        p.currentAction = `[📚上课] 在 ${v.name} 认真学习`; 
+                        this.improveSkill(p, 'culture', 1.5);
+                        this.improveSkill(p, 'social', 0.3);
+                        p.hunger -= 2;
+                    }
+                    else if (buildingId === 'library') {
+                        // 图书馆：免费阅读
+                        p.happiness = Math.min(100, p.happiness + 8); 
+                        staminaGain += 5;
+                        p.currentAction = `[📖阅读] 在 ${v.name} 静心读书`; 
+                        this.improveSkill(p, 'culture', 1.2);
+                        this.improveSkill(p, 'integrity', 0.2);
+                    }
+                    else if (buildingId === 'park') {
+                        // 公园：免费休闲
+                        p.happiness = Math.min(100, p.happiness + 10); 
+                        staminaGain += 10;
+                        p.currentAction = `[🌳散步] 在 ${v.name} 悠闲漫步`; 
+                        this.improveSkill(p, 'social', 0.3);
+                        this.improveSkill(p, 'integrity', 0.1);
+                    }
+                    else if (v.effect === 'study') { 
                         p.happiness = Math.min(100, p.happiness + 8); 
                         staminaGain += 5;
                         p.currentAction = `[学习] 在 ${v.name} 汲取知识`; 
@@ -1910,11 +2094,13 @@ const TOWN_EVENTS = [
                         p.currentAction = `在 ${v.name} 放松`; 
                     } 
                     if (v.studyBonus) this.improveSkill(p, 'culture', v.studyBonus);
-                    p.stamina = Math.min(100, p.stamina + staminaGain);
-                    p.addLog(`${timeStr} 在 ${v.name} 休息`); v.addLog(`${timeStr} ${p.name} 来访`); 
-                } else { p.currentAction = `在 路边 闲逛`; p.addLog(`${timeStr} 在路边闲逛`); p.stamina = Math.min(100, p.stamina + staminaGain); }
+                    p.stamina = Math.min(p.staminaMax || 100, p.stamina + staminaGain);
+                    p.addLog(`${timeStr} 在 ${v.name} 休息`); 
+                    v.addLog(`${timeStr} ${p.name} 来访`); 
+                } else { p.currentAction = `在 路边 闲逛`; p.addLog(`${timeStr} 在路边闲逛`); p.stamina = Math.min(p.staminaMax || 100, p.stamina + staminaGain); }
             }
-            p.happiness = Math.min(100, p.happiness + rand(5, 10)); p.hunger -= 1; 
+            p.happiness = Math.min(100, p.happiness + rand(5, 10)); 
+            p.hunger -= 1; 
         }
 
         doShopping(p, shop, intention = null) {
@@ -1955,8 +2141,8 @@ const TOWN_EVENTS = [
         doUseItem(p, itemId) {
             const item = ITEMS_DB[itemId]; if (!item) return; const idx = p.bag.indexOf(itemId); if (idx === -1) return; p.bag.splice(idx, 1);
             if (item.hungerBonus) { p.hunger = Math.min(100, p.hunger + item.hungerBonus); if(item.hungerBonus > 5) p.lastMealTime = this.gameTime; }
-            if (item.happinessBonus) p.happiness = Math.min(100, p.happiness + item.happinessBonus); if (item.healthBonus) p.health = Math.min(100, p.health + item.healthBonus); 
-            if (item.staminaBonus) p.stamina = Math.min(100, p.stamina + item.staminaBonus);
+            if (item.happinessBonus) p.happiness = Math.min(100, p.happiness + item.happinessBonus); if (item.healthBonus) p.health = Math.min(p.healthMax || 100, p.health + item.healthBonus); 
+            if (item.staminaBonus) p.stamina = Math.min(p.staminaMax || 100, p.stamina + item.staminaBonus);
             
             // 书籍效果
             if (item.cultureBonus) this.improveSkill(p, 'culture', item.cultureBonus);
@@ -2149,6 +2335,9 @@ const TOWN_EVENTS = [
                     if (c.hunger === undefined) c.hunger = 80; 
                     if (c.health === undefined) c.health = 100;
                     if (c.stamina === undefined) c.stamina = 100;
+                    // 初始化属性上限（兼容旧存档）
+                    if (c.staminaMax === undefined) c.staminaMax = 100;
+                    if (c.healthMax === undefined) c.healthMax = 100;
                     if (c.nextActionOverride === undefined) c.nextActionOverride = null; 
                     if(!c.bag) c.bag = []; if(!c.history) c.history = []; 
                     if (c.jailTerm === undefined) c.jailTerm = 0;
@@ -2579,6 +2768,86 @@ const TOWN_EVENTS = [
                 wageInfoHtml += '</div>';
             }
             
+            // 生成建筑特殊互动效果说明
+            let interactionHtml = '';
+            const buildingId = b.id;
+            const effects = [];
+            
+            if (buildingId === 'school') {
+                effects.push({ icon: '📚', text: '上课学习', desc: '提升文化 +1.5，社交 +0.3，心情 +8，体力 +5' });
+                effects.push({ icon: '💡', text: '长期效果', desc: '持续学习可提升文化水平' });
+            }
+            else if (buildingId === 'gym') {
+                effects.push({ icon: '💪', text: '锻炼健身', desc: '健康 +8，颜值 +3，心情 +12，体力 +15' });
+                effects.push({ icon: '📈', text: '上限提升', desc: '10%概率提升体力上限，5%概率提升健康上限（最高120）' });
+            }
+            else if (buildingId === 'library') {
+                effects.push({ icon: '📖', text: '阅读学习', desc: '文化 +1.2，诚信 +0.2，心情 +6~8，体力 +5' });
+            }
+            else if (buildingId === 'museum') {
+                effects.push({ icon: '🏛', text: '参观展览', desc: '文化 +1.0，社交 +0.2，心情 +8，体力 +5' });
+            }
+            else if (buildingId === 'hospital') {
+                effects.push({ icon: '🏥', text: '医疗治疗', desc: '健康 +50，心情 +5，体力 +5' });
+                effects.push({ icon: '📈', text: '上限提升', desc: '5%概率提升健康上限（最高120）' });
+            }
+            else if (buildingId === 'hotspring') {
+                effects.push({ icon: '♨️', text: '温泉疗养', desc: '健康 +30，心情 +15，体力 +20' });
+                effects.push({ icon: '📈', text: '上限提升', desc: '15%概率提升健康上限（最高120）' });
+            }
+            else if (buildingId === 'church') {
+                effects.push({ icon: '⛪', text: '祈祷祷告', desc: '诚信 +1.0，恶意 -0.5，心情 +10，体力 +5' });
+            }
+            else if (buildingId === 'netcafe') {
+                effects.push({ icon: '🎮', text: '游戏娱乐', desc: '心情 +20，体力 +5' });
+                effects.push({ icon: '⚠️', text: '负面效果', desc: '30%概率降低文化 -0.2' });
+            }
+            else if (buildingId === 'cinema') {
+                effects.push({ icon: '🎬', text: '观影娱乐', desc: '心情 +18，社交 +0.5，体力 +5' });
+            }
+            else if (buildingId === 'bar') {
+                effects.push({ icon: '🍺', text: '喝酒买醉', desc: '心情 +25，体力 +5' });
+                effects.push({ icon: '⚠️', text: '负面效果', desc: '健康 -3，诚信 -0.3' });
+            }
+            else if (buildingId === 'amusement') {
+                effects.push({ icon: '🎡', text: '游玩娱乐', desc: '心情 +35，社交 +0.8，体力 +10' });
+            }
+            else if (buildingId === 'park') {
+                effects.push({ icon: '🌳', text: '散步休闲', desc: '心情 +8~10，社交 +0.3，诚信 +0.1，体力 +10（免费）' });
+            }
+            else if (b.effect === 'food') {
+                effects.push({ icon: '🍽️', text: '用餐', desc: `恢复饱食度 +${b.food || 35}，体力 +5` });
+            }
+            else if (b.effect === 'health' || b.effect === 'tourist_health') {
+                effects.push({ icon: '🏥', text: '医疗', desc: '健康 +40，心情 +5，体力 +5' });
+            }
+            else if (b.effect === 'beauty') {
+                effects.push({ icon: '💪', text: '健身', desc: '健康 +5，颜值 +2，心情 +10，体力 +10' });
+            }
+            else if (b.effect === 'fun_high' || b.effect === 'tourist_high') {
+                effects.push({ icon: '🎉', text: '娱乐', desc: '心情 +30，体力 +5' });
+            }
+            else if (b.effect === 'study') {
+                effects.push({ icon: '📚', text: '学习', desc: '文化 +0.5，心情 +5~8，体力 +5' });
+            }
+            else if (b.effect === 'tourist') {
+                effects.push({ icon: '📸', text: '观光', desc: '心情 +10' });
+            }
+            
+            if (effects.length > 0) {
+                interactionHtml = '<div class="section-title">✨ 特殊互动效果</div><div style="background:#f0f8ff; padding:12px; border-radius:6px; margin-bottom:15px; border:1px solid #b3d9ff;">';
+                effects.forEach((eff, idx) => {
+                    interactionHtml += `<div style="margin-bottom:${idx < effects.length - 1 ? '10px' : '0'}; padding-bottom:${idx < effects.length - 1 ? '10px' : '0'}; border-bottom:${idx < effects.length - 1 ? '1px dashed #cce5ff' : 'none'};">
+                        <div style="display:flex; align-items:center; margin-bottom:4px;">
+                            <span style="font-size:1.2rem; margin-right:8px;">${eff.icon}</span>
+                            <span style="font-weight:bold; color:#2c3e50;">${eff.text}</span>
+                        </div>
+                        <div style="font-size:0.85rem; color:#555; margin-left:28px; line-height:1.4;">${eff.desc}</div>
+                    </div>`;
+                });
+                interactionHtml += '</div>';
+            }
+            
             content.innerHTML = `
                 <div style="margin-bottom:15px; font-size:0.9rem; color:#555;">${b.desc}</div>
                 ${statsHtml}
@@ -2597,6 +2866,7 @@ const TOWN_EVENTS = [
                         <span style="font-weight:bold; color:#e67e22;">${b.price}元</span>
                     </div>` : ''}
                 </div>
+                ${interactionHtml}
                 ${wageInfoHtml}
                 ${sellsHtml}
                 <div class="section-title">员工列表 (${b.staff.length}/${b.jobs.length})</div>
