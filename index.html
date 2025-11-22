@@ -28,14 +28,15 @@
         .btn.guide { background: #0984e3; color: white; font-weight: bold; }
 
         .btn.fund { background: #9b59b6; font-size: 0.8rem; padding: 4px 8px; margin-left: 5px; } 
-        .btn.accelerate { background: #2ecc71; color: white; font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: 100%; border: 1px solid #27ae60; }
-        .btn.start-build { background: #95a5a6; color: white; font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: 100%; border: 1px solid #7f8c8d; cursor: not-allowed; }
-        .btn.resume-build { background: #3498db; color: white; font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: 100%; border: 1px solid #2980b9; cursor: pointer; font-weight: bold; }
-        .btn.stop-build { background: #e74c3c; color: white; font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: 100%; border: 1px solid #c0392b; }
-        
+        .btn.accelerate, .btn.start-build, .btn.resume-build, .btn.stop-build { font-size: 0.8rem; padding: 4px 8px; margin-top: 5px; width: 100%; }
+        .btn.accelerate { background: #2ecc71; color: white; border: 1px solid #27ae60; }
+        .btn.start-build { background: #95a5a6; color: white; border: 1px solid #7f8c8d; cursor: not-allowed; }
+        .btn.resume-build { background: #3498db; color: white; border: 1px solid #2980b9; cursor: pointer; font-weight: bold; }
+        .btn.stop-build { background: #e74c3c; color: white; border: 1px solid #c0392b; }
         .btn.control { background: #34495e; width: 100%; margin-top: 10px; }
-        .btn.upgrade { background: #8e44ad; color: white; border:none; padding:5px 10px; border-radius:4px; font-size:0.85rem; cursor:pointer; }
-        .btn.train { background: #e67e22; color: white; border:none; padding:5px 10px; border-radius:4px; font-size:0.85rem; cursor:pointer; margin-left:5px; }
+        .btn.upgrade, .btn.train { color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; }
+        .btn.upgrade { background: #8e44ad; }
+        .btn.train { background: #e67e22; margin-left: 5px; }
 
         #calendar-display { cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
         #calendar-display:hover { background: #e1e4e8; }
@@ -69,15 +70,45 @@
         .char-card.action-use { border-left-color: #00cec9; background: #e0f7fa; }
         .char-card.action-jail { border-left-color: #2d3436; background: #dcdde1; color: #636e72; }
         .char-card.action-sleep { border-left-color: #7f8c8d; background: #f5f6fa; opacity: 0.8; }
-        
         .char-card.mayor { border: 2px solid #f1c40f; background: #fffce0; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
-
+        
         .bar-container { height: 6px; background: #eee; margin: 8px 0; border-radius: 3px; overflow: hidden; }
         .bar-fill { height: 100%; width: 0; transition: width 0.3s; }
-        .hp-fill { background: #2ecc71; } 
+        .hp-fill { background: #2ecc71; }
         .food-fill { background: #fdcb6e; }
         .health-fill { background: #ff7675; }
         .stamina-fill { background: #0984e3; }
+        
+        /* 个人档案进度条白色科技风格 */
+        #char-detail-modal .bar-container {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+        }
+        
+        #char-detail-modal .bar-fill {
+            border-radius: 4px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        #char-detail-modal .hp-fill { 
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+        }
+        
+        #char-detail-modal .food-fill { 
+            background: linear-gradient(90deg, #fdcb6e, #f39c12);
+        }
+        
+        #char-detail-modal .health-fill { 
+            background: linear-gradient(90deg, #ff7675, #e74c3c);
+        }
+        
+        #char-detail-modal .stamina-fill { 
+            background: linear-gradient(90deg, #0984e3, #74b9ff);
+        }
 
         .build-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
         .build-card { cursor: pointer; background: var(--card); padding: 15px; border-radius: 8px; opacity: 0.6; filter: grayscale(1); transition: 0.3s; border: 2px dashed #ccc; display: flex; flex-direction: column; justify-content: space-between; }
@@ -127,10 +158,101 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
         .modal-content { background: var(--card); padding: 25px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        
+        /* 个人档案模态框 - 白色平板风格 */
+        #char-detail-modal .modal-overlay { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+        #char-detail-modal .modal-content { 
+            max-width: 1000px; width: 95%; max-height: 90vh; padding: 0; background: #ffffff;
+            box-shadow: 0 0 0 6px #e0e0e0, 0 0 0 10px #f5f5f5, 0 8px 40px rgba(0, 0, 0, 0.15), 0 0 30px rgba(74, 144, 226, 0.1);
+            border: 2px solid #4a90e2; border-radius: 16px; position: relative; 
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        #char-detail-modal .modal-content::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 14px; pointer-events: none;
+        }
+        
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        /* 个人档案header - 白色科技风格 */
+        #char-detail-modal .modal-header { 
+            padding: 20px 30px; border-bottom: 2px solid rgba(74, 144, 226, 0.2);
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); position: relative; z-index: 1;
+            flex-shrink: 0; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;
+        }
+        #char-detail-modal .modal-header::before {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(to right, transparent, #4a90e2, transparent);
+        }
+        #char-detail-modal .modal-header h3 { 
+            font-size: 1.5rem; font-weight: 700; color: #2c3e50; flex: 0 0 auto; min-width: 0; letter-spacing: 0.5px;
+            margin: 0;
+        }
+        
+        /* 个人档案信仰主义显示 */
+        #char-detail-modal #detail-ideology { 
+            flex: 1; min-width: 0; font-size: 0.9rem; flex-wrap: wrap; gap: 8px; justify-content: flex-start;
+            display: flex; align-items: center; overflow-x: auto; overflow-y: visible; max-width: 100%;
+        }
+        #char-detail-modal #detail-ideology::-webkit-scrollbar {
+            height: 4px;
+        }
+        #char-detail-modal #detail-ideology::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 2px;
+        }
+        #char-detail-modal #detail-ideology::-webkit-scrollbar-thumb {
+            background: rgba(74, 144, 226, 0.3);
+            border-radius: 2px;
+        }
+        #char-detail-modal #detail-ideology span {
+            white-space: nowrap; padding: 4px 10px; background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 4px; color: #4a90e2; flex-shrink: 0;
+        }
+        #char-detail-modal .edit-btn {
+            padding: 4px 10px; border-radius: 4px; background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.3); color: #4a90e2; transition: all 0.3s ease; text-decoration: none;
+        }
+        #char-detail-modal .edit-btn:hover {
+            background: rgba(74, 144, 226, 0.2); border-color: #4a90e2;
+            box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3); text-decoration: none;
+        }
+        
+        /* 个人档案内容区域 */
+        #char-detail-modal #detail-content {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;
+            padding: 30px; background: #ffffff; position: relative; z-index: 1;
+            overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0;
+        }
+        #char-detail-modal #detail-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        #char-detail-modal #detail-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        #char-detail-modal #detail-content::-webkit-scrollbar-thumb {
+            background: rgba(74, 144, 226, 0.4);
+            border-radius: 4px;
+        }
+        #char-detail-modal #detail-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(74, 144, 226, 0.6);
+        }
+        @media (max-width: 768px) { #char-detail-modal #detail-content { grid-template-columns: 1fr; } }
+        
         .modal-header h3 { margin: 0; font-size: 1.3rem; }
         .modal-close { cursor: pointer; font-size: 1.5rem; color: #999; background: none; border: none; padding: 0; width: 30px; height: 30px; }
         .modal-close:hover { color: #333; }
+        
+        /* 个人档案关闭按钮 */
+        #char-detail-modal .modal-close {
+            color: #4a90e2; font-size: 1.8rem; width: 35px; height: 35px; border-radius: 50%;
+            border: 1px solid rgba(74, 144, 226, 0.3); background: rgba(74, 144, 226, 0.1); transition: all 0.3s ease;
+        }
+        #char-detail-modal .modal-close:hover {
+            color: #ffffff; background: #4a90e2; border-color: #4a90e2;
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4); transform: rotate(90deg);
+        }
 
         .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
         .guide-item { background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #eee; position: relative; overflow: hidden; }
@@ -142,11 +264,95 @@
 
         .detail-group { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
         .detail-group:last-child { border-bottom: none; }
+        
+        /* 个人档案详情组 */
+        #char-detail-modal .detail-group { 
+            margin-bottom: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px;
+            border: 1px solid rgba(74, 144, 226, 0.2); border-left: 3px solid #4a90e2;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; position: relative;
+        }
+        #char-detail-modal .detail-group:hover {
+            border-color: rgba(74, 144, 226, 0.4); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); transform: translateY(-2px);
+        }
+        #char-detail-modal .detail-group:last-child { border-bottom: 1px solid rgba(74, 144, 226, 0.2); }
+        
         .detail-label { font-weight: bold; color: #666; margin-bottom: 5px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 个人档案标签和值 */
+        #char-detail-modal .detail-label { 
+            font-size: 1.05rem; color: #2c3e50; margin-bottom: 12px; padding-bottom: 10px;
+            border-bottom: 1px solid rgba(74, 144, 226, 0.2); font-weight: 700; letter-spacing: 0.5px;
+        }
         .detail-val { font-size: 1.05rem; }
+        #char-detail-modal .detail-val { font-size: 1.1rem; line-height: 1.8; color: #34495e; }
         .detail-desc { font-size: 0.9rem; color: #888; margin-top: 4px; font-style: italic; }
+        #char-detail-modal .detail-desc { font-size: 0.95rem; color: #7f8c8d; margin-top: 8px; font-style: normal; line-height: 1.6; }
+        
         .trait-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #f0f0f0; color: #333; margin-right: 5px; font-size: 0.9rem; margin-bottom: 5px; }
+        
+        /* 个人档案特质标签美化 - 白色科技风格，支持横向滚动 */
+        #char-detail-modal .trait-container {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 8px;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding-bottom: 5px;
+            min-width: min-content;
+        }
+        
+        #char-detail-modal .trait-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        #char-detail-modal .trait-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+        
+        #char-detail-modal .trait-container::-webkit-scrollbar-thumb {
+            background: rgba(74, 144, 226, 0.4);
+            border-radius: 3px;
+        }
+        
+        #char-detail-modal .trait-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(74, 144, 226, 0.6);
+        }
+        
+        #char-detail-modal .trait-tag { 
+            padding: 6px 14px; 
+            border-radius: 6px; 
+            background: rgba(74, 144, 226, 0.1);
+            color: #4a90e2; 
+            margin-right: 0;
+            margin-bottom: 0; 
+            font-size: 0.9rem;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        #char-detail-modal .trait-tag:hover {
+            transform: translateY(-2px);
+            background: rgba(74, 144, 226, 0.2);
+            border-color: #4a90e2;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+        
         .ideology-box { padding: 10px; border-radius: 6px; background: #f9f9f9; border: 1px solid #eee; margin-top: 5px; }
+        
+        /* 个人档案信仰主义框白色科技风格 */
+        #char-detail-modal .ideology-box {
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(74, 144, 226, 0.08);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            margin-top: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
         .edit-btn { font-size: 0.8rem; color: var(--primary); cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; }
         
         .relation-view { display: none; flex: 1; background: var(--card); padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; flex-direction: column; }
@@ -157,6 +363,48 @@
         .rel-item { padding: 8px; border-bottom: 1px solid #eee; }
         .rel-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; color: white; }
         .tag-spouse { background: #e84393; } .tag-lover { background: #ff7675; } .tag-mistress { background: #ff8c00; } .tag-friend { background: #74b9ff; } .tag-bestfriend { background: #3498db; } .tag-ex { background: #636e72; } .tag-stranger { background: #95a5a6; } .tag-enemy { background: #c0392b; }
+        
+        /* 个人档案关系标签白色科技风格 */
+        #char-detail-modal .rel-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        #char-detail-modal .rel-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        #char-detail-modal .tag-spouse { 
+            background: linear-gradient(135deg, #e84393, #fd79a8);
+        }
+        #char-detail-modal .tag-lover { 
+            background: linear-gradient(135deg, #ff7675, #fab1a0);
+        }
+        #char-detail-modal .tag-mistress { 
+            background: linear-gradient(135deg, #ff8c00, #ffa500);
+        }
+        #char-detail-modal .tag-friend { 
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+        }
+        #char-detail-modal .tag-bestfriend { 
+            background: linear-gradient(135deg, #3498db, #74b9ff);
+        }
+        #char-detail-modal .tag-ex { 
+            background: linear-gradient(135deg, #636e72, #95a5a6);
+        }
+        #char-detail-modal .tag-stranger { 
+            background: linear-gradient(135deg, #95a5a6, #b2bec3);
+        }
+        #char-detail-modal .tag-enemy { 
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+        }
         canvas { width: 100%; height: 100%; display: block; }
 
         /* 排行榜 */
@@ -204,12 +452,91 @@
         
         /* 物品与背包 */
         .bag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 5px; margin-top: 5px; }
+        
+        /* 个人档案背包网格美化 - 白色科技风格 */
+        #char-detail-modal .bag-grid { 
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
+            gap: 12px; 
+            margin-top: 10px;
+        }
+        
         .bag-item { background: #fff5f0; border: 1px solid #e17055; border-radius: 4px; padding: 5px; text-align: center; font-size: 0.8rem; color: #d35400; cursor:help; }
         
+        #char-detail-modal .bag-item { 
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.4); 
+            border-radius: 8px; 
+            padding: 12px; 
+            font-size: 0.85rem; 
+            color: #e67e22;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        #char-detail-modal .bag-item:hover {
+            transform: translateY(-2px);
+            border-color: #e67e22;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+            background: rgba(255, 165, 0, 0.15);
+        }
+        
         .history-list { font-size: 0.85rem; color: #555; background: #f8f9fa; border-radius: 6px; padding: 8px; border: 1px solid #eee; max-height: 150px; overflow-y: auto; }
+        
+        /* 个人档案历史列表美化 - 白色科技风格 */
+        #char-detail-modal .history-list { 
+            font-size: 0.9rem; 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            padding: 15px; 
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            max-height: 200px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+        }
+        
+        /* 滚动条样式 */
+        #char-detail-modal .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #char-detail-modal .history-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+        
+        #char-detail-modal .history-list::-webkit-scrollbar-thumb {
+            background: rgba(74, 144, 226, 0.4);
+            border-radius: 3px;
+        }
+        
+        #char-detail-modal .history-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(74, 144, 226, 0.6);
+        }
+        
         .history-item { padding: 4px 0; border-bottom: 1px dashed #e0e0e0; }
+        
+        #char-detail-modal .history-item { 
+            padding: 10px 8px; 
+            border-bottom: 1px dashed rgba(74, 144, 226, 0.15);
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 3px 0;
+            color: #555;
+        }
+        
+        #char-detail-modal .history-item:hover {
+            background: rgba(74, 144, 226, 0.1);
+            border-left: 3px solid #4a90e2;
+            padding-left: 12px;
+            color: #2c3e50;
+        }
+        
         .history-item:last-child { border-bottom: none; }
         .history-time { color: #999; font-size: 0.8em; margin-right: 5px; font-family: monospace; }
+        
+        #char-detail-modal .history-time {
+            color: #4a90e2;
+        }
 
         .tooltip-item { position: relative; cursor: help; }
         .tooltip-item:hover::after {
@@ -244,14 +571,76 @@
         }
 
         .skill-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.85rem; }
+        
+        /* 个人档案技能条美化 - 白色科技风格 */
+        #char-detail-modal .skill-row { 
+            margin-bottom: 12px; 
+            font-size: 0.9rem;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid rgba(74, 144, 226, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        #char-detail-modal .skill-row:hover {
+            background: rgba(74, 144, 226, 0.05);
+            border-color: rgba(74, 144, 226, 0.3);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        
         .skill-name { width: 60px; font-weight: bold; color: #555; }
+        
+        #char-detail-modal .skill-name { 
+            width: 80px; 
+            font-weight: 600; 
+            color: #2c3e50;
+        }
+        
         .skill-track { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin: 0 10px; }
+        
+        #char-detail-modal .skill-track { 
+            height: 12px; 
+            background: #e0e0e0; 
+            border-radius: 6px; 
+            margin: 0 15px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+        
         .skill-bar { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        
+        #char-detail-modal .skill-bar {
+            border-radius: 5px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
         .skill-val { width: 30px; text-align: right; color: #777; }
+        
+        #char-detail-modal .skill-val {
+            color: #4a90e2;
+            font-weight: 700;
+        }
+        
         .sk-social { background: #e84393; }
+        #char-detail-modal .sk-social { 
+            background: linear-gradient(90deg, #e84393, #fd79a8);
+        }
+        
         .sk-culture { background: #00b894; }
+        #char-detail-modal .sk-culture { 
+            background: linear-gradient(90deg, #00b894, #55efc4);
+        }
+        
         .sk-integrity { background: #0984e3; }
+        #char-detail-modal .sk-integrity { 
+            background: linear-gradient(90deg, #0984e3, #74b9ff);
+        }
+        
         .sk-malice { background: #8e44ad; }
+        #char-detail-modal .sk-malice { 
+            background: linear-gradient(90deg, #8e44ad, #a29bfe);
+        }
         
         /* 选项卡过滤器样式 */
         .tab-filter { display:flex; gap:5px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; }
@@ -527,7 +916,7 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="char-detail-modal"><div class="modal-content"><div class="modal-header"><h3 id="detail-name">角色详情</h3><button class="modal-close" onclick="gameInstance.closeCharDetail()">×</button></div><div id="detail-content"></div></div></div>
+<div class="modal-overlay" id="char-detail-modal" onclick="if(event.target.id === 'char-detail-modal') gameInstance.closeCharDetail();"><div class="modal-content" onclick="event.stopPropagation();"><div class="modal-header"><h3 id="detail-name">角色详情</h3><div id="detail-ideology" style="margin-left:20px; display:flex; align-items:center; gap:8px;"></div><button class="modal-close" onclick="gameInstance.closeCharDetail()">×</button></div><div id="detail-content"></div></div></div>
 
 <div class="modal-overlay" id="gov-modal">
     <div class="modal-content">
@@ -2643,6 +3032,34 @@ const TOWN_EVENTS = [
             let traitsHtml = c.traits.map(t => `<div class="trait-tag" title="${t.desc}">${t.name}</div>`).join('') || "无";
             const ideology = c.ideology || { name: "无", color: "#999", desc: "", chaosMod:0, loveMod:0, wageMod:0 };
             
+            // 在header中显示信仰主义
+            const ideologyEl = document.getElementById('detail-ideology'); 
+            if(ideologyEl) {
+                // 将十六进制颜色转换为rgba格式
+                const hexToRgba = (hex, alpha) => {
+                    const r = parseInt(hex.slice(1, 3), 16);
+                    const g = parseInt(hex.slice(3, 5), 16);
+                    const b = parseInt(hex.slice(5, 7), 16);
+                    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                };
+                const colorRgba1 = hexToRgba(ideology.color, 0.12);
+                const colorRgba2 = hexToRgba(ideology.color, 0.08);
+                
+                const loveText = ideology.loveMod > 0 ? `<span class="stat-positive">❤ +${ideology.loveMod.toFixed(1)} 好感</span>` : ideology.loveMod < 0 ? `<span class="stat-negative">❤ ${ideology.loveMod.toFixed(1)} 好感</span>` : '';
+                const wageText = ideology.wageMod > 0 ? `<span class="stat-positive">💰 +${(ideology.wageMod * 100).toFixed(0)}% 工资</span>` : ideology.wageMod < 0 ? `<span class="stat-negative">💰 ${(ideology.wageMod * 100).toFixed(0)}% 工资</span>` : '';
+                const chaosText = ideology.chaosMod > 0 ? `<span class="stat-negative">💢 +${(ideology.chaosMod * 100).toFixed(0)}% 吵架</span>` : ideology.chaosMod < 0 ? `<span class="stat-positive">🕊️ ${(ideology.chaosMod * 100).toFixed(0)}% 吵架</span>` : '';
+                const bonusText = [loveText, wageText, chaosText].filter(t => t).join(' | ');
+                
+                ideologyEl.innerHTML = `
+                    <div style="display:inline-flex; align-items:center; gap:10px; padding:8px 15px; border-radius:8px; border:2px solid ${ideology.color}; background:linear-gradient(135deg, ${colorRgba1} 0%, ${colorRgba2} 100%); box-shadow:0 2px 8px ${hexToRgba(ideology.color, 0.2)};">
+                        <span style="color:#666; font-size:0.9rem;">信仰主义:</span>
+                        <span style="color:${ideology.color}; font-weight:bold; font-size:1rem;">${ideology.name}</span>
+                        ${bonusText ? `<span style="font-size:0.85rem;">${bonusText}</span>` : ''}
+                        <button class="edit-btn" onclick="gameInstance.openEditModal('修改主义', gameInstance.getIdeologyNames(), '${ideology.name}', 'ideology', '${c.name}')" style="font-size:0.85rem; padding:2px 6px;">[修改]</button>
+                    </div>
+                `;
+            }
+            
             let bagHtml = '<div style="color:#999; font-size:0.85rem;">背包空空如也</div>'; if (c.bag && c.bag.length > 0) { bagHtml = '<div class="bag-grid">'; c.bag.forEach(itemId => { const item = ITEMS_DB[itemId]; if(item) { const tooltipText = getItemTooltipText(itemId); bagHtml += `<div class="bag-item tooltip-item" data-tip="${tooltipText}">${item.name}</div>`; } }); bagHtml += '</div>'; }
             let historyHtml = '<div class="history-list">'; if (!c.history || c.history.length === 0) { historyHtml += '<div class="history-item">暂无活动记录</div>'; } else { c.history.forEach(h => { historyHtml += `<div class="history-item">${h}</div>`; }); } historyHtml += '</div>';
             
@@ -2654,19 +3071,6 @@ const TOWN_EVENTS = [
                 <div class="skill-row"><span class="skill-name">恶意</span><div class="skill-track"><div class="skill-bar sk-malice" style="width:${c.skills.malice}%"></div></div><span class="skill-val">${Math.floor(c.skills.malice)}</span></div>
                 `;
             
-            // 独立出信仰主义模块，放到最下方
-            const ideologySection = `
-                <div class="detail-group">
-                    <div class="detail-label">
-                         <span>信仰主义</span>
-                         <button class="edit-btn" onclick="gameInstance.openEditModal('修改主义', gameInstance.getIdeologyNames(), '${ideology.name}', 'ideology', '${c.name}')">[修改]</button>
-                    </div>
-                    <div class="ideology-box">
-                         <div style="color:${ideology.color}; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">${ideology.name}</div>
-                         <div style="font-size:0.9rem; color:#555; margin-bottom:5px;">${ideology.desc}</div>
-                         <div style="font-size:0.85rem;"><span class="stat-positive">❤ +${ideology.loveMod} 好感</span> | <span class="stat-positive">💢 ${Math.floor(ideology.chaosMod * 100)}% 吵架</span> | <span class="stat-positive">💰 ${Math.floor(ideology.wageMod * 100)}% 工资</span></div>
-                    </div>
-                </div>`;
             const relationEntries = Object.entries(c.relationships || {})
                 .map(([name, rel]) => ({ name, ...rel }))
                 .filter(rel => rel.name !== c.name)
@@ -2684,11 +3088,49 @@ const TOWN_EVENTS = [
             content.innerHTML = `
                 <div class="detail-group">
                     <div class="detail-label">生理需求 <button class="edit-btn" onclick="gameInstance.openEditModal('修改性别', ['♂ 男', '♀ 女'], '${c.gender}', 'gender', '${c.name}')">[修改性别]</button></div>
-                    <div class="detail-val" style="font-size:0.9rem">
-                        <div>💰 资金: ${Math.floor(c.money)}</div>
-                        <div>❤ 心情: ${Math.floor(c.happiness)} | 🍗 饱食: ${Math.floor(c.hunger)}</div>
-                        <div>🚑 健康: ${Math.floor(c.health)} | ⚡ 体力: ${Math.floor(c.stamina)}</div>
-                        <div style="color:#8e44ad; margin-top:4px;">✨ 颜值: ${c.appearance}</div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:15px; width:100%; padding:10px 0;">
+                        <div style="background:linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border-radius:10px; padding:15px; color:#fff; box-shadow:0 4px 8px rgba(243,156,18,0.3);">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">💰</div>
+                            <div style="font-size:0.85rem; opacity:0.9; margin-bottom:5px;">资金</div>
+                            <div style="font-size:1.3rem; font-weight:bold;">${Math.floor(c.money)}</div>
+                        </div>
+                        <div style="background:linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius:10px; padding:15px; color:#fff; box-shadow:0 4px 8px rgba(231,76,60,0.3); position:relative; overflow:hidden;">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">❤️</div>
+                            <div style="font-size:0.85rem; opacity:0.9; margin-bottom:5px;">心情</div>
+                            <div style="font-size:1.3rem; font-weight:bold; margin-bottom:5px;">${Math.floor(c.happiness)}</div>
+                            <div style="background:rgba(255,255,255,0.3); height:6px; border-radius:3px; overflow:hidden;">
+                                <div style="background:#fff; height:100%; width:${Math.min(c.happiness, 100)}%; transition:width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        <div style="background:linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); border-radius:10px; padding:15px; color:#fff; box-shadow:0 4px 8px rgba(241,196,15,0.3); position:relative; overflow:hidden;">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">🍗</div>
+                            <div style="font-size:0.85rem; opacity:0.9; margin-bottom:5px;">饱食</div>
+                            <div style="font-size:1.3rem; font-weight:bold; margin-bottom:5px;">${Math.floor(c.hunger)}</div>
+                            <div style="background:rgba(255,255,255,0.3); height:6px; border-radius:3px; overflow:hidden;">
+                                <div style="background:#fff; height:100%; width:${Math.min(c.hunger, 100)}%; transition:width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        <div style="background:linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border-radius:10px; padding:15px; color:#fff; box-shadow:0 4px 8px rgba(46,204,113,0.3); position:relative; overflow:hidden;">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">🚑</div>
+                            <div style="font-size:0.85rem; opacity:0.9; margin-bottom:5px;">健康</div>
+                            <div style="font-size:1.3rem; font-weight:bold; margin-bottom:5px;">${Math.floor(c.health)}</div>
+                            <div style="background:rgba(255,255,255,0.3); height:6px; border-radius:3px; overflow:hidden;">
+                                <div style="background:#fff; height:100%; width:${Math.min(c.health, 100)}%; transition:width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        <div style="background:linear-gradient(135deg, #3498db 0%, #2980b9 100%); border-radius:10px; padding:15px; color:#fff; box-shadow:0 4px 8px rgba(52,152,219,0.3); position:relative; overflow:hidden;">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">⚡</div>
+                            <div style="font-size:0.85rem; opacity:0.9; margin-bottom:5px;">体力</div>
+                            <div style="font-size:1.3rem; font-weight:bold; margin-bottom:5px;">${Math.floor(c.stamina)}</div>
+                            <div style="background:rgba(255,255,255,0.3); height:6px; border-radius:3px; overflow:hidden;">
+                                <div style="background:#fff; height:100%; width:${Math.min(c.stamina, 100)}%; transition:width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        <div style="background:linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); border-radius:10px; padding:15px; color:#fff; box-shadow:0 4px 8px rgba(155,89,182,0.3);">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">✨</div>
+                            <div style="font-size:0.85rem; opacity:0.9; margin-bottom:5px;">颜值</div>
+                            <div style="font-size:1.3rem; font-weight:bold;">${c.appearance}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="detail-group">
@@ -2701,7 +3143,7 @@ const TOWN_EVENTS = [
                     <div class="detail-label">特质 
                         <button class="edit-btn" onclick="gameInstance.openEditModal('重置特质', gameInstance.getTraitNames(), '', 'trait', '${c.name}')">[改特质]</button>
                     </div>
-                    <div style="margin-top:5px;">${traitsHtml}</div>
+                    <div class="trait-container" style="margin-top:5px;">${traitsHtml}</div>
                 </div>
                 <div class="detail-group">
                     <div class="detail-label">人际关系 (点击查看详情)</div>
@@ -2720,7 +3162,6 @@ const TOWN_EVENTS = [
                     <div class="detail-label">犯罪记录</div>
                     <div class="detail-desc">抢劫: ${c.stat_rob} | 被抢: ${c.stat_be_robbed} | 站街: ${c.stat_streetwalk} | 骚扰: ${c.stat_assault} | 被骚扰: ${c.stat_be_assaulted}</div>
                 </div>
-                ${ideologySection}
             `;
             modal.classList.add('active');
         }
