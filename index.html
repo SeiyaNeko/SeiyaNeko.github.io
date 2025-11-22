@@ -125,7 +125,7 @@
     }
     const BUILDINGS_BLUEPRINT = [
         { id: "huoshao", name: "🥙 火烧铺", category: "food", cost: 150, desc: "3.5元吃饱，体力恢复圣地", effect: "food", price: 3.5, food: 35, open: 6, close: 20, jobs: ["火烧师傅"], sells: ["huoshao_meat", "huoshao_veg", "tofu_pudding"], isBuilt: true, mapX: 25, mapY: 45 },
-        { id: "baozi", name: "🥯 包子铺", category: "food", cost: 100, desc: "物美价廉的早餐店", effect: "shop", price: 0, open: 5, close: 14, jobs: ["早点工"], sells: ["baozi_tofu", "baozi_pork", "baozi_beef"], isBuilt: true, mapX: 20, mapY: 50 },
+        { id: "baozi", name: "🥯 包子铺", category: "food", cost: 100, desc: "物美价廉的早餐店", effect: "shop", price: 3.5, open: 5, close: 14, jobs: ["早点工"], sells: ["baozi_tofu", "baozi_pork", "baozi_beef"], isBuilt: true, mapX: 20, mapY: 50 },
         { id: "bookstore", name: "📚 知识书店", category: "shop", cost: 400, desc: "精神食粮与堕落之源", effect: "shop", price: 0, open: 9, close: 21, jobs: ["图书管理员"], sells: ["book_novel", "book_manga", "book_h", "book_53"], studyBonus: 0.6, mapX: 60, mapY: 30 },
         { id: "ramen", name: "🍜 兰州拉面", category: "food", cost: 250, desc: "正宗牛肉面，管饱", effect: "food", price: 12, food: 35, open: 7, close: 22, jobs: ["拉面师傅"], mapX: 30, mapY: 40 },
         { id: "711", name: "🏪 7-11便利店", category: "food", cost: 300, desc: "24小时营业", effect: "shop", price: 0, open: 0, close: 24, jobs: ["收银员"], sells: ["water_wahaha", "water_ganten", "noodle_beef", "chips_lays", "chocolate", "cola_pepsi", "coffee_instant", "sushi_box", "beer_tsingtao", "beer_laoshan"], mapX: 50, mapY: 50 },
@@ -135,7 +135,7 @@
         { id: "museum", name: "🏛 博物馆", category: "fun", cost: 1200, desc: "历史的沉淀，增长见识", effect: "study", price: 40, open: 9, close: 17, jobs: ["讲解员", "保安"], closedDays: [1], mapX: 65, mapY: 25 },
         { id: "police", name: "👮 派出所", category: "service", cost: 800, desc: "维护小镇治安", effect: "security", price: 0, open: 0, close: 24, jobs: ["警察", "警察"], mapX: 40, mapY: 60 },
         { id: "hospital", name: "🏥 综合医院", category: "service", cost: 1500, desc: "设备先进的医疗中心", effect: "health", price: 80, open: 0, close: 24, jobs: ["主治医师", "护士", "保洁"], mapX: 55, mapY: 55 },
-        { id: "clinic", name: "💊 社区诊所", category: "service", cost: 400, desc: "方便快捷的小诊所", effect: "shop", price: 0, open: 8, close: 20, jobs: ["社区医生", "护士"], sells: ["bandage", "painkiller", "digestion_tablets", "cold_medicine", "anti_inflammatory", "fever_medicine"], mapX: 35, mapY: 55 },
+        { id: "clinic", name: "💊 社区诊所", category: "service", cost: 400, desc: "方便快捷的小诊所", effect: "shop", price: 40, open: 8, close: 20, jobs: ["社区医生", "护士"], sells: ["bandage", "painkiller", "digestion_tablets", "cold_medicine", "anti_inflammatory", "fever_medicine"], mapX: 35, mapY: 55 },
         { id: "school", name: "🏫 小镇学校", category: "service", cost: 1000, desc: "知识就是力量", effect: "study", price: 0, open: 7, close: 17, jobs: ["语文老师", "数学老师", "体育老师", "保安"], closedDays: [0, 6], mapX: 50, mapY: 25 },
         { id: "library", name: "📚 图书馆", category: "fun", cost: 500, desc: "静谧的阅读时光", effect: "study", price: 0, open: 9, close: 21, jobs: ["图书管理员", "保洁"], mapX: 60, mapY: 35 },
         { id: "church", name: "⛪ 婚礼教堂", category: "service", cost: 1200, desc: "神圣之地", effect: "marriage", price: 20, open: 8, close: 20, jobs: ["神父"], mapX: 30, mapY: 30 },
@@ -1043,15 +1043,17 @@ const TOWN_EVENTS = [
         }
         // 税率计算函数：从金额中提取税款到镇库
         collectTax(amount, source = '未知来源', buildingId = null) {
-            if(amount <= 0 || this.taxRate <= 0) return 0;
-            const tax = Math.floor(amount * this.taxRate / 100);
+            if(amount <= 0) return 0;
+            // 计算税款（统一计算，避免重复计算导致不一致）
+            const tax = (this.taxRate > 0 && this.taxRate) ? Math.floor(amount * this.taxRate / 100) : 0;
+            // 如果指定了建筑ID，记录建筑收入（无论税率如何，都要记录收入和税收）
+            if(buildingId) {
+                this.recordBuildingRevenue(buildingId, amount, tax);
+            }
+            // 收取税款到镇库
             if(tax > 0) {
                 this.townMoney += tax;
                 this.addFinanceRecord(tax, source);
-                // 如果指定了建筑ID，记录建筑收入
-                if(buildingId) {
-                    this.recordBuildingRevenue(buildingId, amount, tax);
-                }
             }
             return tax;
         }
@@ -1357,17 +1359,20 @@ const TOWN_EVENTS = [
         }
         doEat(p, r) {
             p.consecutiveWork = 0; const timeStr = this.getDateTimeStr();
+            // 确保 r 有 id 属性（建筑对象应该有 id）
+            const buildingId = r.id;
             if (p.money >= r.price) {
                 p.money -= r.price;
                 p.hunger = Math.min(100, p.hunger + r.food);
                 p.happiness = Math.min(100, p.happiness + 5);
                 const staminaGain = Math.max(8, Math.floor((r.food || 20) / 2));
                 p.stamina = Math.min(100, p.stamina + staminaGain);
-                this.collectTax(r.price, `餐饮消费 - ${p.name}在${r.name}`, r.id);
+                // 确保传入 buildingId 来记录收入和税收
+                this.collectTax(r.price, `餐饮消费 - ${p.name}在${r.name}`, buildingId);
                 p.currentAction = `[吃饭] 在 ${r.name} 吃得饱饱`;
                 p.lastMealTime = this.gameTime;
                 p.addLog(`${timeStr} 在 ${r.name} 吃饭`);
-                r.addLog(`${timeStr} 顾客 ${p.name} 在此用餐`);
+                if (r.addLog) r.addLog(`${timeStr} 顾客 ${p.name} 在此用餐`);
             } else {
                 p.currentAction = `[吃饭] 没钱去 ${r.name}，路边啃馒头`;
                 p.hunger = Math.min(100, p.hunger + 10);
@@ -1396,9 +1401,11 @@ const TOWN_EVENTS = [
             let staminaGain = 15;
             if (v && v.price > 0) {
                 if (p.money >= cost) {
-                    p.money -= cost; this.collectTax(cost, `娱乐消费 - ${p.name}在${v.name}`, v.id);
-                    let happyGain = 0;
+                    p.money -= cost;
                     const buildingId = v.id;
+                    const sourceDesc = buildingId === 'clinic' ? `医疗消费 - ${p.name}在${v.name}` : `娱乐消费 - ${p.name}在${v.name}`;
+                    this.collectTax(cost, sourceDesc, buildingId);
+                    let happyGain = 0;
                     // 根据建筑ID添加特殊效果
                     if (buildingId === 'school') {
                         // 学校：上课提升文化、社交
@@ -1533,12 +1540,12 @@ const TOWN_EVENTS = [
                         }
                     }
                     else if (buildingId === 'clinic') {
-                        // 社区诊所：门诊治疗
+                        // 社区诊所：收费治疗
                         p.health = Math.min(p.healthMax || 100, p.health + 30);
                         happyGain = 5;
                         staminaGain += 5;
-                        p.currentAction = `[💊门诊] 在 ${v.name} 看病`;
-                        // 门诊可能提升健康上限
+                        p.currentAction = `[💊治疗] 在 ${v.name} 看病`;
+                        // 治疗可能提升健康上限
                         if (Math.random() < 0.03 && p.healthMax < 120) {
                             p.healthMax = Math.min(120, p.healthMax + 1);
                             p.addLog(`${timeStr} 定期体检，身体更健康了！`);
@@ -1636,12 +1643,12 @@ const TOWN_EVENTS = [
                         }
                     }
                     else if (buildingId === 'clinic') {
-                        // 社区诊所：门诊治疗
+                        // 社区诊所：收费治疗
                         p.health = Math.min(p.healthMax || 100, p.health + 30);
                         p.happiness = Math.min(100, p.happiness + 5);
                         staminaGain += 5;
-                        p.currentAction = `[💊门诊] 在 ${v.name} 看病`;
-                        // 门诊可能提升健康上限
+                        p.currentAction = `[💊治疗] 在 ${v.name} 看病`;
+                        // 治疗可能提升健康上限
                         if (Math.random() < 0.03 && p.healthMax < 120) {
                             p.healthMax = Math.min(120, p.healthMax + 1);
                             p.addLog(`${timeStr} 定期体检，身体更健康了！`);
@@ -2264,54 +2271,61 @@ const TOWN_EVENTS = [
             const buildingId = b.id;
             const effects = [];
             let hasSpecificEffect = false; // 标记是否已经添加了特定建筑的效果
+            // 辅助函数：添加消费价格到描述
+            const addPriceToDesc = (desc, price) => {
+                if (price && price > 0) {
+                    return `消费 💰${price} | ${desc}`;
+                }
+                return desc;
+            };
             if (buildingId === 'school') {
-                effects.push({ icon: '📚', text: '上课学习', desc: '提升文化 +1.5，社交 +0.3，心情 +8，体力 +5' });
+                effects.push({ icon: '📚', text: '上课学习', desc: addPriceToDesc('提升文化 +1.5，社交 +0.3，心情 +8，体力 +5', b.price) });
                 effects.push({ icon: '💡', text: '长期效果', desc: '持续学习可提升文化水平' });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'gym') {
-                effects.push({ icon: '💪', text: '锻炼健身', desc: '健康 +8，颜值 +3，心情 +12，体力 +15' });
+                effects.push({ icon: '💪', text: '锻炼健身', desc: addPriceToDesc('健康 +8，颜值 +3，心情 +12，体力 +15', b.price) });
                 effects.push({ icon: '📈', text: '上限提升', desc: '10%概率提升体力上限，5%概率提升健康上限（最高120）' });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'library') {
-                effects.push({ icon: '📖', text: '阅读学习', desc: '文化 +1.2，诚信 +0.2，心情 +6~8，体力 +5' });
+                effects.push({ icon: '📖', text: '阅读学习', desc: addPriceToDesc('文化 +1.2，诚信 +0.2，心情 +6~8，体力 +5', b.price) });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'museum') {
-                effects.push({ icon: '🏛', text: '参观展览', desc: '文化 +1.0，社交 +0.2，心情 +8，体力 +5' });
+                effects.push({ icon: '🏛', text: '参观展览', desc: addPriceToDesc('文化 +1.0，社交 +0.2，心情 +8，体力 +5', b.price) });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'hospital') {
-                effects.push({ icon: '🏥', text: '医疗治疗', desc: '健康 +50，心情 +5，体力 +5' });
+                effects.push({ icon: '🏥', text: '医疗治疗', desc: addPriceToDesc('健康 +50，心情 +5，体力 +5', b.price) });
                 effects.push({ icon: '📈', text: '上限提升', desc: '5%概率提升健康上限（最高120）' });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'hotspring') {
-                effects.push({ icon: '♨️', text: '温泉疗养', desc: '健康 +30，心情 +15，体力 +20' });
+                effects.push({ icon: '♨️', text: '温泉疗养', desc: addPriceToDesc('健康 +30，心情 +15，体力 +20', b.price) });
                 effects.push({ icon: '📈', text: '上限提升', desc: '15%概率提升健康上限（最高120）' });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'church') {
-                effects.push({ icon: '⛪', text: '祈祷祷告', desc: '诚信 +1.0，恶意 -0.5，心情 +10，体力 +5' });
+                effects.push({ icon: '⛪', text: '祈祷祷告', desc: addPriceToDesc('诚信 +1.0，恶意 -0.5，心情 +10，体力 +5', b.price) });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'netcafe') {
-                effects.push({ icon: '🎮', text: '游戏娱乐', desc: '心情 +20，体力 +5' });
+                effects.push({ icon: '🎮', text: '游戏娱乐', desc: addPriceToDesc('心情 +20，体力 +5', b.price) });
                 effects.push({ icon: '⚠️', text: '负面效果', desc: '30%概率降低文化 -0.2' });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'cinema') {
-                effects.push({ icon: '🎬', text: '观影娱乐', desc: '心情 +18，社交 +0.5，体力 +5' });
+                effects.push({ icon: '🎬', text: '观影娱乐', desc: addPriceToDesc('心情 +18，社交 +0.5，体力 +5', b.price) });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'bar') {
-                effects.push({ icon: '🍺', text: '喝酒买醉', desc: '心情 +25，体力 +5' });
+                effects.push({ icon: '🍺', text: '喝酒买醉', desc: addPriceToDesc('心情 +25，体力 +5', b.price) });
                 effects.push({ icon: '⚠️', text: '负面效果', desc: '健康 -3，诚信 -0.3' });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'amusement') {
-                effects.push({ icon: '🎡', text: '游玩娱乐', desc: '心情 +35，社交 +0.8，体力 +10' });
+                effects.push({ icon: '🎡', text: '游玩娱乐', desc: addPriceToDesc('心情 +35，社交 +0.8，体力 +10', b.price) });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'park') {
@@ -2319,33 +2333,33 @@ const TOWN_EVENTS = [
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'baozi') {
-                effects.push({ icon: '🥟', text: '用餐', desc: '饱食度 +25，心情 +5，体力 +8~33（根据包子类型）' });
+                effects.push({ icon: '🥟', text: '用餐', desc: addPriceToDesc('饱食度 +25，心情 +5，体力 +8~33（根据包子类型）', b.price) });
                 hasSpecificEffect = true;
             }
             else if (buildingId === 'clinic') {
-                effects.push({ icon: '💊', text: '门诊治疗', desc: '健康 +30，心情 +5，体力 +5' });
+                effects.push({ icon: '💊', text: '收费治疗', desc: addPriceToDesc('健康 +30，心情 +5，体力 +5', b.price) });
                 effects.push({ icon: '📈', text: '上限提升', desc: '3%概率提升健康上限（最高120）' });
                 hasSpecificEffect = true;
             }
             // 如果没有特定建筑效果，则使用通用effect类型
             if (!hasSpecificEffect) {
                 if (b.effect === 'food') {
-                    effects.push({ icon: '🍽️', text: '用餐', desc: `恢复饱食度 +${b.food || 35}，体力 +5` });
+                    effects.push({ icon: '🍽️', text: '用餐', desc: addPriceToDesc(`恢复饱食度 +${b.food || 35}，体力 +5`, b.price) });
                 }
                 else if (b.effect === 'health' || b.effect === 'tourist_health') {
-                    effects.push({ icon: '🏥', text: '医疗', desc: '健康 +40，心情 +5，体力 +5' });
+                    effects.push({ icon: '🏥', text: '医疗', desc: addPriceToDesc('健康 +40，心情 +5，体力 +5', b.price) });
                 }
                 else if (b.effect === 'beauty') {
-                    effects.push({ icon: '💪', text: '健身', desc: '健康 +5，颜值 +2，心情 +10，体力 +10' });
+                    effects.push({ icon: '💪', text: '健身', desc: addPriceToDesc('健康 +5，颜值 +2，心情 +10，体力 +10', b.price) });
                 }
                 else if (b.effect === 'fun_high' || b.effect === 'tourist_high') {
-                    effects.push({ icon: '🎉', text: '娱乐', desc: '心情 +30，体力 +5' });
+                    effects.push({ icon: '🎉', text: '娱乐', desc: addPriceToDesc('心情 +30，体力 +5', b.price) });
                 }
                 else if (b.effect === 'study') {
-                    effects.push({ icon: '📚', text: '学习', desc: '文化 +0.5，心情 +5~8，体力 +5' });
+                    effects.push({ icon: '📚', text: '学习', desc: addPriceToDesc('文化 +0.5，心情 +5~8，体力 +5', b.price) });
                 }
                 else if (b.effect === 'tourist') {
-                    effects.push({ icon: '📸', text: '观光', desc: '心情 +10' });
+                    effects.push({ icon: '📸', text: '观光', desc: addPriceToDesc('心情 +10', b.price) });
                 }
             }
             if (effects.length > 0) {
@@ -2408,8 +2422,7 @@ const TOWN_EVENTS = [
             content.innerHTML = `
                 <div style="margin-bottom:15px; font-size:0.9rem; color:#555;">${b.desc}</div>
                 ${statsHtml}
-                <div class="section-title">📋 基本信息</div><div style="background:#f8f9fa; padding:12px; border-radius:6px; margin-bottom:15px; border:1px solid #eee; font-size:0.9rem;"><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#666;">🕒 营业时间:</span><span style="font-weight:bold; color:#2c3e50;">${openTimeStr || '未设置'}</span></div><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#666;">📅 休息日:</span><span style="font-weight:bold; color:#2c3e50;">${closedDaysStr}</span></div>
-                    ${b.price > 0 ? `<div style="display:flex; justify-content:space-between;"><span style="color:#666;">💰 消费价格:</span><span style="font-weight:bold; color:#e67e22;">${b.price}元</span></div>` : ''}
+                <div class="section-title">📋 基本信息</div><div style="background:#f8f9fa; padding:12px; border-radius:6px; margin-bottom:15px; border:1px solid #eee; font-size:0.9rem;"><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#666;">🕒 营业时间:</span><span style="font-weight:bold; color:#2c3e50;">${openTimeStr || '未设置'}</span></div><div style="display:flex; justify-content:space-between;"><span style="color:#666;">📅 休息日:</span><span style="font-weight:bold; color:#2c3e50;">${closedDaysStr}</span></div>
                 </div>
                 ${interactionHtml}
                 ${wageInfoHtml}
