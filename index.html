@@ -440,7 +440,8 @@
         </div>
     </div>
     <div class="header-group">
-        <button class="btn gov" onclick="gameInstance.showGov()">🏛 政府 & 财政</button>
+        <button class="btn gov" onclick="gameInstance.showGov()">🏛 政府</button>
+        <button class="btn" style="background: #27ae60; color: white; font-weight: bold;" onclick="gameInstance.showFinance()">💰 财政</button>
         <button class="btn purple" onclick="gameInstance.showTownEvents()">🎉 举办活动</button>
         <button class="btn achieve" onclick="gameInstance.showAchievements()">🏆 成就</button>
         <button class="btn gold" onclick="gameInstance.showLeaderboard()">📊 排行榜</button>
@@ -580,7 +581,7 @@
 <div class="modal-overlay" id="gov-modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>🏛 小镇政府 & 财政中心</h3>
+            <h3>🏛 小镇政府</h3>
             <button class="modal-close" onclick="gameInstance.closeGov()">×</button>
         </div>
         <div class="gov-panel">
@@ -606,11 +607,6 @@
                     <div class="label">👥 小镇常住人口</div>
                     <div class="value" id="resident-count">0</div>
                     <button class="btn create" onclick="inputNewResident()">➕ 招募新居民</button>
-                </div>
-                <div class="gov-stat-card">
-                    <div class="label">💰 镇库资金</div>
-                    <div class="value" id="town-money">0</div>
-                    <button class="btn fund" onclick="gameInstance.showEmbezzle()">💸 财政拨款</button>
                 </div>
             </div>
             
@@ -653,6 +649,49 @@
             
             <div style="border-top:1px solid #eee; padding-top:15px;">
                 <button class="btn reset" style="width:100%" onclick="gameInstance.resetData()">🗑 重置小镇数据 (慎用)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="finance-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💰 财政中心</h3>
+            <button class="modal-close" onclick="gameInstance.closeFinance()">×</button>
+        </div>
+        <div class="gov-panel">
+            <div class="gov-stat-row">
+                <div class="gov-stat-card">
+                    <div class="label">💰 镇库资金</div>
+                    <div class="value" id="finance-town-money">0</div>
+                </div>
+                <div class="gov-stat-card">
+                    <div class="label">📊 当前税率</div>
+                    <div class="value" id="tax-rate-display">5%</div>
+                    <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">
+                        <input type="range" id="tax-rate-slider" min="0" max="20" value="5" step="1" style="flex:1;" oninput="gameInstance.updateTaxRate(this.value)">
+                        <span id="tax-rate-value" style="font-weight:bold; color:#27ae60; min-width:40px;">5%</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:#666; margin-top:5px;">所有收入和支出将按此税率收纳到镇库</div>
+                </div>
+            </div>
+            
+            <div class="gov-policy-section" style="margin-top:15px;">
+                <h4>💸 财政操作</h4>
+                <button class="btn fund" style="width:100%; margin-bottom:10px;" onclick="gameInstance.showEmbezzle()">💸 财政拨款</button>
+                <div style="font-size:0.85rem; color:#666; padding:10px; background:#f8f9fa; border-radius:6px; margin-bottom:15px;">
+                    <div style="font-weight:bold; margin-bottom:5px;">📋 税率说明：</div>
+                    <div>• 居民收入（工资、奖励等）：按税率收纳到镇库</div>
+                    <div>• 居民支出（购物、消费等）：按税率收纳到镇库</div>
+                    <div>• 建筑收入（门票、服务费等）：按税率收纳到镇库</div>
+                    <div style="margin-top:8px; color:#e67e22; font-weight:bold;">当前税率：<span id="tax-rate-info">5%</span></div>
+                </div>
+                
+                <h4 style="margin-top:15px; margin-bottom:10px;">📊 最近15笔资金来源</h4>
+                <div id="finance-history-list" style="max-height:400px; overflow-y:auto; border:1px solid #ddd; border-radius:6px; background:#fff; padding:10px;">
+                    <div style="text-align:center; color:#999; padding:20px;">暂无资金流动记录</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1027,6 +1066,8 @@ const TOWN_EVENTS = [
             this.jailTerm = 0; 
             this.lastMealTime = -999;
             this.consecutiveWork = 0;
+            this.workHoursToday = 0; // 今日工作小时数，用于每日工资结算
+            this.incomeHistory = []; // 资金收入历史记录，最多保存10条
             
             // 新四维：社交、文化、诚信、恶意值
             this.skills = { 
@@ -1079,11 +1120,14 @@ const TOWN_EVENTS = [
         decideProposal(askerName, type) { const rel = this.relationships[askerName]; let chance = rel.love + (this.happiness - 50) / 2; let threshold = 0; if (type === 'date') threshold = 30; if (type === 'confess') threshold = 75; if (type === 'propose') threshold = 90; chance += rand(-10, 10); return chance >= threshold; }
         
         calculateWage(baseWage, role) { 
+            // 员工自己的主义加成
             let bonus = (this.ideology && this.ideology.wageMod) ? this.ideology.wageMod : 0;
+            // 特质加成
             if (this.hasTrait('hardworking')) bonus += 0.2; // 勤劳 +20%
             if (this.hasTrait('workaholic')) bonus += 0.3; // 工作狂 +30%
             if (this.hasTrait('smart')) bonus += 0.1; // 聪明 +10%
 
+            // 镇长政策加成（全镇统一）
             let mayorMult = 1.0;
             const g = (typeof gameInstance !== 'undefined' && gameInstance) ? gameInstance : window.gameInstance;
             if (g && g.mayor) {
@@ -1093,6 +1137,8 @@ const TOWN_EVENTS = [
                    if (effect && effect.wage !== undefined) mayorMult = effect.wage;
                 }
             }
+            
+            // 建筑等级加成
             let buildLevelBonus = 1.0;
             if (this.job && g) {
                 const b = g.buildings.find(x => x.id === this.job.buildingId);
@@ -1100,12 +1146,15 @@ const TOWN_EVENTS = [
                     buildLevelBonus = 1 + (b.level - 1) * 0.1;
                 }
             }
+            
             if (role) {
+                // 技能等级加成（通过multiplier体现）
+                // 注意：info.multiplier已经根据技能等级给出了加成（1.0, 1.2, 1.4, 1.6）
+                // 不再额外加skillBonus，避免重复计算
                 const type = getJobSkillType(role);
                 const skillVal = this.skills[type] || 0;
                 const info = getLevelInfo(skillVal);
-                const skillBonus = skillVal * 0.005;
-                return Math.floor(baseWage * info.multiplier * (1 + bonus + skillBonus) * mayorMult * buildLevelBonus); 
+                return Math.floor(baseWage * info.multiplier * (1 + bonus) * mayorMult * buildLevelBonus); 
             }
             return Math.floor(baseWage * (1 + bonus) * mayorMult); 
         }
@@ -1145,7 +1194,9 @@ const TOWN_EVENTS = [
             this.policySocialSecurity = false; 
             this.policyHousing = false; 
             this.policyFood = false; 
-            this.mayor = null; 
+            this.mayor = null;
+            this.taxRate = 5; // 税率百分比，默认5%
+            this.financeHistory = []; // 资金流动历史记录，最多保存15条 
             
             this.votingInProgress = false;
             this.voteTimer = null;
@@ -1222,8 +1273,29 @@ const TOWN_EVENTS = [
                 this.voteTimer = null;
             }
             
+            // 先创建所有角色
             this.chars = NAMES.map(n => { let c = new Character(n); NAMES.forEach(target => { if (target !== n) c.relationships[target] = { love: 0, status: 'stranger' }; }); return c; }); 
             this.buildings = BUILDINGS_BLUEPRINT.map(b => new Building(b)); 
+            
+            // 确保所有建筑的员工数组被清空
+            this.buildings.forEach(b => {
+                b.staff = [];
+                b.prostitutes = [];
+            });
+            
+            // 确保所有角色的工作被清空，并强制重置技能为初始值（见习等级）
+            this.chars.forEach(c => {
+                c.job = null;
+                // 强制重置所有技能为初始值（见习等级），确保工作相关技能值都在见习范围内（< 20）
+                // social 和 culture 用于工作技能，应该 < 20
+                // integrity 和 malice 不是工作技能，保持原范围
+                c.skills = {
+                    social: rand(10, 19),      // 见习范围：10-19
+                    culture: rand(10, 19),     // 见习范围：10-19
+                    integrity: rand(50, 80),   // 非工作技能，保持原范围
+                    malice: rand(0, 10)        // 非工作技能，保持原范围
+                };
+            });
             
             const park = this.buildings.find(b => b.id === 'park'); if(park) { park.isBuilt = true; park.currentProgress = park.totalCost; park.hasPermit = true; }
             const clinic = this.buildings.find(b => b.id === 'clinic'); if(clinic) { clinic.isBuilt = true; clinic.currentProgress = clinic.totalCost; clinic.hasPermit = true; }
@@ -1243,7 +1315,7 @@ const TOWN_EVENTS = [
 
                 this.buildings.forEach(b => {
                     if (b.isBuilt && b.category === 'landmark') {
-                        this.townMoney += b.price; 
+                        this.collectTax(b.price, `地标建筑收入 - ${b.name}`); 
                         if (b.effect === 'tourist_high') { this.chars.forEach(c => c.happiness = Math.min(100, c.happiness + 0.5)); } else if (b.effect === 'tourist_health') { this.chars.forEach(c => c.health = Math.min(c.healthMax || 100, c.health + 0.5)); }
                     }
                 });
@@ -1259,6 +1331,9 @@ const TOWN_EVENTS = [
             }
 
             if (this.gameTime >= 1440) { 
+                // 每日工资结算（在日期变更前）
+                this.settleDailyWages();
+                
                 this.gameTime = 0; 
                 this.gameDay = (this.gameDay + 1) % 7; 
                 this.dateDay++;
@@ -1272,7 +1347,11 @@ const TOWN_EVENTS = [
                 }
                 
                 this.runDailyPolicies();
-                this.chars.forEach(c => { c.dailySleepOffset = rand(-2, 4); c.stayUpLate = Math.random() < 0.05; });
+                this.chars.forEach(c => { 
+                    c.dailySleepOffset = rand(-2, 4); 
+                    c.stayUpLate = Math.random() < 0.05;
+                    c.workHoursToday = 0; // 重置每日工作小时数
+                });
                 this.generateDailyWeather();
                 
                 // 检查今日是否有节日
@@ -1480,7 +1559,7 @@ const TOWN_EVENTS = [
         runDailyPolicies() {
             if (this.policySocialSecurity) {
                 let count = 0; let totalPayout = 0; const subsidy = 10; const threshold = 15;
-                this.chars.forEach(c => { if (c.money < threshold) { if (this.townMoney >= subsidy) { this.townMoney -= subsidy; c.money += subsidy; count++; totalPayout += subsidy; c.addLog(`[🏛社保] 收到政府发放的低保金 💰${subsidy}`); } } });
+                this.chars.forEach(c => { if (c.money < threshold) { if (this.townMoney >= subsidy) { this.townMoney -= subsidy; c.money += subsidy; this.addCharIncome(c, subsidy, '低保金'); count++; totalPayout += subsidy; c.addLog(`[🏛社保] 收到政府发放的低保金 💰${subsidy}`); } } });
                 if (count > 0) { this.log(`[📜社保] 社会低保金生效，为 ${count} 位贫困居民发放补助 💰${totalPayout}。`, "tag-promote"); }
             }
             if (this.policyHousing) {
@@ -1513,7 +1592,9 @@ const TOWN_EVENTS = [
             const ach = ACHIEVEMENTS_DB.find(a => a.id === id); 
             if (!ach || !ach.reward) return; // 确保成就存在且有奖励
             this.achievements.push(id); 
-            this.townMoney += ach.reward; 
+            // 成就奖励全额获取，不收税
+            this.townMoney += ach.reward;
+            this.addFinanceRecord(ach.reward, `成就奖励 - ${ach.name}`);
             this.log(`[🏆成就] 恭喜解锁成就：**${ach.name}** (${ach.desc})！奖励资金 💰${ach.reward}`, "tag-promote"); 
             showAchievementPopup(ach);
         }
@@ -1522,7 +1603,7 @@ const TOWN_EVENTS = [
 
         decideAction(p) {
             if (p.jailTerm > 0) { p.currentAction = `[🛑坐牢] 铁窗泪 (剩余 ${(p.jailTerm/60).toFixed(1)}h)`; p.hunger = Math.max(0, p.hunger - 0.5); p.happiness = Math.max(0, p.happiness - 0.5); p.consecutiveWork = 0; return; }
-            if (p.nextActionOverride) { const cmd = p.nextActionOverride; p.nextActionOverride = null; this.log(`[🕹️强制] 上帝控制 **${p.name}** 去 ${cmd.desc}...`, "tag-build"); if (cmd.type === 'work' && p.job) { const b = this.buildings.find(x => x.id === p.job.buildingId); if(b) { this.doWork(p, b); return; } } else if (cmd.type === 'rest') { this.doRest(p, {name:"家", price:0}); return; } else if (cmd.type === 'build') { const b = this.buildings.find(x => x.id === cmd.target); if (b) { this.doBuild(p, b); return; } } else if (cmd.type === 'visit') { const b = this.buildings.find(x => x.id === cmd.target); if (b) { if(b.effect==='food') this.doEat(p, b); else if(b.effect==='shop') this.doShopping(p, b); else this.doRest(p, b); return; } } else if (cmd.type === 'social') { const t = this.chars.find(x => x.name === cmd.target); if (t) { const park = this.buildings.find(b=>b.id==='park'); this.doSocialTarget(p, t, park || {name:"路边", effect:"none"}); return; } } else if (cmd.type === 'crime_rob') { const t = this.chars.find(x => x.name === cmd.target); if (t) { this.doRobbery(p, t); return; } } else if (cmd.type === 'crime_assault') { const t = this.chars.find(x => x.name === cmd.target); if (t) { this.doSexualAssault(p, t); return; } } }
+            if (p.nextActionOverride) { const cmd = p.nextActionOverride; p.nextActionOverride = null; this.log(`[🕹️强制] 上帝控制 **${p.name}** 去 ${cmd.desc}...`, "tag-build"); if (cmd.type === 'work' && p.job) { const b = this.buildings.find(x => x.id === p.job.buildingId); const hour = Math.floor(this.gameTime / 60); if(b && b.isOpen(hour, this.gameDay)) { this.doWork(p, b); return; } else if(b && !b.isOpen(hour, this.gameDay)) { this.log(`[⚠️] ${b.name}当前不在营业时间，无法工作`, "tag-reject"); return; } } else if (cmd.type === 'rest') { this.doRest(p, {name:"家", price:0}); return; } else if (cmd.type === 'build') { const b = this.buildings.find(x => x.id === cmd.target); if (b) { this.doBuild(p, b); return; } } else if (cmd.type === 'visit') { const b = this.buildings.find(x => x.id === cmd.target); if (b) { if(b.effect==='food') this.doEat(p, b); else if(b.effect==='shop') this.doShopping(p, b); else this.doRest(p, b); return; } } else if (cmd.type === 'social') { const t = this.chars.find(x => x.name === cmd.target); if (t) { const park = this.buildings.find(b=>b.id==='park'); this.doSocialTarget(p, t, park || {name:"路边", effect:"none"}); return; } } else if (cmd.type === 'crime_rob') { const t = this.chars.find(x => x.name === cmd.target); if (t) { this.doRobbery(p, t); return; } } else if (cmd.type === 'crime_assault') { const t = this.chars.find(x => x.name === cmd.target); if (t) { this.doSexualAssault(p, t); return; } } }
 
             this.breakInteraction(p); 
             const hour = Math.floor(this.gameTime / 60);
@@ -1573,7 +1654,27 @@ const TOWN_EVENTS = [
 
             if (p.stamina < 25) { this.doRest(p, {name:"家", price:0}); return; }
 
-            if (p.job && p.hunger > 0 && p.stamina >= 30) { const workplace = this.buildings.find(b => b.id === p.job.buildingId); if (workplace && workplace.isOpen(hour, this.gameDay)) { if (workplace.open === 0 && workplace.close === 24 ? Math.random() < 0.7 : true) { this.doWork(p, workplace); return; } } }
+            // 员工工作逻辑：严格检查营业时间
+            if (p.job) {
+                const workplace = this.buildings.find(b => b.id === p.job.buildingId); 
+                if (workplace && workplace.isBuilt) {
+                    if (workplace.isOpen(hour, this.gameDay)) {
+                        // 在营业时间内，如果满足工作条件就工作
+                        if (p.hunger > 0 && p.stamina >= 30) {
+                            this.doWork(p, workplace); 
+                            return;
+                        } else {
+                            // 不满足工作条件，但仍在工作场所
+                            p.currentAction = `[待岗] 在 ${workplace.name} 待命`;
+                            return; // 重要：必须return，避免后续逻辑覆盖工作状态
+                        }
+                    } else {
+                        // 不在营业时间，员工离开工作岗位
+                        p.currentAction = `[下班] ${workplace.name}已关门`;
+                        return; // 重要：必须return，避免后续逻辑覆盖工作状态
+                    }
+                }
+            }
             if (p.prostitute && p.hunger > 0) { const footshop = this.buildings.find(b => b.id === p.prostitute.buildingId); if (footshop && footshop.isBuilt && footshop.isOpen(hour, this.gameDay)) { this.doProstitution(p, footshop); return; } }
             if (!p.job && p.money < 20 && p.hunger > 0) { if ((p.hasTrait('estrous') || p.hasTrait('lustful')) && Math.random() < 0.6) { this.doStreetwalking(p); } else { this.doOddJob(p); } return; }
             
@@ -1616,7 +1717,7 @@ const TOWN_EVENTS = [
                 p.addLog(`${timeStr} 劫色了 ${victim.name}`); victim.addLog(`${timeStr} 惨遭 ${p.name} 劫色 (心情-50, 健康-15)`); if(policeStation) policeStation.addLog(`${timeStr} 接到报案：${p.name} 骚扰了 ${victim.name}`);
                 return true;
             } else {
-                if (hasPolice) { const fine = 200; p.happiness -= 40; p.money -= fine; this.townMoney += fine; p.jailTerm = 1440; this.logInteraction(`[👮逮捕] **${p.name}** 试图对 **${victim.name}** 图谋不轨，被警察逮捕！`, "tag-build"); const copName = choose(policeStation.staff); const cop = this.chars.find(c => c.name === copName); if (cop) { cop.money += 30; } p.currentAction = `[被捕] 劫色未遂，锒铛入狱`; p.addLog(`${timeStr} 劫色 ${victim.name} 失败，被捕入狱`); } else { p.happiness -= 20; p.appearance -= 2; p.health = Math.max(0, p.health - 5); this.logInteraction(`[👊反击] **${p.name}** 想劫色 **${victim.name}**，结果被对方一顿暴揍！`, "tag-reject"); p.currentAction = `[失败] 劫色挨揍，鼻青脸肿`; p.addLog(`${timeStr} 骚扰 ${victim.name} 反被打`); victim.addLog(`${timeStr} 痛扁了色狼 ${p.name}`); }
+                if (hasPolice) { const fine = 200; p.happiness -= 40; p.money -= fine; this.collectTax(fine, `罚款 - ${p.name}劫色被捕`); p.jailTerm = 1440; this.logInteraction(`[👮逮捕] **${p.name}** 试图对 **${victim.name}** 图谋不轨，被警察逮捕！`, "tag-build"); const copName = choose(policeStation.staff); const cop = this.chars.find(c => c.name === copName); if (cop) { const copBonus = 30; this.collectTax(copBonus, `警察奖金 - ${cop.name}`); cop.money += copBonus; this.addCharIncome(cop, copBonus, '警察奖金'); } p.currentAction = `[被捕] 劫色未遂，锒铛入狱`; p.addLog(`${timeStr} 劫色 ${victim.name} 失败，被捕入狱`); } else { p.happiness -= 20; p.appearance -= 2; p.health = Math.max(0, p.health - 5); this.logInteraction(`[👊反击] **${p.name}** 想劫色 **${victim.name}**，结果被对方一顿暴揍！`, "tag-reject"); p.currentAction = `[失败] 劫色挨揍，鼻青脸肿`; p.addLog(`${timeStr} 骚扰 ${victim.name} 反被打`); victim.addLog(`${timeStr} 痛扁了色狼 ${p.name}`); }
                 p.stamina = Math.max(0, p.stamina - 8);
                 return true;
             }
@@ -1672,6 +1773,129 @@ const TOWN_EVENTS = [
         }
         closeGov() { document.getElementById('gov-modal').classList.remove('active'); }
         
+        showFinance() {
+            const modal = document.getElementById('finance-modal');
+            document.getElementById('finance-town-money').innerText = Math.floor(this.townMoney);
+            document.getElementById('tax-rate-display').innerText = this.taxRate + '%';
+            const slider = document.getElementById('tax-rate-slider');
+            const display = document.getElementById('tax-rate-value');
+            const info = document.getElementById('tax-rate-info');
+            if(slider) slider.value = this.taxRate;
+            if(display) display.innerText = this.taxRate + '%';
+            if(info) info.innerText = this.taxRate + '%';
+            
+            // 渲染资金流动历史
+            this.renderFinanceHistory();
+            
+            modal.classList.add('active');
+        }
+        
+        renderFinanceHistory() {
+            const listEl = document.getElementById('finance-history-list');
+            if(!listEl) return;
+            
+            if(this.financeHistory.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">暂无资金流动记录</div>';
+                return;
+            }
+            
+            let html = '';
+            this.financeHistory.forEach((record, index) => {
+                html += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee; ${index === this.financeHistory.length - 1 ? 'border-bottom:none;' : ''}">
+                        <div style="flex:1;">
+                            <div style="font-weight:bold; color:#2c3e50; font-size:0.9rem;">${record.source}</div>
+                            <div style="font-size:0.75rem; color:#999; margin-top:2px;">${record.time}</div>
+                        </div>
+                        <div style="font-weight:bold; color:#27ae60; font-size:1rem; min-width:60px; text-align:right;">+💰${record.amount}</div>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+        
+        closeFinance() { document.getElementById('finance-modal').classList.remove('active'); }
+        
+        updateTaxRate(value) {
+            this.taxRate = parseInt(value);
+            const display = document.getElementById('tax-rate-value');
+            const info = document.getElementById('tax-rate-info');
+            if(display) display.innerText = this.taxRate + '%';
+            if(info) info.innerText = this.taxRate + '%';
+            document.getElementById('tax-rate-display').innerText = this.taxRate + '%';
+        }
+        
+        // 税率计算函数：从金额中提取税款到镇库
+        collectTax(amount, source = '未知来源') {
+            if(amount <= 0 || this.taxRate <= 0) return 0;
+            const tax = Math.floor(amount * this.taxRate / 100);
+            if(tax > 0) {
+                this.townMoney += tax;
+                this.addFinanceRecord(tax, source);
+            }
+            return tax;
+        }
+        
+        // 添加资金流动记录
+        addFinanceRecord(amount, source) {
+            const record = {
+                amount: amount,
+                source: source,
+                time: this.getDateTimeStr(),
+                timestamp: this.gameTime
+            };
+            this.financeHistory.unshift(record); // 添加到开头
+            if(this.financeHistory.length > 15) {
+                this.financeHistory.pop(); // 只保留最近15条
+            }
+            
+            // 如果财政界面是打开的，实时更新显示
+            const financeModal = document.getElementById('finance-modal');
+            if(financeModal && financeModal.classList.contains('active')) {
+                this.renderFinanceHistory();
+                // 同时更新镇库资金显示
+                const moneyEl = document.getElementById('finance-town-money');
+                if(moneyEl) moneyEl.innerText = Math.floor(this.townMoney);
+            }
+        }
+        
+        // 记录居民收入
+        addCharIncome(c, amount, source) {
+            if (!c.incomeHistory) c.incomeHistory = [];
+            const record = {
+                amount: amount,
+                source: source,
+                time: this.getDateTimeStr(),
+                timestamp: this.gameTime
+            };
+            c.incomeHistory.unshift(record);
+            if(c.incomeHistory.length > 10) {
+                c.incomeHistory.pop(); // 只保留最近10条
+            }
+        }
+        
+        // 每日工资结算（24点结算）
+        settleDailyWages() {
+            this.chars.forEach(c => {
+                if (c.job) {
+                    const b = this.buildings.find(x => x.id === c.job.buildingId);
+                    if (b && b.isBuilt) {
+                        const role = c.job.role;
+                        // 获取基础每日工资（建筑岗位标注的工资）
+                        const baseDailyWage = getBaseJobWage(role);
+                        // 计算实际每日工资（考虑技能、特质、镇长等加成）
+                        const dailyWage = c.calculateWage(baseDailyWage, role);
+                        if (dailyWage > 0) {
+                            this.collectTax(dailyWage, `工资收入 - ${c.name}(${b.name})`);
+                            c.money += dailyWage;
+                            this.addCharIncome(c, dailyWage, `工资 - ${b.name}`);
+                            c.addLog(`[💰工资] 收到今日工资 💰${dailyWage}`);
+                        }
+                    }
+                }
+            });
+        }
+        
         executeCommonProsperity() {
             if (!this.mayor) { alert("当前没有镇长，无法执行决策。"); return; }
             if (this.chars.length < 5) { alert("人口太少，无法执行。"); return; }
@@ -1680,8 +1904,8 @@ const TOWN_EVENTS = [
             const poorList = sorted.filter(c => c.money < 50);
             if (poorList.length === 0) { alert("小镇已经全面脱贫，无需执行此政策！"); return; }
             let totalPool = 0; let msg = "🎩 镇长发起 [共同富裕] 运动：\n";
-            richList.forEach(c => { const tax = Math.floor(c.money * 0.2); if (tax > 0) { c.money -= tax; totalPool += tax; c.happiness -= 10; c.addLog(`[💸被劫富] 被强制收缴了 💰${tax} 用于共同富裕`); msg += `- 向富豪 ${c.name} 征收 💰${tax}\n`; } });
-            if (totalPool > 0) { const share = Math.floor(totalPool / poorList.length); poorList.forEach(c => { c.money += share; c.happiness += 10; c.addLog(`[💰济贫] 收到了共同富裕分红 💰${share}`); }); msg += `\n💰 共计收缴 ${totalPool}，平分给 ${poorList.length} 位困难户 (每人得 ${share})。`; this.log(`[⚖️决策] 镇长执行了"共同富裕"决策！向富人征税补贴穷人。`, "tag-gov"); alert(msg); this.updateUI(); } else { alert("富豪们也没钱了，榨不出油水！"); }
+            richList.forEach(c => { const tax = Math.floor(c.money * 0.2); if (tax > 0) { c.money -= tax; this.collectTax(tax, `共同富裕 - 向${c.name}征税`); totalPool += tax; c.happiness -= 10; c.addLog(`[💸被劫富] 被强制收缴了 💰${tax} 用于共同富裕`); msg += `- 向富豪 ${c.name} 征收 💰${tax}\n`; } });
+            if (totalPool > 0) { const share = Math.floor(totalPool / poorList.length); poorList.forEach(c => { c.money += share; this.collectTax(share, `共同富裕 - ${c.name}分红`); this.addCharIncome(c, share, '共同富裕分红'); c.happiness += 10; c.addLog(`[💰济贫] 收到了共同富裕分红 💰${share}`); }); msg += `\n💰 共计收缴 ${totalPool}，平分给 ${poorList.length} 位困难户 (每人得 ${share})。`; this.log(`[⚖️决策] 镇长执行了"共同富裕"决策！向富人征税补贴穷人。`, "tag-gov"); alert(msg); this.updateUI(); } else { alert("富豪们也没钱了，榨不出油水！"); }
         }
 
         togglePolicy(type) { if (type === 'social') this.policySocialSecurity = document.getElementById('policy-social-security').checked; if (type === 'housing') this.policyHousing = document.getElementById('policy-housing').checked; if (type === 'food') this.policyFood = document.getElementById('policy-food').checked; }
@@ -1757,13 +1981,13 @@ const TOWN_EVENTS = [
                     if (c.money > 10) { 
                         const base = isSpecialDay ? 50 : 20;
                         const donation = Math.min(c.money, rand(5, base)); 
-                        c.money -= donation; totalRaised += donation; 
+                        c.money -= donation; this.collectTax(donation, `慈善募捐 - ${c.name}`); totalRaised += donation; 
                         c.happiness = isSpecialDay ? c.happiness + 5 : c.happiness - 5; 
                         this.chars.forEach(other => { if(other.name!==c.name) { c.relationships[other.name].love += 2; } }); 
                         if (isSpecialDay) c.addLog(`[💝慈善日] 捐款 💰${donation} 帮助他人`);
                     } 
                 }); 
-                this.townMoney += totalRaised; 
+                // 慈善募捐已经在捐款时收税，这里不需要再收 
                 this.logInteraction(`[🎗️募捐] 居民们共捐款 💰${totalRaised}，${isSpecialDay?'爱心充满了小镇！':'虽然心疼钱但关系更紧密了。'}`, "tag-build"); 
             }
             else if (id === 'anniversary') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); for(let k in c.relationships) c.relationships[k].love += 2; }); }
@@ -1777,7 +2001,7 @@ const TOWN_EVENTS = [
                 const shops = this.buildings.filter(b => b.isBuilt && b.effect === 'shop' && b.sells.length > 0); if (shops.length === 0) { this.log("⚠️ 镇上没有营业的商店，购物节取消了。", "tag-reject"); return; }
                 let shopperCount = 0; let totalSpent = 0;
                 this.chars.forEach(c => { if (c.money >= 10) { const shop = choose(shops); const affordables = shop.sells.filter(sid => ITEMS_DB[sid] && ITEMS_DB[sid].price <= c.money); if (affordables.length > 0) { const itemId = choose(affordables); const item = ITEMS_DB[itemId]; c.money -= item.price; 
-                this.townMoney += item.price; 
+                this.collectTax(item.price, `购物节 - ${item.name}`); 
                 c.bag.push(itemId); c.happiness = Math.min(100, c.happiness + 15); totalSpent += item.price; shopperCount++; c.addLog(`[🛍️购物节] 在 ${shop.name} 抢购了 ${item.name}`); } } });
                 if (shopperCount > 0) { this.logInteraction(`[🛍️狂欢] 购物节圆满结束！${shopperCount} 位居民抢购了商品，镇库收入 💰${totalSpent}。`, "tag-item"); } else { this.logInteraction(`[🌬️冷清] 购物节大家囊中羞涩，无人消费...`, "tag-lonely"); }
             }
@@ -1785,7 +2009,7 @@ const TOWN_EVENTS = [
             else if (id === 'snowfest' || id === 'christmas') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); c.health = Math.min(100, c.health + 10); c.hunger = Math.min(100, c.hunger + 10); }); }
             else if (id === 'new_year') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); c.money = Math.floor(c.money * 1.1); }); this.log("新年新气象，大家心情大好，存款似乎也变多了？", "tag-promote"); }
             else if (id === 'fools_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); }); if(Math.random()<0.5) { const v = choose(this.chars); v.happiness -= 15; this.logInteraction(`[🤡恶搞] **${v.name}** 被人贴了"我是笨蛋"的纸条，气得不行！`, "tag-reject"); } }
-            else if (id === 'labor_day') { this.chars.forEach(c => { if(c.job) { c.money += 50; c.addLog(`获得劳动节奖金 💰50`); } else { c.happiness += 5; } }); this.log("劳动节快乐！所有在职员工获得了50奖金。", "tag-build"); }
+            else if (id === 'labor_day') { this.chars.forEach(c => { if(c.job) { const bonus = 50; this.collectTax(bonus, `劳动节奖金 - ${c.name}`); c.money += bonus; this.addCharIncome(c, bonus, '劳动节奖金'); c.addLog(`获得劳动节奖金 💰50`); } else { c.happiness += 5; } }); this.log("劳动节快乐！所有在职员工获得了50奖金。", "tag-build"); }
             else if (id === 'children_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 15); }); }
             else if (id === 'harvest') { this.chars.forEach(c => { c.hunger = Math.min(100, c.hunger + 30); }); this.log("丰收节大餐！所有人饱食度大幅提升！", "tag-eat"); }
             else if (id === 'halloween') { 
@@ -1799,7 +2023,7 @@ const TOWN_EVENTS = [
             else if (id === 'cat_return') { 
                 this.chars.forEach(c => {
                     const r = Math.random();
-                    if(r < 0.33) { c.money += 100; c.addLog("🐱 猫神显灵，捡到了 💰100"); }
+                    if(r < 0.33) { const found = 100; this.collectTax(found, `猫神节 - ${c.name}捡到钱`); c.money += found; this.addCharIncome(c, found, '猫神节捡到钱'); c.addLog("🐱 猫神显灵，捡到了 💰100"); }
                     else if(r < 0.66) { c.health = 100; c.happiness = 100; c.addLog("🐱 猫神显灵，身体恢复了最佳状态！"); }
                     else { c.bag.push('rose'); c.addLog("🐱 猫神显灵，背包里多了一朵玫瑰！"); }
                 });
@@ -1834,8 +2058,19 @@ const TOWN_EVENTS = [
         upgradeBuilding(bid) { const b = this.buildings.find(x => x.id === bid); if(!b || !b.isBuilt) return; if(b.level >= 3) { alert("已达到最高等级！"); return; } const cost = Math.floor(b.totalCost * b.level); if(this.townMoney >= cost) { this.townMoney -= cost; b.level++; this.log(`[🏗️升级] **${b.name}** 升级到了 Lv.${b.level}！员工收入将获得提升！`, "tag-build"); this.showBuildingDetail(bid); this.updateUI(); } else { alert(`资金不足，升级需要 💰${cost}`); } }
         
         boostTraining(bid) { const b = this.buildings.find(x => x.id === bid); if(!b || !b.isBuilt) return; const cost = 200; if(this.townMoney >= cost) { this.townMoney -= cost; let trained = 0; b.staff.forEach(sName => { const s = this.chars.find(c => c.name === sName); if(s) { const role = s.job.role; const skillType = getJobSkillType(role); this.improveSkill(s, skillType, 5); trained++; } }); if(trained > 0) { this.log(`[📚培训] 政府拨款 💰${cost} 为 **${b.name}** 的员工进行了技能培训！`, "tag-study"); } else { this.log(`[📚培训] 虽然拨款了，但是这里并没有员工...`, "tag-reject"); } this.showBuildingDetail(bid); this.updateUI(); } else { alert(`资金不足，培训需要 💰${cost}`); } }
+        
+        // 确保员工技能为初始值（见习等级）
+        ensureEmployeeSkillsReset(char, role) {
+            if (!char || !char.skills || !role) return;
+            const skillType = getJobSkillType(role);
+            const skillVal = char.skills[skillType] || 0;
+            // 如果工作相关技能值 >= 20（不在见习范围内），则重置为见习范围（10-19）
+            if (skillVal >= 20) {
+                char.skills[skillType] = rand(10, 19);
+            }
+        }
 
-        runElectionsAndHiring() { this.buildings.forEach(b => { if (!b.isBuilt || b.jobs.length === 0) return; if (b.staff.length === 0) { const candidates = this.chars.filter(c => !c.job).sort(() => Math.random() - 0.5); if (candidates.length > 0) { const votes = {}; candidates.forEach(c => votes[c.name] = 0); this.chars.forEach(voter => { let bestC = null; let maxLove = -999; candidates.forEach(c => { let love = (c.name !== voter.name) ? (voter.relationships[c.name]?.love || 0) : 50; love += rand(-20, 20); if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) votes[bestC.name]++; }); let winner = candidates[0]; let maxVotes = -1; for (let name in votes) { if (votes[name] > maxVotes) { maxVotes = votes[name]; winner = candidates.find(c => c.name === name); } } if (winner) { const roleName = b.jobs[0]; winner.job = { buildingId: b.id, role: roleName }; b.staff.push(winner.name); this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build"); } } } else if (b.staff.length < b.jobs.length) { const managerName = b.staff[0]; const manager = this.chars.find(c => c.name === managerName); if (manager) { const roleName = b.jobs[b.staff.length]; const candidates = this.chars.filter(c => !c.job); let bestC = null; let maxLove = -999; candidates.forEach(c => { const rel = manager.relationships[c.name]; let love = rel ? rel.love : 0; if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) { bestC.job = { buildingId: b.id, role: roleName }; b.staff.push(bestC.name); this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${roleName}。`); } } } if (b.id === 'footshop' && b.isBuilt && b.staff.length > 0) { const bossName = b.staff[0]; const boss = this.chars.find(c => c.name === bossName); if (boss && b.prostitutes.length < 3) { const candidates = this.chars.filter(c => !c.job && !c.prostitute && (c.hasTrait('estrous') || c.hasTrait('lustful'))); if (candidates.length > 0 && Math.random() < 0.1) { const target = choose(candidates); target.prostitute = { buildingId: b.id }; b.prostitutes.push(target.name); this.logInteraction(`[💋拉皮条] **${boss.name}** 说服了 **${target.name}** 在洗脚店卖银...`, "tag-drama"); } } } }); }
+        runElectionsAndHiring() { this.buildings.forEach(b => { if (!b.isBuilt || b.jobs.length === 0) return; if (b.staff.length === 0) { const candidates = this.chars.filter(c => !c.job).sort(() => Math.random() - 0.5); if (candidates.length > 0) { const votes = {}; candidates.forEach(c => votes[c.name] = 0); this.chars.forEach(voter => { let bestC = null; let maxLove = -999; candidates.forEach(c => { let love = (c.name !== voter.name) ? (voter.relationships[c.name]?.love || 0) : 50; love += rand(-20, 20); if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) votes[bestC.name]++; }); let winner = candidates[0]; let maxVotes = -1; for (let name in votes) { if (votes[name] > maxVotes) { maxVotes = votes[name]; winner = candidates.find(c => c.name === name); } } if (winner) { const roleName = b.jobs[0]; this.ensureEmployeeSkillsReset(winner, roleName); winner.job = { buildingId: b.id, role: roleName }; b.staff.push(winner.name); this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build"); } } } else if (b.staff.length < b.jobs.length) { const managerName = b.staff[0]; const manager = this.chars.find(c => c.name === managerName); if (manager) { const roleName = b.jobs[b.staff.length]; const candidates = this.chars.filter(c => !c.job); let bestC = null; let maxLove = -999; candidates.forEach(c => { const rel = manager.relationships[c.name]; let love = rel ? rel.love : 0; if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) { this.ensureEmployeeSkillsReset(bestC, roleName); bestC.job = { buildingId: b.id, role: roleName }; b.staff.push(bestC.name); this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${roleName}。`); } } } if (b.id === 'footshop' && b.isBuilt && b.staff.length > 0) { const bossName = b.staff[0]; const boss = this.chars.find(c => c.name === bossName); if (boss && b.prostitutes.length < 3) { const candidates = this.chars.filter(c => !c.job && !c.prostitute && (c.hasTrait('estrous') || c.hasTrait('lustful'))); if (candidates.length > 0 && Math.random() < 0.1) { const target = choose(candidates); target.prostitute = { buildingId: b.id }; b.prostitutes.push(target.name); this.logInteraction(`[💋拉皮条] **${boss.name}** 说服了 **${target.name}** 在洗脚店卖银...`, "tag-drama"); } } } }); }
         
         doRobbery(p, target = null) { 
             p.consecutiveWork = 0;
@@ -1848,12 +2083,23 @@ const TOWN_EVENTS = [
             p.skills.malice = Math.min(100, (p.skills.malice||0) + 10);
             p.skills.integrity = Math.max(0, (p.skills.integrity||0) - 20);
 
-            if (Math.random() < successChance) { const stolen = Math.floor(victim.money * rand(0.3, 0.6)); victim.money -= stolen; p.money += stolen; victim.happiness -= 30; victim.health = Math.max(0, victim.health - 10); const pRel = p.relationships[victim.name]; const vRel = victim.relationships[p.name]; if (['lover', 'spouse', 'mistress'].includes(pRel.status)) { pRel.status = "ex"; vRel.status = "ex"; } else { pRel.status = "enemy"; vRel.status = "enemy"; } pRel.love = -50; vRel.love = -50; p.stat_rob = (p.stat_rob || 0) + 1; victim.stat_be_robbed = (victim.stat_be_robbed || 0) + 1; p.stamina = Math.max(0, p.stamina - 10); this.logInteraction(`[🔪抢劫] 天呐！**${p.name}** 抢劫了 **${victim.name}**，抢走 💰${stolen}！两人反目成仇！`, "tag-crime"); p.currentAction = `[犯罪] 抢劫了 ${victim.name}`; p.addLog(`${timeStr} 抢劫了 ${victim.name} 💰${stolen}`); victim.addLog(`${timeStr} 被 ${p.name} 抢劫了 💰${stolen} (健康-10)`); if(policeStation) policeStation.addLog(`${timeStr} 接到报案：${p.name} 抢劫了 ${victim.name}`); return true; 
-            } else { if (hasPolice) { const fine = 100; p.happiness -= 30; p.money -= fine; this.townMoney += fine; p.jailTerm = 1440; this.logInteraction(`[👮逮捕] **${p.name}** 抢劫 **${victim.name}** 失败！被警察逮捕！罚款💰${fine}并判处监禁24小时！`, "tag-build"); const copName = choose(policeStation.staff); const cop = this.chars.find(c => c.name === copName); if (cop) { cop.money += 20; this.log(`[🚓治安] 警官 **${cop.name}** 因制止犯罪获得奖金 💰20。`, "tag-build"); } p.currentAction = `[被捕] 抢劫失败，锒铛入狱`; p.addLog(`${timeStr} 抢劫 ${victim.name} 失败，被捕入狱`); if(policeStation) policeStation.addLog(`${timeStr} 警察逮捕了抢劫犯 ${p.name}`); } else { p.happiness -= 10; this.logInteraction(`[💨失败] **${p.name}** 试图抢劫 **${victim.name}**，但被对方一脚踹飞了！`, "tag-reject"); p.currentAction = `[失败] 抢劫未遂，落荒而逃`; p.addLog(`${timeStr} 试图抢劫 ${victim.name} 但被打飞`); } p.stamina = Math.max(0, p.stamina - 6); return true; } 
+            if (Math.random() < successChance) { const stolen = Math.floor(victim.money * rand(0.3, 0.6)); victim.money -= stolen; this.collectTax(stolen, `抢劫收入 - ${p.name}抢劫${victim.name}`); p.money += stolen; this.addCharIncome(p, stolen, `抢劫${victim.name}`); victim.happiness -= 30; victim.health = Math.max(0, victim.health - 10); const pRel = p.relationships[victim.name]; const vRel = victim.relationships[p.name]; if (['lover', 'spouse', 'mistress'].includes(pRel.status)) { pRel.status = "ex"; vRel.status = "ex"; } else { pRel.status = "enemy"; vRel.status = "enemy"; } pRel.love = -50; vRel.love = -50; p.stat_rob = (p.stat_rob || 0) + 1; victim.stat_be_robbed = (victim.stat_be_robbed || 0) + 1; p.stamina = Math.max(0, p.stamina - 10); this.logInteraction(`[🔪抢劫] 天呐！**${p.name}** 抢劫了 **${victim.name}**，抢走 💰${stolen}！两人反目成仇！`, "tag-crime"); p.currentAction = `[犯罪] 抢劫了 ${victim.name}`; p.addLog(`${timeStr} 抢劫了 ${victim.name} 💰${stolen}`); victim.addLog(`${timeStr} 被 ${p.name} 抢劫了 💰${stolen} (健康-10)`); if(policeStation) policeStation.addLog(`${timeStr} 接到报案：${p.name} 抢劫了 ${victim.name}`); return true; 
+            } else { if (hasPolice) { const fine = 100; p.happiness -= 30; p.money -= fine; this.collectTax(fine, `罚款 - ${p.name}抢劫被捕`); p.jailTerm = 1440; this.logInteraction(`[👮逮捕] **${p.name}** 抢劫 **${victim.name}** 失败！被警察逮捕！罚款💰${fine}并判处监禁24小时！`, "tag-build"); const copName = choose(policeStation.staff); const cop = this.chars.find(c => c.name === copName); if (cop) { const copBonus = 20; this.collectTax(copBonus, `警察奖金 - ${cop.name}`); cop.money += copBonus; this.addCharIncome(cop, copBonus, '警察奖金'); this.log(`[🚓治安] 警官 **${cop.name}** 因制止犯罪获得奖金 💰20。`, "tag-build"); } p.currentAction = `[被捕] 抢劫失败，锒铛入狱`; p.addLog(`${timeStr} 抢劫 ${victim.name} 失败，被捕入狱`); if(policeStation) policeStation.addLog(`${timeStr} 警察逮捕了抢劫犯 ${p.name}`); } else { p.happiness -= 10; this.logInteraction(`[💨失败] **${p.name}** 试图抢劫 **${victim.name}**，但被对方一脚踹飞了！`, "tag-reject"); p.currentAction = `[失败] 抢劫未遂，落荒而逃`; p.addLog(`${timeStr} 试图抢劫 ${victim.name} 但被打飞`); } p.stamina = Math.max(0, p.stamina - 6); return true; } 
         }
         
         doWork(p, b) { 
-            const role = p.job.role; p.money += p.calculateWage(getBaseJobWage(role), role); p.happiness -= 1; p.hunger -= 3; p.stamina = Math.max(0, p.stamina - 12);
+            // 检查是否在营业时间内
+            const hour = Math.floor(this.gameTime / 60);
+            if (!b.isOpen(hour, this.gameDay)) {
+                // 不在营业时间，员工应该离开工作岗位
+                p.currentAction = `[下班] ${b.name}已关门`;
+                return;
+            }
+            
+            const role = p.job.role;
+            // 工作不再记录小时数，工资按每日固定工资结算
+            
+            p.happiness -= 1; p.hunger -= 3; p.stamina = Math.max(0, p.stamina - 12);
             p.consecutiveWork = (p.consecutiveWork || 0) + 1;
             
             if (p.hasTrait('workaholic')) {
@@ -1869,8 +2115,8 @@ const TOWN_EVENTS = [
         doOddJob(p) { 
             if (p.stamina < 15) { this.doRest(p, {name:"家", price:0}); return; }
             const job = choose(ODD_JOBS); 
-            if (job.name === "躺平" && p.money < 3) { p.money += 4; p.happiness -= 3; p.hunger -= 4; p.stamina = Math.min(100, p.stamina + 6); p.currentAction = `[零工] 没钱躺平，被迫搬砖`; p.addLog(`${this.getDateTimeStr()} 被迫去工地搬砖`); this.improveSkill(p, 'integrity', 0.1); p.consecutiveWork = 0; return; } 
-            let wage = job.wage > 0 ? p.calculateWage(job.wage) : job.wage; p.money += wage; p.happiness += job.mood; p.happiness = Math.min(100, Math.max(0, p.happiness)); p.hunger -= (job.name === "躺平" ? 1 : 4); 
+            if (job.name === "躺平" && p.money < 3) { const tempWage = 4; this.collectTax(tempWage, `零工收入 - ${p.name}(被迫搬砖)`); p.money += tempWage; this.addCharIncome(p, tempWage, '零工-被迫搬砖'); p.happiness -= 3; p.hunger -= 4; p.stamina = Math.min(100, p.stamina + 6); p.currentAction = `[零工] 没钱躺平，被迫搬砖`; p.addLog(`${this.getDateTimeStr()} 被迫去工地搬砖`); this.improveSkill(p, 'integrity', 0.1); p.consecutiveWork = 0; return; } 
+            let wage = job.wage > 0 ? p.calculateWage(job.wage) : job.wage; if(wage > 0) { this.collectTax(wage, `零工收入 - ${p.name}(${job.name})`); p.money += wage; this.addCharIncome(p, wage, `零工-${job.name}`); } p.happiness += job.mood; p.happiness = Math.min(100, Math.max(0, p.happiness)); p.hunger -= (job.name === "躺平" ? 1 : 4); 
             if (job.name === "躺平") { 
                 p.consecutiveWork = 0; p.currentAction = `[生活] 在家 躺平`; 
                 p.stamina = Math.min(100, p.stamina + 12); 
@@ -1891,7 +2137,7 @@ const TOWN_EVENTS = [
                 p.happiness = Math.min(100, p.happiness + 5); 
                 const staminaGain = Math.max(8, Math.floor((r.food || 20) / 2));
                 p.stamina = Math.min(100, p.stamina + staminaGain);
-                this.townMoney += r.price; 
+                this.collectTax(r.price, `餐饮消费 - ${p.name}在${r.name}`); 
                 p.currentAction = `[吃饭] 在 ${r.name} 吃得饱饱`; 
                 p.lastMealTime = this.gameTime; 
                 p.addLog(`${timeStr} 在 ${r.name} 吃饭`); 
@@ -1907,14 +2153,14 @@ const TOWN_EVENTS = [
         
         doProstitution(p, s) { 
             p.consecutiveWork = 0; p.stamina = Math.max(0, p.stamina - 15);
-            const w = p.calculateWage(rand(15, 25), "技师"); const ps = Math.floor(w * 0.7); const bs = w - ps; p.money += ps; p.happiness -= 2; p.hunger -= 4; if (s.staff.length > 0) { const boss = this.chars.find(c => c.name === s.staff[0]); if (boss) boss.money += bs; } p.currentAction = `[💋卖银] 在 ${s.name} 接客`; const timeStr = this.getDateTimeStr(); p.addLog(`${timeStr} 在 ${s.name} 接客`); s.addLog(`${timeStr} ${p.name} 在此提供服务`); this.improveSkill(p, 'social', 0.2); this.improveSkill(p, 'malice', 0.2);
+            const w = p.calculateWage(rand(15, 25), "技师"); const ps = Math.floor(w * 0.7); const bs = w - ps; this.collectTax(ps, `卖淫收入 - ${p.name}在${s.name}`); if(bs > 0) this.collectTax(bs, `卖淫收入 - ${s.name}老板`); p.money += ps; this.addCharIncome(p, ps, `卖淫-${s.name}`); p.happiness -= 2; p.hunger -= 4; if (s.staff.length > 0) { const boss = this.chars.find(c => c.name === s.staff[0]); if (boss) { boss.money += bs; this.addCharIncome(boss, bs, `卖淫老板-${s.name}`); } } p.currentAction = `[💋卖银] 在 ${s.name} 接客`; const timeStr = this.getDateTimeStr(); p.addLog(`${timeStr} 在 ${s.name} 接客`); s.addLog(`${timeStr} ${p.name} 在此提供服务`); this.improveSkill(p, 'social', 0.2); this.improveSkill(p, 'malice', 0.2);
         }
         
-        doStreetwalking(p) { p.consecutiveWork = 0; p.stamina = Math.max(0, p.stamina - 12); p.money += p.calculateWage(rand(8, 15)); p.happiness -= 4; p.hunger -= 5; p.stat_streetwalk = (p.stat_streetwalk || 0) + 1; p.currentAction = `[💋站街] 在路边拉客`; p.addLog(`${this.getDateTimeStr()} 在路边拉客`); this.improveSkill(p, 'social', 0.05); this.improveSkill(p, 'malice', 0.15); }
+        doStreetwalking(p) { p.consecutiveWork = 0; p.stamina = Math.max(0, p.stamina - 12); const wage = p.calculateWage(rand(8, 15)); this.collectTax(wage, `站街收入 - ${p.name}`); p.money += wage; this.addCharIncome(p, wage, '站街收入'); p.happiness -= 4; p.hunger -= 5; p.stat_streetwalk = (p.stat_streetwalk || 0) + 1; p.currentAction = `[💋站街] 在路边拉客`; p.addLog(`${this.getDateTimeStr()} 在路边拉客`); this.improveSkill(p, 'social', 0.05); this.improveSkill(p, 'malice', 0.15); }
         
         doBuild(p, b) { 
             p.consecutiveWork = 0; p.stamina = Math.max(0, p.stamina - 15);
-            b.currentProgress += rand(5, 15); p.money += 5; p.happiness -= 2; p.hunger -= 5; p.currentAction = `建设: ${b.name}`; if (!p.constructionContribution[b.id]) p.constructionContribution[b.id] = 0; p.constructionContribution[b.id] += 10; const timeStr = this.getDateTimeStr(); p.addLog(`${timeStr} 参与建设 ${b.name}`); b.addLog(`${timeStr} ${p.name} 参与了建设`);
+            b.currentProgress += rand(5, 15); const buildWage = 5; this.collectTax(buildWage, `建设工资 - ${p.name}建设${b.name}`); p.money += buildWage; this.addCharIncome(p, buildWage, `建设-${b.name}`); p.happiness -= 2; p.hunger -= 5; p.currentAction = `建设: ${b.name}`; if (!p.constructionContribution[b.id]) p.constructionContribution[b.id] = 0; p.constructionContribution[b.id] += 10; const timeStr = this.getDateTimeStr(); p.addLog(`${timeStr} 参与建设 ${b.name}`); b.addLog(`${timeStr} ${p.name} 参与了建设`);
             if (b.currentProgress >= b.totalCost && !b.isBuilt) { b.isBuilt = true; this.log(`[🔨竣工] **${b.name}** 建成了！`, "tag-build"); this.unlockAchievement('first_build'); if(b.id==='gym') this.unlockAchievement('first_gym'); if(b.id==='museum') this.unlockAchievement('culture_hub'); this.distributeConstructionReward(b); setTimeout(() => this.triggerConstructionVote(), 5000); } 
             this.improveSkill(p, 'culture', 0.05); // 建设也许能学到点东西
         }
@@ -1930,7 +2176,7 @@ const TOWN_EVENTS = [
 
             if (v && v.price > 0) { 
                 if (p.money >= cost) { 
-                    p.money -= cost; this.townMoney += cost; 
+                    p.money -= cost; this.collectTax(cost, `娱乐消费 - ${p.name}在${v.name}`); 
                     
                     let happyGain = 0;
                     const buildingId = v.id;
@@ -2219,7 +2465,7 @@ const TOWN_EVENTS = [
                     if (p.hasTrait('lavish')) cost = Math.floor(cost * 1.5); // 挥霍
                     
                     p.money -= cost; 
-                    this.townMoney += cost; 
+                    this.collectTax(cost, `购物消费 - ${p.name}在${shop.name}购买${itemInfo.name}`); 
                     p.bag.push(itemId); 
                     
                     let happyGain = 5;
@@ -2343,7 +2589,7 @@ const TOWN_EVENTS = [
         
         doSocial(p, v) { 
             p.consecutiveWork = 0; const timeStr = this.getDateTimeStr();
-            if (v.price > 0) { if (p.money < v.price) { this.doRest(p, {name:"路边",price:0}); return; } p.money -= v.price; this.townMoney += v.price; } 
+            if (v.price > 0) { if (p.money < v.price) { this.doRest(p, {name:"路边",price:0}); return; } p.money -= v.price; this.collectTax(v.price, `社交消费 - ${p.name}在${v.name}`); } 
             const t = choose(this.chars.filter(c => c.name !== p.name)); const pRel = p.relationships[t.name]; const tRel = t.relationships[p.name]; this.breakInteraction(t); 
             if (this.tryGift(p, t, v)) return;
             p.currentAction = `和 ${t.name} 在 ${v.name}`; t.currentAction = `和 ${p.name} 在 ${v.name}`; p.interactingWith = t.name; t.interactingWith = p.name; p.hunger -= 2; t.hunger -= 2; p.stamina = Math.max(0, p.stamina - 4); t.stamina = Math.max(0, t.stamina - 3); this.improveSkill(p, 'social', 0.1);
@@ -2389,11 +2635,11 @@ const TOWN_EVENTS = [
             }
         }
 
-        distributeConstructionReward(b) { let total = 0; this.chars.forEach(c => total += (c.constructionContribution[b.id] || 0)); if (total === 0) return; const reward = Math.floor(b.totalCost * 0.3); this.chars.forEach(c => { const share = c.constructionContribution[b.id] || 0; if (share > 0) { const m = Math.floor(reward * (share / total)); c.money += m; if(m>0) this.log(`[💰奖励] **${c.name}** 获建设奖励 💰${m}`, "tag-build"); } }); }
+        distributeConstructionReward(b) { let total = 0; this.chars.forEach(c => total += (c.constructionContribution[b.id] || 0)); if (total === 0) return; const reward = Math.floor(b.totalCost * 0.3); this.chars.forEach(c => { const share = c.constructionContribution[b.id] || 0; if (share > 0) { const m = Math.floor(reward * (share / total)); this.collectTax(m, `建设奖励 - ${c.name}建设${b.name}`); c.money += m; this.addCharIncome(c, m, `建设奖励-${b.name}`); if(m>0) this.log(`[💰奖励] **${c.name}** 获建设奖励 💰${m}`, "tag-build"); } }); }
         updateRelationshipStatus(p, t, pRel, tRel) { if (pRel.status === 'stranger' && pRel.love > 10) { pRel.status = 'friend'; tRel.status = 'friend'; } else if (pRel.status === 'friend' && pRel.love > 60 && !['lover','spouse','mistress','enemy','ex'].includes(pRel.status)) { pRel.status = 'bestfriend'; tRel.status = 'bestfriend'; } }
         checkRomanceEvent(p, t, pRel, tRel, v) { if (!p.partner && !t.partner && pRel.love > 70 && pRel.status !== 'spouse') { if (Math.random() < 0.2) { if (t.decideProposal(p.name, 'confess')) { p.partner = t.name; t.partner = p.name; pRel.status = "lover"; tRel.status = "lover"; p.happiness += 20; t.happiness += 20; this.unlockAchievement('first_marriage'); this.logInteraction(`[❤️表白] ${p.name} 向 ${t.name} 表白成功！`, "tag-love"); } else { p.happiness -= 20; pRel.love -= 10; this.logInteraction(`[💔拒绝] ${p.name} 表白失败...`, "tag-reject"); } return true; } } return false; }
         breakInteraction(c) { if (c.interactingWith) { const partner = this.chars.find(x => x.name === c.interactingWith); if (partner) { partner.interactingWith = null; partner.currentAction = "发呆"; } c.interactingWith = null; } }
-        saveData(isAuto = false) { const data = { chars: this.chars, buildings: this.buildings, townMoney: this.townMoney, gameTime: this.gameTime, gameDay: this.gameDay, dateMonth: this.dateMonth, dateDay: this.dateDay, weather: this.weather, achievements: this.achievements, policySocialSecurity: this.policySocialSecurity, policyHousing: this.policyHousing, policyFood: this.policyFood, mayor: this.mayor, ts: Date.now() }; localStorage.setItem('happyTownV2_Save', JSON.stringify(data)); this.lastSaveTime = Date.now(); if (!isAuto) alert("✅ 存档成功！"); }
+        saveData(isAuto = false) { const data = { chars: this.chars, buildings: this.buildings, townMoney: this.townMoney, gameTime: this.gameTime, gameDay: this.gameDay, dateMonth: this.dateMonth, dateDay: this.dateDay, weather: this.weather, achievements: this.achievements, policySocialSecurity: this.policySocialSecurity, policyHousing: this.policyHousing, policyFood: this.policyFood, mayor: this.mayor, taxRate: this.taxRate, financeHistory: this.financeHistory, ts: Date.now() }; localStorage.setItem('happyTownV2_Save', JSON.stringify(data)); this.lastSaveTime = Date.now(); if (!isAuto) alert("✅ 存档成功！"); }
         
         loadFromJSON(jsonStr) { 
             try { 
@@ -2409,6 +2655,8 @@ const TOWN_EVENTS = [
                 this.policyHousing = data.policyHousing || false;
                 this.policyFood = data.policyFood || false;
                 this.mayor = data.mayor || null;
+                this.taxRate = data.taxRate !== undefined ? data.taxRate : 5;
+                this.financeHistory = data.financeHistory || [];
 
                 this.buildings = data.buildings.map(bData => { 
                     const bp = BUILDINGS_BLUEPRINT.find(x => x.id === bData.id); 
@@ -2445,6 +2693,8 @@ const TOWN_EVENTS = [
                     if (c.jailTerm === undefined) c.jailTerm = 0;
                     if (c.lastMealTime === undefined) c.lastMealTime = -999;
                     if (c.consecutiveWork === undefined) c.consecutiveWork = 0;
+                    if (c.workHoursToday === undefined) c.workHoursToday = 0;
+                    if (!c.incomeHistory) c.incomeHistory = [];
                     if (c.stat_rob === undefined) c.stat_rob = 0;
                     if (c.stat_be_robbed === undefined) c.stat_be_robbed = 0;
                     if (c.stat_streetwalk === undefined) c.stat_streetwalk = 0;
@@ -2527,7 +2777,7 @@ const TOWN_EVENTS = [
                 document.getElementById('embezzle-modal').classList.add('active'); 
             }
         }
-        doEmbezzle() { const name = window.selectedFundTarget; const amt = parseInt(document.getElementById('embezzle-amount').value); if (!name || isNaN(amt) || amt <= 0) return alert("请选择居民并输入有效金额"); if (this.townMoney < amt) return alert("镇库资金不足！"); const c = this.chars.find(x => x.name === name); if (c) { c.money += amt; this.townMoney -= amt; this.log(`[💸拨款] 镇长向 **${c.name}** 拨款 💰${amt}。`, "tag-build"); this.updateUI(); this.closeEmbezzle(); } }
+        doEmbezzle() { const name = window.selectedFundTarget; const amt = parseInt(document.getElementById('embezzle-amount').value); if (!name || isNaN(amt) || amt <= 0) return alert("请选择居民并输入有效金额"); if (this.townMoney < amt) return alert("镇库资金不足！"); const c = this.chars.find(x => x.name === name); if (c) { c.money += amt; this.addCharIncome(c, amt, '财政拨款'); this.townMoney -= amt; this.log(`[💸拨款] 镇长向 **${c.name}** 拨款 💰${amt}。`, "tag-build"); this.updateUI(); this.closeEmbezzle(); } }
         closeEmbezzle() { document.getElementById('embezzle-modal').classList.remove('active'); }
         
         showJobBoard() {
@@ -2608,7 +2858,7 @@ const TOWN_EVENTS = [
                                 <div class="job-name">👔 ${role}</div>
                                 <div class="job-loc">${building.name} <span class="lvl-badge">Lv.${building.level}</span></div>
                             </div>
-                            <div class="job-wage">💰 ${getJobWage(role)}</div>
+                            <div class="job-wage">💰 ${getJobWage(role)}/天</div>
                         `;
                         list.appendChild(item);
                     });
@@ -2818,6 +3068,28 @@ const TOWN_EVENTS = [
                     ${historyHtml}
                 </div>
                 <div class="detail-group">
+                    <div class="detail-label">💰 近十次资金收入</div>
+                    ${(() => {
+                        if (!c.incomeHistory || c.incomeHistory.length === 0) {
+                            return '<div class="history-list"><div class="history-item" style="color:#999;">暂无收入记录</div></div>';
+                        }
+                        let incomeHtml = '<div class="history-list">';
+                        c.incomeHistory.forEach((record, index) => {
+                            incomeHtml += `
+                                <div class="history-item" style="display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="flex:1;">
+                                        <div style="font-weight:bold; color:#2c3e50; font-size:0.9rem;">${record.source}</div>
+                                        <div style="font-size:0.75rem; color:#999; margin-top:2px;">${record.time}</div>
+                                    </div>
+                                    <div style="font-weight:bold; color:#27ae60; font-size:1rem; min-width:60px; text-align:right;">+💰${record.amount}</div>
+                                </div>
+                            `;
+                        });
+                        incomeHtml += '</div>';
+                        return incomeHtml;
+                    })()}
+                </div>
+                <div class="detail-group">
                     <div class="detail-label">犯罪记录</div>
                     <div class="detail-desc">抢劫: ${c.stat_rob} | 被抢: ${c.stat_be_robbed} | 站街: ${c.stat_streetwalk} | 骚扰: ${c.stat_assault} | 被骚扰: ${c.stat_be_assaulted}</div>
                 </div>
@@ -2934,7 +3206,7 @@ const TOWN_EVENTS = [
                     const baseWage = getBaseJobWage(jobRole);
                     wageInfoHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:${idx < b.jobs.length - 1 ? '1px dashed #ddd' : 'none'};">
                         <span style="font-weight:bold;">${jobRole}</span>
-                        <span style="color:#e67e22; font-weight:bold;">💰${baseWage}/次</span>
+                        <span style="color:#e67e22; font-weight:bold;">💰${baseWage}/天</span>
                     </div>`;
                 });
                 wageInfoHtml += '</div>';
@@ -3084,6 +3356,14 @@ const TOWN_EVENTS = [
             const weatherEl = document.getElementById('weather-display'); if(weatherEl) weatherEl.innerText = WEATHER_TYPES[this.weather].name;
             const moneyEl = document.getElementById('town-money'); if(moneyEl) moneyEl.innerText = Math.floor(this.townMoney);
             const resCountEl = document.getElementById('resident-count'); if(resCountEl) resCountEl.innerText = this.chars.length;
+            
+            // 如果财政界面是打开的，更新财政界面显示
+            const financeModal = document.getElementById('finance-modal');
+            if(financeModal && financeModal.classList.contains('active')) {
+                const financeMoneyEl = document.getElementById('finance-town-money');
+                if(financeMoneyEl) financeMoneyEl.innerText = Math.floor(this.townMoney);
+                this.renderFinanceHistory();
+            }
             
             const charList = document.getElementById('char-list');
             if(charList) {
