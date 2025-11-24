@@ -1850,6 +1850,26 @@ const TOWN_EVENTS = [
         }
         // 每日工资结算（24点结算）
         settleDailyWages() {
+            // 政府建筑列表（不给予国家资金支持）
+            const governmentBuildings = ['bank', 'govbuilding', 'police', 'tvstation', 'prison'];
+            
+            // 每日国家资金支持：所有有员工的建筑获得工位基础工资总和50%的支持
+            this.buildings.forEach(b => {
+                if (b.isBuilt && b.jobs && b.jobs.length > 0 && !governmentBuildings.includes(b.id)) {
+                    // 计算该建筑所有工位的基础工资总和
+                    let totalBaseWage = 0;
+                    b.jobs.forEach(role => {
+                        totalBaseWage += getJobWage(role);
+                    });
+                    // 计算支持金额（基础工资总和的50%）
+                    const aidAmount = parseFloat((totalBaseWage * 0.5).toFixed(2));
+                    // 将支持金额添加到建筑资金槽
+                    b.buildingMoney = parseFloat(((b.buildingMoney || 0) + aidAmount).toFixed(2));
+                    // 记录日志到建筑经营日志
+                    b.addLog(`${this.getDateTimeStr()} 获得国家资金支持 💰${this.formatMoney(aidAmount)}`);
+                }
+            });
+            
             // 按建筑分组计算工资
             const buildingWages = {}; // {buildingId: {total: 0, employees: []}}
             
@@ -1872,9 +1892,6 @@ const TOWN_EVENTS = [
                     }
                 }
             });
-            
-            // 政府建筑列表（直接从镇库支付工资）
-            const governmentBuildings = ['bank', 'govbuilding', 'police', 'tvstation', 'prison'];
             
             // 从建筑资金槽支付工资，并将剩余资金移入银行
             Object.keys(buildingWages).forEach(buildingId => {
@@ -3809,16 +3826,34 @@ const TOWN_EVENTS = [
             // 建筑资金槽显示（仅显示有员工的建筑）
             let buildingMoneyHtml = '';
             if (b.isBuilt && b.id !== 'bank' && b.jobs && b.jobs.length > 0) {
+                // 计算国家资金支持金额（工位基础工资总和的50%）
+                const governmentBuildings = ['bank', 'govbuilding', 'police', 'tvstation', 'prison'];
+                let nationalSupportHtml = '';
+                if (!governmentBuildings.includes(b.id)) {
+                    let totalBaseWage = 0;
+                    b.jobs.forEach(role => {
+                        totalBaseWage += getJobWage(role);
+                    });
+                    const supportAmount = parseFloat((totalBaseWage * 0.5).toFixed(2));
+                    nationalSupportHtml = `
+                        <div style="margin-top:10px; padding:10px; background:#e8f5e9; border-radius:6px; border:1px solid #4caf50;">
+                            <div style="font-size:0.85rem; color:#2e7d32; font-weight:bold; margin-bottom:5px;">🏛️ 国家资金支持</div>
+                            <div style="font-size:0.9rem; color:#388e3c;">每日24:00结算前将获得 💰<span style="font-weight:bold; font-size:1rem;">${this.formatMoney(supportAmount)}</span> 的资金支持</div>
+                            <div style="font-size:0.75rem; color:#66bb6a; margin-top:3px;">（工位基础工资总和的50%）</div>
+                        </div>
+                    `;
+                }
                 buildingMoneyHtml = `
                 <div class="section-title">💰 建筑资金槽</div>
                 <div style="background:#fff3cd; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ffc107;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
+                        <div style="flex:1;">
                             <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">当前资金</div>
                             <div style="font-size:1.5rem; font-weight:bold; color:#e67e22;">💰${this.formatMoney(b.buildingMoney || 0)}</div>
                             <div style="font-size:0.75rem; color:#999; margin-top:5px;">每日24:00结算工资后，剩余资金将存入银行</div>
                         </div>
                     </div>
+                    ${nationalSupportHtml}
                 </div>
                 `;
             }
