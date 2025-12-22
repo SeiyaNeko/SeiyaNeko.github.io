@@ -5,7 +5,7 @@
                 </div><div id="single-char-relation-list"></div></div></div></div></div><div class="modal-overlay" id="achievement-popup-modal" style="z-index:2000;" onclick="if(event.target.id === 'achievement-popup-modal') closeAchievementPopup();"><div class="modal-content" id="achievement-popup-content" style="max-width:500px; width:90%; text-align:center; animation:achievementPopIn 0.5s ease-out; position:relative;" onclick="event.stopPropagation();"><div style="font-size:4rem; margin-bottom:15px; animation:achievementIconBounce 0.6s ease-out 0.2s both; filter:drop-shadow(0 4px 8px rgba(241,196,15,0.5));">🏆</div><div style="font-size:1.8rem; font-weight:bold; color:#f1c40f; margin-bottom:15px; text-shadow:2px 2px 4px rgba(0,0,0,0.2); letter-spacing:2px;">成就解锁！</div><div id="achievement-popup-icon" style="font-size:4rem; margin:20px 0; animation:achievementIconBounce 0.6s ease-out 0.3s both; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></div><div id="achievement-popup-name" style="font-size:1.6rem; font-weight:bold; color:#2c3e50; margin-bottom:12px; padding:0 10px;"></div><div id="achievement-popup-desc" style="font-size:1rem; color:#7f8c8d; margin-bottom:25px; line-height:1.6; padding:0 15px;"></div><div style="background:linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); color:white; padding:15px 30px; border-radius:30px; font-size:1.2rem; font-weight:bold; display:inline-block; box-shadow:0 6px 20px rgba(241,196,15,0.5); margin-bottom:15px;"><span id="achievement-popup-reward">💰 +0</span></div><button class="btn" onclick="closeAchievementPopup()" style="margin-top:10px; background:#3498db; width:100%; font-size:1rem; padding:12px; border-radius:8px; font-weight:bold; box-shadow:0 4px 10px rgba(52,152,219,0.3);">太棒了！</button></div></div><div class="modal-overlay" id="town-level-upgrade-popup-modal" style="z-index:2000;" onclick="if(event.target.id === 'town-level-upgrade-popup-modal') closeTownLevelUpgradePopup();"><div class="modal-content" id="town-level-upgrade-popup-content" style="max-width:500px; width:90%; text-align:center; animation:achievementPopIn 0.5s ease-out; position:relative;" onclick="event.stopPropagation();"><div style="font-size:4rem; margin-bottom:15px; animation:achievementIconBounce 0.6s ease-out 0.2s both; filter:drop-shadow(0 4px 8px rgba(241,196,15,0.5));">🎉</div><div style="font-size:1.8rem; font-weight:bold; color:#f1c40f; margin-bottom:15px; text-shadow:2px 2px 4px rgba(0,0,0,0.2); letter-spacing:2px;">小镇升级！</div><div id="town-level-upgrade-popup-icon" style="font-size:4rem; margin:20px 0; animation:achievementIconBounce 0.6s ease-out 0.3s both; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></div><div id="town-level-upgrade-popup-name" style="font-size:1.6rem; font-weight:bold; color:#2c3e50; margin-bottom:12px; padding:0 10px;"></div><div id="town-level-upgrade-popup-desc" style="font-size:1rem; color:#7f8c8d; margin-bottom:25px; line-height:1.6; padding:0 15px;"></div><div style="background:linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); color:white; padding:15px 30px; border-radius:30px; font-size:1.2rem; font-weight:bold; display:inline-block; box-shadow:0 6px 20px rgba(241,196,15,0.5); margin-bottom:15px;"><span id="town-level-upgrade-popup-reward">💰 +0</span></div><button class="btn" onclick="closeTownLevelUpgradePopup()" style="margin-top:10px; background:#3498db; width:100%; font-size:1rem; padding:12px; border-radius:8px; font-weight:bold; box-shadow:0 4px 10px rgba(52,152,219,0.3);">太棒了！</button></div></div><div class="modal-overlay" id="guide-modal"><div class="modal-content"><div class="modal-header"><h3>📘 游戏图鉴</h3><button class="modal-close" onclick="gameInstance.closeGameGuide()">×</button></div><div class="tab-filter"><button class="filter-btn active" id="guide-tab-trait" onclick="gameInstance.switchGuideTab('trait')">特质图鉴</button><button class="filter-btn" id="guide-tab-ideology" onclick="gameInstance.switchGuideTab('ideology')">信仰主义</button></div><div id="guide-content" class="guide-grid"></div></div></div><div class="modal-overlay" id="edit-modal"><div class="modal-content" style="max-width:400px;"><div class="modal-header"><h3 id="edit-title">修改属性</h3><button class="modal-close" onclick="gameInstance.closeEditModal()">×</button></div><div style="margin-bottom:15px;"><select id="edit-select" style="width:100%; padding:8px; font-size:1rem; border-radius:4px; border:1px solid #ddd;"></select></div><button class="btn save" style="width:100%" onclick="gameInstance.confirmEdit()">💾 保存修改</button></div></div><div class="modal-overlay" id="voting-modal"><div class="modal-content"><div class="modal-header"><h3 id="voting-title">🗳️ 全民投票</h3></div><div style="margin-bottom:15px; color:#555; font-size:0.9rem;"><span id="voting-mayor-msg"></span><span id="voting-instruction">请投出神圣的一票！</span></div><div id="voting-candidates-list"></div><div class="voting-log" id="voting-realtime-log"></div></div></div><div class="modal-overlay" id="char-detail-modal" onclick="if(event.target.id === 'char-detail-modal') gameInstance.closeCharDetail();"><div class="modal-content" onclick="event.stopPropagation();"><div class="modal-header"><h3 id="detail-name">角色详情</h3><div id="detail-ideology" style="margin-left:20px; display:flex; align-items:center; gap:8px;"></div><button class="modal-close" onclick="gameInstance.closeCharDetail()">×</button></div><div id="detail-content"></div></div></div><div class="modal-overlay" id="gov-modal"><div class="modal-content"><div class="modal-header"><h3>🏛 小镇政府</h3><button class="modal-close" onclick="gameInstance.closeGov()">×</button></div><div class="gov-panel"><div class="gov-mayor-section"><h4 style="margin:0 0 10px 0; color:#2980b9; border-bottom:1px solid #d6eaf8; padding-bottom:5px;">🎖️ 现任镇长</h4><div id="mayor-info" style="display:flex; align-items:center; gap:15px;"><div class="mayor-avatar">🎖️</div><div class="mayor-details"><div id="mayor-name-display" class="mayor-name">暂无镇长</div><div id="mayor-ideology-display" class="mayor-ideology" style="background:#ccc">--</div><div id="mayor-policy-display" class="mayor-effect">每周 (周日) 举行一次选举</div></div></div><div style="margin-top:15px; border-top:1px dashed #bcdff1; padding-top:10px;"><div style="font-weight:bold; font-size:0.9rem; margin-bottom:5px; color:#2c3e50;">⚖️ 镇长决策:</div><button class="btn" style="background:#e67e22; font-size:0.85rem; width:100%" onclick="gameInstance.executeCommonProsperity()">🤝 共同富裕 (均贫富)</button><div style="font-size:0.8rem; color:#666; margin-top:4px;">强制收缴前3名富豪部分资产，平分给所有贫困户(<50)。</div></div></div><div class="gov-stat-row"><div class="gov-stat-card"><div class="label">👥 小镇常住人口</div><div class="value" id="resident-count">0</div><button class="btn create" onclick="inputNewResident()">➕ 招募新居民</button></div></div><div class="gov-policy-section"><h4>📜 社会保障政策</h4><div class="policy-item"><div style="flex:1"><label class="checkbox-container"><input type="checkbox" id="policy-social-security" onchange="gameInstance.togglePolicy('social')"><span class="policy-name">社会最低保障金</span></label><div class="policy-desc"><small>每日凌晨检测。若资金>10，为存款<15的居民发放10救济金。</small></div></div></div><div class="policy-item"><div style="flex:1"><label class="checkbox-container"><input type="checkbox" id="policy-housing" onchange="gameInstance.togglePolicy('housing')"><span class="policy-name">保障性住房计划</span></label><div class="policy-desc"><small>每日为无业居民提供免费住房补贴（心情+5），每人消耗镇库💰5。</small></div></div></div><div class="policy-item"><div style="flex:1"><label class="checkbox-container"><input type="checkbox" id="policy-food" onchange="gameInstance.togglePolicy('food')"><span class="policy-name">最低食品保障</span></label><div class="policy-desc"><small>每日为极度饥饿(<20)的居民发放猪肉包（饱食+20），每人消耗镇库💰4。</small></div></div></div><div class="policy-item"><div style="flex:1"><label class="checkbox-container"><input type="checkbox" id="policy-tax-hike" onchange="gameInstance.togglePolicy('taxhike')"><span class="policy-name">临时轻度税率上调</span></label><div class="policy-desc"><small>启用后税率上限提升至40%。代价：每日消耗镇库💰25维护成本；税率超过20%时，每超过1%导致所有居民心情-0.5；资金不足时自动关闭。</small></div></div></div></div><div class="gov-policy-section" style="background:#f0f8ff; border-color:#74b9ff;"><h4>⚙️ 游戏设置</h4><div class="policy-item"><div style="flex:1"><label class="checkbox-container"><input type="checkbox" id="setting-daynight" onchange="gameInstance.toggleDayNight()"><span class="policy-name">🌙 昼夜交替</span></label><div class="policy-desc"><small>开启后，20:00-6:00界面会自动切换为夜间模式。</small></div></div></div><div class="policy-item"><div style="flex:1"><label class="checkbox-container"><input type="checkbox" id="setting-weather" onchange="gameInstance.toggleWeatherEffect()"><span class="policy-name">🌧️ 天气特效</span></label><div class="policy-desc"><small>开启后，会显示雨天、雪天等天气特效动画。</small></div></div></div></div><div style="border-top:1px solid #eee; padding-top:15px;"><button class="btn reset" style="width:100%" onclick="gameInstance.resetData()">🗑 重置小镇数据 (慎用)</button></div></div></div></div><div class="modal-overlay" id="finance-modal"><div class="modal-content"><div class="modal-header"><h3>💰 财政中心</h3><button class="modal-close" onclick="gameInstance.closeFinance()">×</button></div><div class="gov-panel"><div class="gov-stat-row"><div class="gov-stat-card"><div class="label">💰 镇库资金</div><div class="value" id="finance-town-money">0</div></div><div class="gov-stat-card"><div class="label">📊 当前税率</div><div class="value" id="tax-rate-display">5%</div><div style="margin-top:10px; display:flex; gap:5px; align-items:center;"><input type="range" id="tax-rate-slider" min="0" max="20" value="5" step="1" style="flex:1;" oninput="gameInstance.updateTaxRate(this.value)"><span id="tax-rate-value" style="font-weight:bold; color:#27ae60; min-width:40px;">5%</span></div><div style="font-size:0.75rem; color:#666; margin-top:5px;">所有收入和支出将按此税率收纳到镇库</div></div></div><div class="gov-policy-section" style="margin-top:15px;"><h4>💸 财政操作</h4><button class="btn fund" style="width:100%; margin-bottom:10px;" onclick="gameInstance.showEmbezzle()">💸 财政拨款</button><div style="font-size:0.85rem; color:#666; padding:10px; background:#f8f9fa; border-radius:6px; margin-bottom:15px;"><div style="font-weight:bold; margin-bottom:5px;">📋 税率说明：</div><div>• 居民收入（工资、奖励等）：按税率收纳到镇库</div><div>• 居民支出（购物、消费等）：按税率收纳到镇库</div><div>• 建筑收入（门票、服务费等）：按税率收纳到镇库</div><div style="margin-top:8px; color:#e67e22; font-weight:bold;">当前税率：<span id="tax-rate-info">5%</span></div></div><h4 style="margin-top:15px; margin-bottom:10px;">📊 最近15笔资金来源</h4><div id="finance-history-list" style="max-height:400px; overflow-y:auto; border:1px solid #ddd; border-radius:6px; background:#fff; padding:10px;"><div style="text-align:center; color:#999; padding:20px;">暂无资金流动记录</div></div></div></div></div></div><div class="modal-overlay" id="leaderboard-modal"><div class="modal-content"><div class="modal-header"><h3>📊 小镇排行榜</h3><button class="modal-close" onclick="gameInstance.closeLeaderboard()">×</button></div><div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap: wrap;"><button class="btn" onclick="gameInstance.renderLeaderboard('money')">💰 财富榜</button><button class="btn" onclick="gameInstance.renderLeaderboard('happiness')" style="background:#2ecc71">❤ 幸福榜</button><button class="btn" onclick="gameInstance.renderLeaderboard('popularity')" style="background:#a55eea">🔥 人气榜</button><button class="btn" onclick="gameInstance.renderLeaderboard('robbery')" style="background:#2d3436; color:white;">🔪 抢劫榜</button><button class="btn" onclick="gameInstance.renderLeaderboard('streetwalk')" style="background:#e056fd; color:white;">💋 站街榜</button><button class="btn" onclick="gameInstance.renderLeaderboard('assault')" style="background:#c0392b; color:white;">😈 劫色榜</button></div><div id="leaderboard-list" class="rank-list"></div></div></div><div class="modal-overlay" id="achievements-modal"><div class="modal-content"><div class="modal-header"><h3>🏆 荣誉成就馆</h3><button class="modal-close" onclick="gameInstance.closeAchievements()">×</button></div><div id="achievements-list" class="achieve-list"></div></div></div><div class="modal-overlay" id="jobboard-modal"><div class="modal-content" style="max-width:900px; max-height:90vh; display:flex; flex-direction:column;"><div class="modal-header" style="flex-shrink:0;"><h3>📋 人才市场 & 工作榜</h3><button class="modal-close" onclick="gameInstance.closeJobBoard()">×</button></div><div class="tab-filter" id="jobboard-tabs" style="flex-shrink:0; overflow-x:auto; overflow-y:hidden; flex-wrap:nowrap; padding-bottom:5px; margin-bottom:10px;"></div><div id="jobboard-list" style="flex:1; overflow-y:auto; overflow-x:hidden; min-height:0; max-height:calc(90vh - 150px);"></div></div></div><div class="modal-overlay" id="embezzle-modal"><div class="modal-content"><div class="modal-header"><h3>💸 镇库拨款</h3><button class="modal-close" onclick="gameInstance.closeEmbezzle()">×</button></div><div style="margin-bottom:15px;"><p>当前镇库资金: <span id="embezzle-town-money" style="font-weight:bold; color:#f1c40f;">0</span></p><p>选择拨款对象:</p><div id="embezzle-list" class="fund-list" style="max-height:200px; overflow-y:auto; margin-bottom:10px; border:1px solid #eee; padding:5px;"></div><div style="display:flex; gap:10px; align-items:center;"><span>金额:</span><input type="number" id="embezzle-amount" value="100" style="width:100px;"><button class="btn save" onclick="gameInstance.doEmbezzle()">确认拨款</button></div></div></div></div><div class="modal-overlay" id="action-select-modal"><div class="modal-content"><div class="modal-header"><h3>🕹️ 强制安排活动</h3><button class="modal-close" onclick="gameInstance.closeActionSelect()">×</button></div><div id="action-select-content"></div></div></div><div class="modal-overlay" id="town-event-modal"><div class="modal-content"><div class="modal-header"><h3>🎉 活动策划部</h3><button class="modal-close" onclick="gameInstance.closeTownEvents()">×</button></div><div class="tab-filter"><button class="filter-btn active" id="evt-tab-normal" onclick="gameInstance.switchEventTab('normal')">常规活动</button><button class="filter-btn" id="evt-tab-season" onclick="gameInstance.switchEventTab('season')">🗓️ 今日节日/限定</button><button class="filter-btn" id="evt-tab-special" onclick="gameInstance.switchEventTab('special')">⚔️ 专项行动</button></div><p style="color:#666; font-size:0.9rem; margin-bottom:15px;">当前镇库: <span id="event-town-money" style="font-weight:bold; color:#f1c40f; font-size:1.1rem;">0</span> (当前日期: <span id="event-season-name"></span>)</p><div id="town-event-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px;"></div></div></div><div class="modal-overlay" id="building-detail-modal"><div class="modal-content"><div class="modal-header"><h3 id="b-detail-name">建筑详情</h3><button class="modal-close" onclick="gameInstance.closeBuildingDetail()">×</button></div><div id="b-detail-content"></div></div></div><div class="modal-overlay" id="calendar-modal"><div class="modal-content" style="max-width:800px;"><div class="modal-header"><h3>📅 小镇年历</h3><button class="modal-close" onclick="gameInstance.closeCalendar()">×</button></div><div style="margin-bottom:10px; color:#666; font-size:0.9rem;">
             鼠标悬停红色日期可查看节日名称。特定节日当天可在活动中心举办庆典。
         </div><div id="calendar-container" class="calendar-grid"></div></div></div><div class="modal-overlay" id="town-level-modal"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3>🏘️ 小镇等级</h3><button class="modal-close" onclick="gameInstance.closeTownLevelDetail()">×</button></div><div id="town-level-content"></div></div></div><script>
-    const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "斗罗", "CPU0", "闪柠", "氘镉殆", "空零", "猫猫", "小格蕾修", "大硕", "香织", "隐心", "三月", "白夜", "叶羽", "阿沂"];
+    const NAMES = ["耄耋", "曼波", "哈基米", "果猫", "暖泪", "沐夏", "sans", "时苏", "小睿", "栢染", "云绒", "玛卡巴卡", "猫冬", "无名", "斗罗", "闪柠", "氘镉殆", "空零", "猫猫", "小格蕾修", "大硕", "香织", "隐心", "三月", "白夜", "叶羽", "阿沂"];
     const TOURIST_NAMES = ["喵熊", "龍玥", "咲梓", "神乐Mea", "绯翠", "星野", "梦蝶", "星辰", "幻夜", "琉璃", "樱华", "铃兰", "晴空", "墨染", "浅笑", "安然", "超级穷没钱", "许樱", "希莱荨", "Submerge", "老韩", "LT", "小怪", "妄兔", "天游", "布谷鸟", "楠狐"];
     // 定义每个月的天数 (0是占位符)
     const MONTH_DAYS = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -116,7 +116,7 @@
         if (role.includes("厨") || role.includes("火烧") || role.includes("花艺") || role.includes("技师")) return 'social';
         if (role.includes("警察") || role.includes("保安") || role.includes("搬砖")) return 'malice'; // 警察需要懂罪犯？或者暂时关联这个
         if (role.includes("技术员") || role.includes("质检员") || role.includes("生产线工人") || role.includes("仓库管理员")) return 'culture'; // 工业岗位需要文化技能
-        if (role.includes("农场工人") || role.includes("水稻工人")) return 'social'; // 农业岗位需要社交技能
+        if (role.includes("农场工人") || role.includes("水稻工人") || role.includes("玉米工人") || role.includes("土豆工人")) return 'social'; // 农业岗位需要社交技能
         return 'social';
     }
     function getLevelInfo(skillVal) {
@@ -165,6 +165,9 @@
         { id: "coalpower", name: "🔥 火力发电站", category: "power", cost: 4000, desc: "传统火力发电，发电量稳定但污染环境", effect: "power", price: 0, open: 0, close: 24, jobs: [], mapX: 90, mapY: 70, powerGeneration: 100 },
         { id: "wheatfarm", name: "🌾 小麦农场", category: "agriculture", cost: 500, desc: "种植小麦，提供基础农业工作岗位", effect: "food", price: 0, open: 6, close: 18, jobs: ["农场工人"], mapX: 15, mapY: 60, powerConsumption: 5 },
         { id: "ricefield", name: "🌾 水稻田地", category: "agriculture", cost: 600, desc: "种植水稻，提供基础农业工作岗位", effect: "food", price: 0, open: 6, close: 18, jobs: ["水稻工人"], mapX: 20, mapY: 65, powerConsumption: 5 },
+        { id: "cornplantation", name: "🌽 玉米种植园", category: "agriculture", cost: 550, desc: "种植玉米，提供基础农业工作岗位", effect: "food", price: 0, open: 6, close: 18, jobs: ["玉米工人"], mapX: 25, mapY: 60, powerConsumption: 5 },
+        { id: "potatofarm", name: "🥔 土豆农场", category: "agriculture", cost: 500, desc: "种植土豆，提供基础农业工作岗位", effect: "food", price: 0, open: 6, close: 18, jobs: ["土豆工人"], mapX: 30, mapY: 65, powerConsumption: 5 },
+        { id: "teaplantation", name: "🍵 茶叶种植园", category: "agriculture", cost: 520, desc: "种植茶叶，生产茶叶并提供采茶岗位", effect: "food", price: 0, open: 6, close: 18, jobs: ["采茶工"], mapX: 35, mapY: 60, powerConsumption: 5 },
         { id: "electronics", name: "🏭 电子厂", category: "industry", cost: 2000, desc: "生产电子产品，提供多个工业工作岗位", effect: "shop", price: 0, open: 8, close: 20, jobs: ["生产线工人", "质检员", "技术员", "仓库管理员"], mapX: 25, mapY: 70, powerConsumption: 30 }
     ];
     const CATEGORY_NAMES = { 'food': '🍔 饮食餐饮', 'service': '🏥 公共服务', 'fun': '🎡 休闲娱乐', 'shop': '🛍️ 商业购物', 'landmark': '🚩 地标建筑', 'government': '🏛️ 政府建筑', 'residence': '🏠 居民住宅', 'power': '⚡ 发电设施', 'agriculture': '🌾 农业', 'industry': '🏭 工业' };
@@ -276,7 +279,7 @@ const TOWN_EVENTS = [
         if (role.includes("老板") || role.includes("主治医师")) return 35;
         if (role.includes("神父") || role.includes("社区医生") || role.includes("讲解") || role.includes("银行经理") || role.includes("监狱长") || role.includes("节目制作人") || role.includes("技术员")) return 25;
         if (role.includes("警察") || role.includes("老师") || role.includes("教练") || role.includes("狱警") || role.includes("新闻主播") || role.includes("质检员") || role.includes("仓库管理员")) return 22;
-        if (role.includes("农场工人") || role.includes("水稻工人") || role.includes("生产线工人")) return 18;
+        if (role.includes("农场工人") || role.includes("水稻工人") || role.includes("玉米工人") || role.includes("土豆工人") || role.includes("生产线工人")) return 18;
         if (role.includes("卖银")) return 20;
         if (role.includes("柜员")) return 19;
         if (role.includes("大厨") || role.includes("火烧") || role.includes("护士") || role.includes("玩偶")) return 18;
@@ -425,6 +428,18 @@ const TOWN_EVENTS = [
             if (this.id === 'ricefield') {
                 this.rice = 0; // 水稻数量
             }
+            // 玉米库存（仅玉米种植园）
+            if (this.id === 'cornplantation') {
+                this.corn = 0; // 玉米数量
+            }
+            // 土豆库存（仅土豆农场）
+            if (this.id === 'potatofarm') {
+                this.potato = 0; // 土豆数量
+            }
+            // 茶叶库存（仅茶叶种植园）
+            if (this.id === 'teaplantation') {
+                this.tea = 0; // 茶叶数量
+            }
             // 电子元件库存（仅电子厂）
             if (this.id === 'electronics') {
                 this.electronics = 0; // 电子元件数量
@@ -512,6 +527,46 @@ const TOWN_EVENTS = [
             if(!this.weather) this.generateDailyWeather();
             this.loopId = setInterval(() => this.tick(), this.speed);
             window.gameInstance = this;
+            // 版本信息显示与说明（运行时注入，避免修改大量静态 HTML）
+            try {
+                // 更新浏览器标题为新版本
+                if (typeof document !== 'undefined') {
+                    document.title = '猫の模拟小镇 Ver 2.6.0 - 虚拟币市场版';
+                    const gameLogEl = document.getElementById('game-log');
+                    if (gameLogEl) {
+                        // 移除已有的旧的“游戏开始”或旧版本描述，避免重复显示
+                        const entries = Array.from(gameLogEl.querySelectorAll('.log-entry'));
+                        entries.forEach(el => {
+                            const txt = (el.innerText || '').toString();
+                            if (txt.includes('游戏开始') || txt.match(/Ver\s*\d+\.\d+\.\d+/) || txt.includes('版本更新：')) {
+                                gameLogEl.removeChild(el);
+                            }
+                        });
+                        // 在最前插入一条版本更新日志（唯一）
+                        const entry = document.createElement('div');
+                        entry.className = 'log-entry';
+                        entry.innerText = '✨ 游戏开始。Ver 2.6.0 虚拟币市场版：新增虚拟币市场与玩家/居民交易功能。';
+                        gameLogEl.insertBefore(entry, gameLogEl.firstChild);
+                    }
+                    const headerGroup = document.querySelector('header .header-group');
+                    if (headerGroup && !document.getElementById('version-banner')) {
+                        const vb = document.createElement('div');
+                        vb.id = 'version-banner';
+                        vb.style.fontSize = '0.85rem';
+                        vb.style.marginLeft = '12px';
+                        vb.style.padding = '6px 10px';
+                        vb.style.background = 'linear-gradient(135deg, #74b9ff, #0984e3)';
+                        vb.style.color = 'white';
+                        vb.style.borderRadius = '8px';
+                        vb.style.fontWeight = '600';
+                        vb.innerText = 'Ver 2.6.0 — 虚拟币市场版：新增虚拟币市场与玩家/居民交易功能';
+                        headerGroup.appendChild(vb);
+                    }
+                    // 更新顶部小版本号文本（header h1 的 small 标签）
+                    const smallEl = document.querySelector('header h1 small');
+                    if (smallEl) smallEl.innerText = 'Ver 2.6.0 虚拟币市场版';
+                }
+            } catch (e) { console.warn('版本注入出错', e); }
         }
         getSeason() {
             const m = this.dateMonth;
@@ -613,6 +668,14 @@ const TOWN_EVENTS = [
                     // 初始化水稻库存（兼容旧存档）- 这里只处理undefined的情况，实际值已在loadFromJSON中恢复
                     if (b.id === 'ricefield') {
                         if (b.rice === undefined || b.rice === null) b.rice = 0;
+                    }
+                    // 初始化玉米库存（兼容旧存档）- 这里只处理undefined的情况，实际值已在loadFromJSON中恢复
+                    if (b.id === 'cornplantation') {
+                        if (b.corn === undefined || b.corn === null) b.corn = 0;
+                    }
+                    // 初始化土豆库存（兼容旧存档）- 这里只处理undefined的情况，实际值已在loadFromJSON中恢复
+                    if (b.id === 'potatofarm') {
+                        if (b.potato === undefined || b.potato === null) b.potato = 0;
                     }
                     // 初始化电子元件库存（兼容旧存档）- 这里只处理undefined的情况，实际值已在loadFromJSON中恢复
                     if (b.id === 'electronics') {
@@ -720,6 +783,23 @@ const TOWN_EVENTS = [
             this.chars.forEach(c => {
                 if(!c.residence) c.residence = 'sharehouse';
             });
+            // 重置虚拟币市场相关状态（清除上个存档残留的数据）
+            try {
+                // 清除 localStorage 中保存的市场状态
+                localStorage.removeItem('game_crypto_state_v1');
+            } catch (e) { /* ignore */ }
+            // 清除内存中可能存在的市场数据
+            if (this.cryptoMarket) {
+                // 停止价格模拟定时器（如果存在）
+                try { if (this.cryptoMarket.intervalId) { clearInterval(this.cryptoMarket.intervalId); } } catch (e) {}
+                this.cryptoMarket.log = [];
+                this.cryptoMarket.selectedCoinId = null;
+                // 重置各币历史为当前价格的单条历史
+                if (Array.isArray(this.cryptoMarket.coins)) {
+                    this.cryptoMarket.coins.forEach(c => { c.history = [c.price]; });
+                }
+            }
+            this.cryptoHoldings = {};
             // 不在这里触发建设公投，等镇长选举完成后再触发
         }
         tick() {
@@ -756,6 +836,12 @@ const TOWN_EVENTS = [
                 this.produceWheat();
                 // 每日水稻生产（水稻田地）
                 this.produceRice();
+                // 每日玉米生产（玉米种植园）
+                this.produceCorn();
+                // 每日土豆生产（土豆农场）
+                this.producePotato();
+                // 每日茶叶生产（茶叶种植园）
+                this.produceTea();
                 // 每日电子元件生产（电子厂）
                 this.produceElectronics();
                 // 每日电费结算
@@ -1128,7 +1214,10 @@ const TOWN_EVENTS = [
                 'concert': [{ icon: '🎼', text: '古典乐音乐会', desc: addPrice('文化 +1.5，心情 +15，体力 +8', 80) }, { icon: '🎵', text: '流行乐音乐会', desc: addPrice('文化 +1.0，心情 +18，社交 +0.3，体力 +8', 60) }, { icon: '🎸', text: '摇滚乐音乐会', desc: addPrice('文化 +0.8，心情 +20，社交 +0.5，体力 +10', 70) }],
                 'hotel': [{ icon: '🛏️', text: '过夜', desc: addPrice('心情 +15，体力 +30，健康 +5', price) }, { icon: '💤', text: '休息效果', desc: '提供舒适的住宿环境，快速恢复体力和心情' }],
                 'wheatfarm': [], // 小麦农场无特殊互动效果
-                'ricefield': [] // 水稻田地无特殊互动效果
+                'ricefield': [], // 水稻田地无特殊互动效果
+                'cornplantation': [], // 玉米种植园无特殊互动效果
+                'potatofarm': [], // 土豆农场无特殊互动效果
+                'teaplantation': [] // 茶叶种植园无特殊互动效果
             };
             return effects[buildingId] !== undefined ? effects[buildingId] : null;
         }
@@ -1218,7 +1307,7 @@ const TOWN_EVENTS = [
                     b.isOpen(hour, this.gameDay, totalPower) && 
                     p.money >= (b.price || 0) &&
                     ((b.effect === 'food') || (b.id === 'baozi')) &&
-                    b.id !== 'wheatfarm' && b.id !== 'ricefield' && b.id !== 'electronics' // 排除生产建筑
+                    b.id !== 'wheatfarm' && b.id !== 'ricefield' && b.id !== 'cornplantation' && b.id !== 'potatofarm' && b.id !== 'electronics' // 排除生产建筑
                 ); 
                 if (restaurants.length > 0) { this.doEat(p, choose(restaurants)); return; } 
                 const shops = this.buildings.filter(b => b.isBuilt && b.effect === 'shop' && b.sells.some(id => ITEMS_DB[id].type === 'food') && b.isOpen(hour, this.gameDay, totalPower) && b.id !== 'baozi'); 
@@ -1232,7 +1321,7 @@ const TOWN_EVENTS = [
                     b.isOpen(hour, this.gameDay, totalPower) && 
                     p.money >= (b.price || 0) &&
                     ((b.effect === 'food') || (b.id === 'baozi')) &&
-                    b.id !== 'wheatfarm' && b.id !== 'ricefield' && b.id !== 'electronics' // 排除生产建筑
+                    b.id !== 'wheatfarm' && b.id !== 'ricefield' && b.id !== 'cornplantation' && b.id !== 'potatofarm' && b.id !== 'electronics' // 排除生产建筑
                 ); 
                 if (restaurants.length > 0) { this.doEat(p, choose(restaurants)); return; } 
                 const shops = this.buildings.filter(b => b.isBuilt && b.effect === 'shop' && b.sells.some(id => ITEMS_DB[id].type === 'food') && b.isOpen(hour, this.gameDay, totalPower) && b.id !== 'baozi'); 
@@ -1282,6 +1371,14 @@ const TOWN_EVENTS = [
             // 员工工作逻辑：严格检查营业时间
             if (p.job) {
                 const workplace = this.buildings.find(b => b.id === p.job.buildingId);
+                // 可能的跳槽判断：当心情低或有一定概率时，尝试寻找更好或有空缺的岗位进行跳槽
+                if (Math.random() < 0.04 || p.happiness < 45) {
+                    if (this.trySwitchJob(p)) {
+                        // 成功跳槽后立即更新界面与日志，不继续当前回合其它行为
+                        this.updateUI();
+                        return;
+                    }
+                }
                 if (workplace && workplace.isBuilt) {
                     if (workplace.isOpen(hour, this.gameDay, totalPower)) {
                         // 在营业时间内，如果满足工作条件就工作
@@ -1301,7 +1398,25 @@ const TOWN_EVENTS = [
                 }
             }
             if (p.prostitute && p.hunger > 0) { const footshop = this.buildings.find(b => b.id === p.prostitute.buildingId); if (footshop && footshop.isBuilt && footshop.isOpen(hour, this.gameDay, totalPower)) { this.doProstitution(p, footshop); return; } }
-            if (!p.job && p.money < 20 && p.hunger > 0) { if ((p.hasTrait('estrous') || p.hasTrait('lustful')) && Math.random() < 0.6) { this.doStreetwalking(p); } else { this.doOddJob(p); } return; }
+            if (!p.job && p.hunger > 0) {
+                // 统一计算打零工的概率：贫穷时默认触发，非贫穷时有基础概率
+                let baseProb = (p.money < 20) ? 1.0 : 0.12; // 贫穷必去，其他情况 12% 基础概率
+                // 根据特质调整概率
+                if (p.hasTrait && p.hasTrait('greedy')) baseProb += 0.15;      // 贪婪更容易去打零工
+                if (p.hasTrait && p.hasTrait('hardworking')) baseProb += 0.10; // 勤劳更容易去打零工
+                if (p.hasTrait && p.hasTrait('lazy')) baseProb -= 0.20;       // 懒惰减少概率
+                if (p.hasTrait && p.hasTrait('workaholic')) baseProb += 0.05; // 工作狂略微增加
+                // 保证范围
+                baseProb = Math.max(0, Math.min(1, baseProb));
+                if (Math.random() < baseProb) {
+                    if ((p.hasTrait('estrous') || p.hasTrait('lustful')) && Math.random() < 0.6) {
+                        this.doStreetwalking(p);
+                    } else {
+                        this.doOddJob(p);
+                    }
+                    return;
+                }
+            }
             if (p.happiness < 40) { 
                 // 优先使用背包中的娱乐物品
                 const funItemId = p.bag.find(id => ITEMS_DB[id] && (ITEMS_DB[id].type === 'alcohol' || ITEMS_DB[id].type === 'snack' || ITEMS_DB[id].type === 'drink' || ITEMS_DB[id].type === 'book')); 
@@ -1752,6 +1867,447 @@ const TOWN_EVENTS = [
             document.getElementById('char-detail-modal').classList.remove('active');
             modal.classList.add('active');
         }
+        // ===== 虚拟币市场功能 =====
+        initCryptoMarket() {
+            if (this.cryptoMarket) return;
+            this.cryptoMarket = {
+                coins: [
+                    { id: 'guomao', name: '果猫币', symbol: 'GUO', price: 10, change: 0, emoji: '🍎', minPrice: 10, maxPrice: 10 },
+                    { id: 'huanm', name: '幻猫币', symbol: 'HUAN', price: 8, change: 0, emoji: '✨', minPrice: 8, maxPrice: 8 },
+                    { id: 'btc', name: 'BTC', symbol: 'BTC', price: 60000, change: 0, emoji: '₿', minPrice: 60000, maxPrice: 60000 },
+                    { id: 'eth', name: '以太坊(ETH)', symbol: 'ETH', price: 2000, change: 0, emoji: 'Ξ', minPrice: 2000, maxPrice: 2000 },
+                    { id: 'usdt', name: 'USDT', symbol: 'USDT', price: 1, change: 0, emoji: '💵', minPrice: 1, maxPrice: 1 },
+                    { id: 'pirate_copper', name: '海盗铜币', symbol: 'PCT', price: 1, change: 0, emoji: '🥉', minPrice: 1, maxPrice: 1 },
+                    { id: 'pirate_silver', name: '海盗银币', symbol: 'PST', price: 5, change: 0, emoji: '🥈', minPrice: 5, maxPrice: 5 },
+                    { id: 'pirate_gold', name: '海盗金币', symbol: 'PGT', price: 20, change: 0, emoji: '🥇', minPrice: 20, maxPrice: 20 },
+                ],
+                intervalId: null
+            };
+            // 默认可配置项
+            this.cryptoMarket.config = {
+                autoTradeProb: 0.03, // 居民自动交易概率（每轮每居民）
+                maxTradePct: 0.5,    // 单次交易最大占资金比例（居民）
+                volatility: 0.15,    // 价格波动幅度（固定默认 ±15%）
+                historyLength: 100   // 价格历史长度
+            };
+            // 初始化价格历史数组，并初始化 min/max
+            this.cryptoMarket.coins.forEach(c => {
+                c.history = [c.price];
+                c.historyMax = this.cryptoMarket.config.historyLength || 100;
+                c.minPrice = (typeof c.minPrice === 'number') ? c.minPrice : c.price;
+                c.maxPrice = (typeof c.maxPrice === 'number') ? c.maxPrice : c.price;
+            });
+            this.cryptoHoldings = this.cryptoHoldings || {};
+            // 尝试从 localStorage 加载之前的市场状态（价格历史 / 持仓 / 交易记录）
+            if (this.loadCryptoState) this.loadCryptoState();
+            // 启动价格模拟
+            this.simulateCryptoPrices();
+        }
+
+        simulateCryptoPrices() {
+            if (!this.cryptoMarket) return;
+            if (this.cryptoMarket.intervalId) return;
+            // 每10秒更新一次价格（可调整）
+            this.cryptoMarket.intervalId = setInterval(() => {
+                const cfg = this.cryptoMarket.config || { volatility: 0.1, autoTradeProb: 0.03, maxTradePct: 0.5, historyLength: 100 };
+                this.cryptoMarket.coins.forEach(c => {
+                    // 随机波动：使用可配置的 volatility（例如 0.1 表示 ±10%）
+                    const base = (Math.random() - 0.5) * cfg.volatility;
+                    const noise = (Math.random() - 0.5) * (cfg.volatility * 0.2);
+                    const changePct = base + noise;
+                    const newPrice = Math.max(0.0001, parseFloat((c.price * (1 + changePct)).toFixed(2)));
+                    c.change = parseFloat(((newPrice - c.price) / c.price * 100).toFixed(2));
+                    c.price = newPrice;
+                    // 更新历史最低/最高价（保留两位小数）
+                    c.minPrice = parseFloat(Math.min((typeof c.minPrice === 'number' ? c.minPrice : newPrice), newPrice).toFixed(2));
+                    c.maxPrice = parseFloat(Math.max((typeof c.maxPrice === 'number' ? c.maxPrice : newPrice), newPrice).toFixed(2));
+                    // 记录价格历史
+                    c.history = c.history || [];
+                    c.history.push(c.price);
+                    if (c.history.length > (cfg.historyLength || 100)) c.history.shift();
+                });
+                // 居民自动交易（概率与额度可配置）
+                if (!this.cryptoMarket.log) this.cryptoMarket.log = [];
+                this.chars.forEach(ch => {
+                    if (!ch || typeof ch.money !== 'number' || ch.money < 1) return;
+                    if (Math.random() < (cfg.autoTradeProb || 0.03)) {
+                        const coin = this.cryptoMarket.coins[Math.floor(Math.random() * this.cryptoMarket.coins.length)];
+                        if (!coin) return;
+                        const action = Math.random() < 0.5 ? 'buy' : 'sell';
+                        if (action === 'buy') {
+                            const maxAffordableCount = Math.floor((ch.money / coin.price) * (cfg.maxTradePct || 0.5));
+                            if (maxAffordableCount >= 1) {
+                                const amt = Math.max(1, Math.floor(Math.random() * Math.min(5, maxAffordableCount)));
+                                ch.money = parseFloat((ch.money - coin.price * amt).toFixed(2));
+                                this.cryptoHoldings[ch.name] = this.cryptoHoldings[ch.name] || {};
+                                this.cryptoHoldings[ch.name][coin.id] = (this.cryptoHoldings[ch.name][coin.id] || 0) + amt;
+                                this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} 买入: ${ch.name} 买入 ${amt} ${coin.name} @ ${this.formatMoney(coin.price)}`);
+                                this.addFinanceRecord(0, `居民自动买入 ${coin.name} - ${ch.name}`);
+                            }
+                        } else {
+                            const holding = (this.cryptoHoldings[ch.name] && this.cryptoHoldings[ch.name][coin.id]) || 0;
+                            if (holding >= 1) {
+                                const amt = Math.max(1, Math.floor(Math.random() * Math.min(holding, 5)));
+                                const revenue = parseFloat((coin.price * amt).toFixed(2));
+                                ch.money = parseFloat((ch.money + revenue).toFixed(2));
+                                this.cryptoHoldings[ch.name][coin.id] = holding - amt;
+                                if (this.cryptoHoldings[ch.name][coin.id] <= 0) delete this.cryptoHoldings[ch.name][coin.id];
+                                this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} 卖出: ${ch.name} 卖出 ${amt} ${coin.name} @ ${this.formatMoney(coin.price)}`);
+                                this.addFinanceRecord(0, `居民自动卖出 ${coin.name} - ${ch.name}`);
+                            }
+                        }
+                    }
+                });
+                // 每次价格与自动交易后保存市场状态到 localStorage
+                if (this.saveCryptoState) this.saveCryptoState();
+                const modal = document.getElementById('crypto-modal');
+                if (modal && modal.classList.contains('active')) {
+                    this.renderCryptoMarket();
+                    this.renderCryptoCharts(this.cryptoMarket.selectedCoinId || this.cryptoMarket.coins[0].id);
+                }
+            }, 10000);
+        }
+
+        // 从 localStorage 恢复虚拟币市场相关数据（价格历史、持仓、交易记录）
+        loadCryptoState() {
+            try {
+                const s = localStorage.getItem('game_crypto_state_v1');
+                if (!s) return;
+                const parsed = JSON.parse(s);
+                if (parsed && parsed.cryptoMarket && Array.isArray(parsed.cryptoMarket.coins)) {
+                    parsed.cryptoMarket.coins.forEach(savedCoin => {
+                        const c = (this.cryptoMarket && this.cryptoMarket.coins) ? this.cryptoMarket.coins.find(x => x.id === savedCoin.id) : null;
+                        if (c && Array.isArray(savedCoin.history)) {
+                            const maxLen = (this.cryptoMarket.config && this.cryptoMarket.config.historyLength) || 100;
+                            c.history = savedCoin.history.slice(-maxLen);
+                            if (typeof savedCoin.price === 'number') c.price = savedCoin.price;
+                        }
+                    });
+                    // 额外恢复 min/max（以防上面未覆盖到）
+                    try {
+                        if (this.cryptoMarket && Array.isArray(this.cryptoMarket.coins)) {
+                            this.cryptoMarket.coins.forEach(c => {
+                                try {
+                                    if (Array.isArray(c.history) && c.history.length > 0) {
+                                        const numericHistory = c.history.map(v => parseFloat(v) || 0);
+                                        c.minPrice = parseFloat(Math.min.apply(null, numericHistory).toFixed(2));
+                                        c.maxPrice = parseFloat(Math.max.apply(null, numericHistory).toFixed(2));
+                                    } else {
+                                        c.minPrice = (typeof c.minPrice === 'number') ? c.minPrice : c.price;
+                                        c.maxPrice = (typeof c.maxPrice === 'number') ? c.maxPrice : c.price;
+                                    }
+                                } catch (e) {
+                                    c.minPrice = (typeof c.minPrice === 'number') ? c.minPrice : c.price;
+                                    c.maxPrice = (typeof c.maxPrice === 'number') ? c.maxPrice : c.price;
+                                }
+                            });
+                        }
+                    } catch (e) { /* ignore */ }
+                    if (parsed.cryptoMarket.log && Array.isArray(parsed.cryptoMarket.log)) {
+                        this.cryptoMarket.log = parsed.cryptoMarket.log;
+                    }
+                    if (parsed.cryptoMarket.selectedCoinId) this.cryptoMarket.selectedCoinId = parsed.cryptoMarket.selectedCoinId;
+                }
+                if (parsed && parsed.cryptoHoldings) {
+                    this.cryptoHoldings = parsed.cryptoHoldings;
+                }
+            } catch (e) {
+                console.warn('loadCryptoState error', e);
+            }
+        }
+
+        // 将虚拟币市场状态保存到 localStorage（价格历史、持仓、交易记录）
+        saveCryptoState() {
+            try {
+                if (!this.cryptoMarket) return;
+                const data = {
+                    cryptoMarket: {
+                        coins: this.cryptoMarket.coins.map(c => ({ id: c.id, history: c.history || [], price: c.price, minPrice: (typeof c.minPrice === 'number' ? c.minPrice : c.price), maxPrice: (typeof c.maxPrice === 'number' ? c.maxPrice : c.price) })),
+                        log: this.cryptoMarket.log || [],
+                        selectedCoinId: this.cryptoMarket.selectedCoinId || null
+                    },
+                    cryptoHoldings: this.cryptoHoldings || {}
+                };
+                localStorage.setItem('game_crypto_state_v1', JSON.stringify(data));
+            } catch (e) {
+                console.warn('saveCryptoState error', e);
+            }
+        }
+
+        showCryptoMarket() {
+            this.initCryptoMarket();
+            let modal = document.getElementById('crypto-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.id = 'crypto-modal';
+                modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h3>🪙 虚拟币市场</h3><button class="modal-close" onclick="gameInstance.closeCryptoMarket()">×</button></div><div id="crypto-market-content"></div></div>`;
+                modal.onclick = (e) => { if (e.target.id === 'crypto-modal') this.closeCryptoMarket(); };
+                document.body.appendChild(modal);
+            }
+            this.renderCryptoMarket();
+            modal.classList.add('active');
+        }
+
+        closeCryptoMarket() {
+            const modal = document.getElementById('crypto-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        renderCryptoMarket() {
+            const container = document.getElementById('crypto-market-content');
+            if (!container) return;
+            const coinsHtml = this.cryptoMarket.coins.map(c => {
+                const changeSign = c.change > 0 ? '↑' : (c.change < 0 ? '↓' : '→');
+                return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee;">
+                            <div style="flex:1;">
+                                <div style="font-weight:bold; cursor:pointer;" onclick="gameInstance.cryptoMarket.selectedCoinId='${c.id}'; gameInstance.renderCryptoCharts('${c.id}');">${c.emoji} ${c.name} (${c.symbol})</div>
+                                <div style="font-size:0.85rem; color:#666;">价格: 💰${this.formatMoney(c.price)} <span style="margin-left:8px; color:${c.change>0?'#27ae60':'#e74c3c'}">${changeSign} ${Math.abs(c.change)}%</span></div>
+                                <div style="font-size:0.8rem; color:#999; margin-top:4px;">最低: 💰${this.formatMoney((typeof c.minPrice === 'number' ? c.minPrice : c.price))}  最高: 💰${this.formatMoney((typeof c.maxPrice === 'number' ? c.maxPrice : c.price))}</div>
+                            </div>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" id="buy-${c.id}" placeholder="买入数量" style="width:90px; padding:6px;">
+                                <button class="btn" style="background:#27ae60;" onclick="gameInstance.buyCrypto('${c.id}', document.getElementById('crypto-char-select')?.value || '', parseFloat(document.getElementById('buy-${c.id}').value || 0))">买</button>
+                                <input type="number" id="sell-${c.id}" placeholder="卖出数量" style="width:90px; padding:6px;">
+                                <button class="btn" style="background:#e74c3c;" onclick="gameInstance.sellCrypto('${c.id}', document.getElementById('crypto-char-select')?.value || '', parseFloat(document.getElementById('sell-${c.id}').value || 0))">卖</button>
+                                <canvas id="spark-${c.id}" width="120" height="36" style="margin-left:8px; border-radius:4px; background:#fff;"></canvas>
+                            </div>
+                        </div>`;
+            }).join('');
+            const charOptions = `<option value="TOWN">当前玩家（镇库） (💰${this.formatMoney(this.townMoney || 0)})</option>` + this.chars.map(ch => `<option value="${ch.name}">${ch.name} (💰${this.formatMoney(ch.money)})</option>`).join('');
+            const logs = (this.cryptoMarket.log || []).slice(0,50).map(l => `<div style="padding:6px 0; border-bottom:1px dashed #eee; font-size:0.9rem;">${l}</div>`).join('') || '<div style="color:#999; padding:8px;">暂无交易记录</div>';
+            const cfg = this.cryptoMarket.config || {};
+            container.innerHTML = `
+                <div style="margin-bottom:10px; display:flex; gap:10px; align-items:center;">
+                    <label>选择居民/玩家: </label><select id="crypto-char-select">${charOptions}</select>
+                    <button class="btn" style="background:#6a4fb8; color:white;" onclick="gameInstance.renderCryptoMarket()">刷新</button>
+                </div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+                    <label>自动交易概率: <input id="crypto-auto-prob" type="number" step="0.01" min="0" max="1" value="${cfg.autoTradeProb || 0.03}" style="width:80px;"></label>
+                    <label>最大交易占比: <input id="crypto-max-pct" type="number" step="0.1" min="0" max="1" value="${cfg.maxTradePct || 0.5}" style="width:80px;"></label>
+                    <button class="btn" style="background:#3498db;" onclick="gameInstance.updateCryptoConfig()">应用</button>
+                    <button class="btn" style="background:#95a5a6; margin-left:6px;" onclick="gameInstance.resetCryptoConfig()">重置默认</button>
+                </div>
+                <div style="border:1px solid #eee; border-radius:6px; background:#fff; overflow:hidden;">${coinsHtml}</div>
+                <div style="margin-top:10px; display:flex; gap:12px; align-items:flex-start;">
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; margin-bottom:6px;">📈 价格历史（选中币种）</div>
+                        <canvas id="crypto-price-chart" width="720" height="180" style="background:#fff; border:1px solid #eee; border-radius:6px;"></canvas>
+                    </div>
+                    <div style="width:300px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:bold;">🧾 持仓分布</div><div><button class="btn" onclick="gameInstance.renderCryptoCharts(gameInstance.cryptoMarket.selectedCoinId || gameInstance.cryptoMarket.coins[0].id)">刷新</button></div></div>
+                        <div id="crypto-holdings-chart" style="margin-top:8px; max-height:180px; overflow:auto; border:1px solid #eee; background:#fff; border-radius:6px; padding:8px;"></div>
+                    </div>
+                </div>
+                <div style="margin-top:10px;"><div style="font-weight:bold; margin-bottom:6px;">📣 交易记录</div><div id="crypto-market-log" style="max-height:160px; overflow:auto; background:#f8f9fa; border:1px solid #eee; border-radius:6px; padding:8px;">${logs}</div></div>
+            `;
+            // 渲染小火花图
+            setTimeout(() => {
+                this.cryptoMarket.coins.forEach(cc => {
+                    const canvas = document.getElementById(`spark-${cc.id}`);
+                    if (canvas && cc.history && cc.history.length > 1) this.drawSparkline(canvas, cc.history.slice(-30));
+                });
+                // 渲染主图与持仓
+                this.renderCryptoCharts(this.cryptoMarket.selectedCoinId || this.cryptoMarket.coins[0].id);
+            }, 50);
+        }
+
+        buyCrypto(coinId, charName, amount) {
+            if (!coinId || !charName || !amount || amount <= 0) return alert('请输入有效的买入数量并选择居民/玩家');
+            const coin = this.cryptoMarket.coins.find(x => x.id === coinId);
+            if (!coin) return alert('找不到币种');
+            const totalCost = parseFloat((coin.price * amount).toFixed(2));
+            // 玩家使用镇库资金（TOWN），居民使用个人资金
+            if (charName === 'TOWN') {
+                if ((this.townMoney || 0) < totalCost) return alert('镇库资金不足，无法购买');
+                this.townMoney = parseFloat(((this.townMoney || 0) - totalCost).toFixed(2));
+                const holder = '镇库(玩家)';
+                this.cryptoHoldings[holder] = this.cryptoHoldings[holder] || {};
+                this.cryptoHoldings[holder][coinId] = (this.cryptoHoldings[holder][coinId] || 0) + amount;
+                this.cryptoMarket.log = this.cryptoMarket.log || [];
+                this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} 玩家(镇库) 买入 ${amount} ${coin.name} @ ${this.formatMoney(coin.price)}，花费 ${this.formatMoney(totalCost)}`);
+                this.addFinanceRecord(totalCost, `玩家(镇库) 购买 ${coin.name}`);
+            } else {
+                const c = this.chars.find(x => x.name === charName);
+                if (!c) return alert('找不到居民');
+                if (c.money < totalCost) return alert('资金不足，无法购买');
+                c.money = parseFloat((c.money - totalCost).toFixed(2));
+                this.cryptoHoldings[charName] = this.cryptoHoldings[charName] || {};
+                this.cryptoHoldings[charName][coinId] = (this.cryptoHoldings[charName][coinId] || 0) + amount;
+                this.cryptoMarket.log = this.cryptoMarket.log || [];
+                this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} ${charName} 买入 ${amount} ${coin.name} @ ${this.formatMoney(coin.price)}，花费 ${this.formatMoney(totalCost)}`);
+                this.addFinanceRecord(totalCost, `购买 ${coin.name} - ${charName}`);
+            }
+            this.log(`[🪙买入] ${charName} 买入 ${amount} ${coin.name}，花费 💰${this.formatMoney(totalCost)}`, "tag-build");
+            this.updateUI();
+            this.renderCryptoMarket();
+            if (this.saveCryptoState) this.saveCryptoState();
+        }
+
+        sellCrypto(coinId, charName, amount) {
+            if (!coinId || !charName || !amount || amount <= 0) return alert('请输入有效的卖出数量并选择居民/玩家');
+            const coin = this.cryptoMarket.coins.find(x => x.id === coinId);
+            if (!coin) return alert('找不到币种');
+            if (charName === 'TOWN') {
+                const holder = '镇库(玩家)';
+                const holding = (this.cryptoHoldings[holder] && this.cryptoHoldings[holder][coinId]) || 0;
+                if (holding < amount) return alert('镇库持仓不足，无法卖出');
+                const totalRevenue = parseFloat((coin.price * amount).toFixed(2));
+                this.townMoney = parseFloat(((this.townMoney || 0) + totalRevenue).toFixed(2));
+                this.cryptoHoldings[holder][coinId] = holding - amount;
+                if (this.cryptoHoldings[holder][coinId] <= 0) delete this.cryptoHoldings[holder][coinId];
+                this.cryptoMarket.log = this.cryptoMarket.log || [];
+                this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} 玩家(镇库) 卖出 ${amount} ${coin.name} @ ${this.formatMoney(coin.price)}，获得 ${this.formatMoney(totalRevenue)}`);
+            } else {
+                const c = this.chars.find(x => x.name === charName);
+                if (!c) return alert('找不到居民');
+                const holding = (this.cryptoHoldings[charName] && this.cryptoHoldings[charName][coinId]) || 0;
+                if (holding < amount) return alert('持仓不足，无法卖出');
+                const totalRevenue = parseFloat((coin.price * amount).toFixed(2));
+                c.money = parseFloat((c.money + totalRevenue).toFixed(2));
+                this.cryptoHoldings[charName][coinId] = holding - amount;
+                if (this.cryptoHoldings[charName][coinId] <= 0) delete this.cryptoHoldings[charName][coinId];
+                this.cryptoMarket.log = this.cryptoMarket.log || [];
+                this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} ${charName} 卖出 ${amount} ${coin.name} @ ${this.formatMoney(coin.price)}，获得 ${this.formatMoney(totalRevenue)}`);
+            }
+            this.addFinanceRecord(0, `卖出 ${coin.name} - ${charName}`);
+            this.log(`[🪙卖出] ${charName} 卖出 ${amount} ${coin.name}，获得 💰${this.formatMoney((coin.price * amount).toFixed(2))}`, "tag-build");
+            this.updateUI();
+            this.renderCryptoMarket();
+            if (this.saveCryptoState) this.saveCryptoState();
+        }
+        // 重置虚拟币市场配置为默认值
+        resetCryptoConfig() {
+            if (!this.cryptoMarket) return;
+            this.cryptoMarket.config = {
+                autoTradeProb: 0.03,
+                maxTradePct: 0.5,
+                volatility: 0.15,
+                historyLength: 100
+            };
+            // 更新 UI 控件显示
+            const pEl = document.getElementById('crypto-auto-prob');
+            const mEl = document.getElementById('crypto-max-pct');
+            if (pEl) pEl.value = this.cryptoMarket.config.autoTradeProb;
+            if (mEl) mEl.value = this.cryptoMarket.config.maxTradePct;
+            // 重新启动价格模拟
+            if (this.cryptoMarket.intervalId) {
+                clearInterval(this.cryptoMarket.intervalId);
+                this.cryptoMarket.intervalId = null;
+            }
+            this.cryptoMarket.coins.forEach(c => { c.history = [c.price]; });
+            this.simulateCryptoPrices();
+            this.renderCryptoMarket();
+            if (this.saveCryptoState) this.saveCryptoState();
+            alert('已重置为默认市场配置（波动 ±15%）');
+        }
+        // 更新市场配置（从 UI 读取）
+        updateCryptoConfig() {
+            try {
+                const pEl = document.getElementById('crypto-auto-prob');
+                const mEl = document.getElementById('crypto-max-pct');
+                if (!this.cryptoMarket) return;
+                this.cryptoMarket.config = this.cryptoMarket.config || {};
+                if (pEl) this.cryptoMarket.config.autoTradeProb = parseFloat(pEl.value) || this.cryptoMarket.config.autoTradeProb;
+                if (mEl) this.cryptoMarket.config.maxTradePct = parseFloat(mEl.value) || this.cryptoMarket.config.maxTradePct;
+                // 更新每个币的历史长度设置
+                this.cryptoMarket.coins.forEach(c => { c.historyMax = this.cryptoMarket.config.historyLength || 100; });
+                // 重启价格模拟以应用新波动参数
+                if (this.cryptoMarket.intervalId) {
+                    clearInterval(this.cryptoMarket.intervalId);
+                    this.cryptoMarket.intervalId = null;
+                }
+                this.simulateCryptoPrices();
+                this.renderCryptoMarket();
+                alert('已应用虚拟币市场配置');
+            } catch (e) {
+                console.warn('更新市场配置失败', e);
+            }
+        }
+
+        // 渲染价格历史主图与持仓分布
+        renderCryptoCharts(coinId) {
+            if (!this.cryptoMarket) return;
+            const coin = this.cryptoMarket.coins.find(c => c.id === coinId) || this.cryptoMarket.coins[0];
+            this.cryptoMarket.selectedCoinId = coin.id;
+            // 主价格图
+            const canvas = document.getElementById('crypto-price-chart');
+            if (canvas && coin.history && coin.history.length > 0) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                const data = coin.history.slice(-Math.min(200, coin.history.length));
+                const w = canvas.width, h = canvas.height, pad = 10;
+                const minV = Math.min(...data), maxV = Math.max(...data);
+                const range = Math.max(0.0001, maxV - minV);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0,0,w,h);
+                // grid
+                ctx.strokeStyle = '#eee'; ctx.lineWidth = 1;
+                for (let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(0, pad + i*(h-2*pad)/3); ctx.lineTo(w, pad + i*(h-2*pad)/3); ctx.stroke(); }
+                // polyline
+                ctx.strokeStyle = '#2d98da'; ctx.lineWidth = 2; ctx.beginPath();
+                data.forEach((v, idx) => {
+                    const x = pad + idx * (w-2*pad) / (data.length-1 || 1);
+                    const y = h - pad - ((v - minV) / range) * (h-2*pad);
+                    if (idx===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                });
+                ctx.stroke();
+                // last price text
+                ctx.fillStyle = '#333'; ctx.font = '14px Arial';
+                ctx.fillText(`${coin.name} ${coin.symbol} — ${this.formatMoney(coin.price)}`, pad, 16);
+            }
+            // 持仓分布：按居民/镇库统计持仓数量并画条
+            const holderMap = {};
+            if (this.cryptoHoldings) {
+                Object.keys(this.cryptoHoldings).forEach(holder => {
+                    const amt = this.cryptoHoldings[holder][coin.id] || 0;
+                    if (amt > 0) holderMap[holder] = (holderMap[holder] || 0) + amt;
+                });
+            }
+            // include town holdings if stored under '镇库(玩家)'
+            const holders = Object.entries(holderMap).sort((a,b)=>b[1]-a[1]);
+            const container = document.getElementById('crypto-holdings-chart');
+            if (container) {
+                if (holders.length === 0) {
+                    container.innerHTML = '<div style="color:#999;">暂无持仓</div>';
+                } else {
+                    const total = holders.reduce((s,kv)=>s+kv[1],0);
+                    container.innerHTML = holders.map(kv => {
+                        const name = kv[0];
+                        const amt = kv[1];
+                        const pct = ((amt/total)*100).toFixed(1);
+                        return `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                                    <div style="flex:1; font-size:0.9rem;">${name} <small style="color:#999;">${pct}%</small></div>
+                                    <div style="width:120px; background:#f1f1f1; height:10px; border-radius:6px; overflow:hidden;">
+                                        <div style="width:${pct}%; height:100%; background:#27ae60;"></div>
+                                    </div>
+                                    <div style="width:44px; text-align:right; font-weight:bold;">${amt}</div>
+                                </div>`;
+                    }).join('');
+                }
+            }
+        }
+
+        // 画小火花图（sparkline），接受 canvas DOM 与数据数组
+        drawSparkline(canvas, data) {
+            if (!canvas || !data || data.length === 0) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0,0,w,h);
+            const minV = Math.min(...data), maxV = Math.max(...data);
+            const range = Math.max(0.0001, maxV - minV);
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db'; ctx.lineWidth = 1.5;
+            data.forEach((v, i) => {
+                const x = i * (w / (data.length - 1 || 1));
+                const y = h - ((v - minV) / range) * h;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            // 填充下方
+            ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+            ctx.fillStyle = 'rgba(52,152,219,0.08)'; ctx.fill();
+        }
         setOverride(name, type, target, desc) { const c = this.chars.find(x => x.name === name); if (c) { c.nextActionOverride = { type, target, desc }; document.getElementById('action-select-modal').classList.remove('active'); alert(`已安排 ${name} 下一步：${desc}`); } }
         closeModal(id) { const el = document.getElementById(id); if(el) el.classList.remove('active'); }
         closeActionSelect() { this.closeModal('action-select-modal'); }
@@ -1885,6 +2441,12 @@ const TOWN_EVENTS = [
                         grantBtnContainer.style.cssText = 'margin:15px 0; text-align:center;';
                         grantBtnContainer.innerHTML = `<button id="finance-grant-btn" class="btn" style="background:#e67e22; color:white; padding:10px 20px; font-size:1rem;" onclick="gameInstance.showGrantModal()">💰 批款给建筑</button>`;
                         townMoneyEl.parentElement.appendChild(grantBtnContainer);
+                        // 添加“虚拟币市场”按钮
+                        const cryptoBtnContainer = document.createElement('div');
+                        cryptoBtnContainer.id = 'finance-crypto-btn-container';
+                        cryptoBtnContainer.style.cssText = 'margin:10px 0; text-align:center;';
+                        cryptoBtnContainer.innerHTML = `<button id="finance-crypto-btn" class="btn" style="background:#6a4fb8; color:white; padding:10px 18px; font-size:0.95rem;" onclick="gameInstance.showCryptoMarket()">🪙 虚拟币市场</button>`;
+                        townMoneyEl.parentElement.appendChild(cryptoBtnContainer);
                     }
                 }
             }
@@ -2044,46 +2606,39 @@ const TOWN_EVENTS = [
             this.log(`[💰转账] 将 **${building.name}** 在银行的存款 💰${this.formatMoney(amount)} 转入镇库`, "tag-build");
             this.updateUI();
         }
-        // 售出小麦（全部）
-        sellWheat(buildingId, amount) {
+        // 通用销售函数
+        sellItem(buildingId, amount, config) {
+            const { expectedBuildingId, inventoryKey, itemName, price, logEmoji } = config;
             const b = this.buildings.find(x => x.id === buildingId);
-            if (!b || b.id !== 'wheatfarm' || !b.isBuilt) {
+            if (!b || b.id !== expectedBuildingId || !b.isBuilt) {
                 alert('无效的建筑！');
                 return;
             }
-            const currentWheat = b.wheat || 0;
-            if (currentWheat <= 0) {
-                alert('当前没有小麦库存！');
+            const currentInventory = b[inventoryKey] || 0;
+            if (currentInventory <= 0) {
+                alert(`当前没有${itemName}库存！`);
                 return;
             }
-            const sellAmount = amount === 'all' ? currentWheat : Math.min(amount, currentWheat);
+            const sellAmount = amount === 'all' ? currentInventory : Math.min(amount, currentInventory);
             if (sellAmount <= 0) {
                 alert('售出数量必须大于0！');
                 return;
             }
-            const wheatPrice = 3; // 每单位小麦售价3元
-            const totalRevenue = sellAmount * wheatPrice;
-            // 计算税费
+            const totalRevenue = sellAmount * price;
             const tax = parseFloat((totalRevenue * (this.taxRate / 100)).toFixed(2));
             const netRevenue = parseFloat((totalRevenue - tax).toFixed(2));
-            // 扣除小麦库存
-            b.wheat = currentWheat - sellAmount;
-            // 将净收入存入建筑资金槽
+            b[inventoryKey] = currentInventory - sellAmount;
             b.buildingMoney = parseFloat(((b.buildingMoney || 0) + netRevenue).toFixed(2));
-            // 记录收入统计
             b.dailyRevenue = parseFloat(((b.dailyRevenue || 0) + totalRevenue).toFixed(2));
             b.dailyTax = parseFloat(((b.dailyTax || 0) + tax).toFixed(2));
             b.weeklyRevenue = parseFloat(((b.weeklyRevenue || 0) + totalRevenue).toFixed(2));
             b.weeklyTax = parseFloat(((b.weeklyTax || 0) + tax).toFixed(2));
-            // 将税费转入镇库
             this.townMoney = parseFloat((this.townMoney + tax).toFixed(2));
-            this.addFinanceRecord(tax, `小麦销售税 - ${b.name}`);
+            this.addFinanceRecord(tax, `${itemName}销售税 - ${b.name}`);
             this.dailyTotalRevenue = parseFloat((this.dailyTotalRevenue + totalRevenue).toFixed(2));
-            // 记录日志
-            b.addLog(`${this.getDateTimeStr()} 售出小麦 ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`);
-            this.log(`[🌾销售] **${b.name}** 售出小麦 ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`, "tag-build");
-            alert(`成功售出 ${sellAmount} 单位小麦！\n\n总收入：💰${this.formatMoney(totalRevenue)}\n税费：💰${this.formatMoney(tax)}\n净收入：💰${this.formatMoney(netRevenue)}\n\n净收入已存入建筑资金槽。`);
-            // 如果建筑详情界面是打开的，刷新显示
+            b.addLog(`${this.getDateTimeStr()} 售出${itemName} ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`);
+            this.log(`[${logEmoji}销售] **${b.name}** 售出${itemName} ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`, "tag-build");
+            alert(`成功售出 ${sellAmount} 单位${itemName}！\n\n总收入：💰${this.formatMoney(totalRevenue)}\n税费：💰${this.formatMoney(tax)}\n净收入：💰${this.formatMoney(netRevenue)}\n\n净收入已存入建筑资金槽。`);
             const buildingDetailModal = document.getElementById('building-detail-modal');
             if (buildingDetailModal && buildingDetailModal.classList.contains('active')) {
                 const nameEl = document.getElementById('b-detail-name');
@@ -2092,182 +2647,72 @@ const TOWN_EVENTS = [
                 }
             }
             this.updateUI();
+        }
+        // 通用销售弹窗函数
+        showSellItemModal(buildingId, config) {
+            const { expectedBuildingId, inventoryKey, itemName, price } = config;
+            const b = this.buildings.find(x => x.id === buildingId);
+            if (!b || b.id !== expectedBuildingId || !b.isBuilt) {
+                alert('无效的建筑！');
+                return;
+            }
+            const currentInventory = b[inventoryKey] || 0;
+            if (currentInventory <= 0) {
+                alert(`当前没有${itemName}库存！`);
+                return;
+            }
+            const amountStr = prompt(`请输入要售出的${itemName}数量（当前库存：${currentInventory} 单位，单价：💰${price}/单位）：`, currentInventory.toString());
+            if (!amountStr) return;
+            const amount = parseInt(amountStr);
+            if (isNaN(amount) || amount <= 0) {
+                alert('请输入有效的数量！');
+                return;
+            }
+            if (amount > currentInventory) {
+                alert(`售出数量不能超过当前库存（${currentInventory} 单位）！`);
+                return;
+            }
+            this.sellItem(buildingId, amount, config);
+        }
+        // 售出小麦（全部）
+        sellWheat(buildingId, amount) {
+            this.sellItem(buildingId, amount, { expectedBuildingId: 'wheatfarm', inventoryKey: 'wheat', itemName: '小麦', price: 3, logEmoji: '🌾' });
         }
         // 显示部分售出小麦的弹窗
         showSellWheatModal(buildingId) {
-            const b = this.buildings.find(x => x.id === buildingId);
-            if (!b || b.id !== 'wheatfarm' || !b.isBuilt) {
-                alert('无效的建筑！');
-                return;
-            }
-            const currentWheat = b.wheat || 0;
-            if (currentWheat <= 0) {
-                alert('当前没有小麦库存！');
-                return;
-            }
-            const wheatPrice = 3;
-            const amountStr = prompt(`请输入要售出的小麦数量（当前库存：${currentWheat} 单位，单价：💰${wheatPrice}/单位）：`, currentWheat.toString());
-            if (!amountStr) return;
-            const amount = parseInt(amountStr);
-            if (isNaN(amount) || amount <= 0) {
-                alert('请输入有效的数量！');
-                return;
-            }
-            if (amount > currentWheat) {
-                alert(`售出数量不能超过当前库存（${currentWheat} 单位）！`);
-                return;
-            }
-            this.sellWheat(buildingId, amount);
+            this.showSellItemModal(buildingId, { expectedBuildingId: 'wheatfarm', inventoryKey: 'wheat', itemName: '小麦', price: 3 });
         }
         // 售出电子元件（全部）
         sellElectronics(buildingId, amount) {
-            const b = this.buildings.find(x => x.id === buildingId);
-            if (!b || b.id !== 'electronics' || !b.isBuilt) {
-                alert('无效的建筑！');
-                return;
-            }
-            const currentElectronics = b.electronics || 0;
-            if (currentElectronics <= 0) {
-                alert('当前没有电子元件库存！');
-                return;
-            }
-            const sellAmount = amount === 'all' ? currentElectronics : Math.min(amount, currentElectronics);
-            if (sellAmount <= 0) {
-                alert('售出数量必须大于0！');
-                return;
-            }
-            const electronicsPrice = 9; // 每单位电子元件售价9元
-            const totalRevenue = sellAmount * electronicsPrice;
-            // 计算税费
-            const tax = parseFloat((totalRevenue * (this.taxRate / 100)).toFixed(2));
-            const netRevenue = parseFloat((totalRevenue - tax).toFixed(2));
-            // 扣除电子元件库存
-            b.electronics = currentElectronics - sellAmount;
-            // 将净收入存入建筑资金槽
-            b.buildingMoney = parseFloat(((b.buildingMoney || 0) + netRevenue).toFixed(2));
-            // 记录收入统计
-            b.dailyRevenue = parseFloat(((b.dailyRevenue || 0) + totalRevenue).toFixed(2));
-            b.dailyTax = parseFloat(((b.dailyTax || 0) + tax).toFixed(2));
-            b.weeklyRevenue = parseFloat(((b.weeklyRevenue || 0) + totalRevenue).toFixed(2));
-            b.weeklyTax = parseFloat(((b.weeklyTax || 0) + tax).toFixed(2));
-            // 将税费转入镇库
-            this.townMoney = parseFloat((this.townMoney + tax).toFixed(2));
-            this.addFinanceRecord(tax, `电子元件销售税 - ${b.name}`);
-            this.dailyTotalRevenue = parseFloat((this.dailyTotalRevenue + totalRevenue).toFixed(2));
-            // 记录日志
-            b.addLog(`${this.getDateTimeStr()} 售出电子元件 ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`);
-            this.log(`[🏭销售] **${b.name}** 售出电子元件 ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`, "tag-build");
-            alert(`成功售出 ${sellAmount} 单位电子元件！\n\n总收入：💰${this.formatMoney(totalRevenue)}\n税费：💰${this.formatMoney(tax)}\n净收入：💰${this.formatMoney(netRevenue)}\n\n净收入已存入建筑资金槽。`);
-            // 如果建筑详情界面是打开的，刷新显示
-            const buildingDetailModal = document.getElementById('building-detail-modal');
-            if (buildingDetailModal && buildingDetailModal.classList.contains('active')) {
-                const nameEl = document.getElementById('b-detail-name');
-                if (nameEl && nameEl.innerText === b.name) {
-                    this.showBuildingDetail(buildingId);
-                }
-            }
-            this.updateUI();
+            this.sellItem(buildingId, amount, { expectedBuildingId: 'electronics', inventoryKey: 'electronics', itemName: '电子元件', price: 9, logEmoji: '🏭' });
         }
         // 显示部分售出电子元件的弹窗
         showSellElectronicsModal(buildingId) {
-            const b = this.buildings.find(x => x.id === buildingId);
-            if (!b || b.id !== 'electronics' || !b.isBuilt) {
-                alert('无效的建筑！');
-                return;
-            }
-            const currentElectronics = b.electronics || 0;
-            if (currentElectronics <= 0) {
-                alert('当前没有电子元件库存！');
-                return;
-            }
-            const electronicsPrice = 9;
-            const amountStr = prompt(`请输入要售出的电子元件数量（当前库存：${currentElectronics} 单位，单价：💰${electronicsPrice}/单位）：`, currentElectronics.toString());
-            if (!amountStr) return;
-            const amount = parseInt(amountStr);
-            if (isNaN(amount) || amount <= 0) {
-                alert('请输入有效的数量！');
-                return;
-            }
-            if (amount > currentElectronics) {
-                alert(`售出数量不能超过当前库存（${currentElectronics} 单位）！`);
-                return;
-            }
-            this.sellElectronics(buildingId, amount);
+            this.showSellItemModal(buildingId, { expectedBuildingId: 'electronics', inventoryKey: 'electronics', itemName: '电子元件', price: 9 });
         }
         // 售出水稻（全部）
         sellRice(buildingId, amount) {
-            const b = this.buildings.find(x => x.id === buildingId);
-            if (!b || b.id !== 'ricefield' || !b.isBuilt) {
-                alert('无效的建筑！');
-                return;
-            }
-            const currentRice = b.rice || 0;
-            if (currentRice <= 0) {
-                alert('当前没有水稻库存！');
-                return;
-            }
-            const sellAmount = amount === 'all' ? currentRice : Math.min(amount, currentRice);
-            if (sellAmount <= 0) {
-                alert('售出数量必须大于0！');
-                return;
-            }
-            const ricePrice = 3.5; // 每单位水稻售价3.5元
-            const totalRevenue = sellAmount * ricePrice;
-            // 计算税费
-            const tax = parseFloat((totalRevenue * (this.taxRate / 100)).toFixed(2));
-            const netRevenue = parseFloat((totalRevenue - tax).toFixed(2));
-            // 扣除水稻库存
-            b.rice = currentRice - sellAmount;
-            // 将净收入存入建筑资金槽
-            b.buildingMoney = parseFloat(((b.buildingMoney || 0) + netRevenue).toFixed(2));
-            // 记录收入统计
-            b.dailyRevenue = parseFloat(((b.dailyRevenue || 0) + totalRevenue).toFixed(2));
-            b.dailyTax = parseFloat(((b.dailyTax || 0) + tax).toFixed(2));
-            b.weeklyRevenue = parseFloat(((b.weeklyRevenue || 0) + totalRevenue).toFixed(2));
-            b.weeklyTax = parseFloat(((b.weeklyTax || 0) + tax).toFixed(2));
-            // 将税费转入镇库
-            this.townMoney = parseFloat((this.townMoney + tax).toFixed(2));
-            this.addFinanceRecord(tax, `水稻销售税 - ${b.name}`);
-            this.dailyTotalRevenue = parseFloat((this.dailyTotalRevenue + totalRevenue).toFixed(2));
-            // 记录日志
-            b.addLog(`${this.getDateTimeStr()} 售出水稻 ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`);
-            this.log(`[🌾销售] **${b.name}** 售出水稻 ${sellAmount} 单位，获得收入 💰${this.formatMoney(totalRevenue)}，交税 💰${this.formatMoney(tax)}，净收入 💰${this.formatMoney(netRevenue)}`, "tag-build");
-            alert(`成功售出 ${sellAmount} 单位水稻！\n\n总收入：💰${this.formatMoney(totalRevenue)}\n税费：💰${this.formatMoney(tax)}\n净收入：💰${this.formatMoney(netRevenue)}\n\n净收入已存入建筑资金槽。`);
-            // 如果建筑详情界面是打开的，刷新显示
-            const buildingDetailModal = document.getElementById('building-detail-modal');
-            if (buildingDetailModal && buildingDetailModal.classList.contains('active')) {
-                const nameEl = document.getElementById('b-detail-name');
-                if (nameEl && nameEl.innerText === b.name) {
-                    this.showBuildingDetail(buildingId);
-                }
-            }
-            this.updateUI();
+            this.sellItem(buildingId, amount, { expectedBuildingId: 'ricefield', inventoryKey: 'rice', itemName: '水稻', price: 3.5, logEmoji: '🌾' });
         }
         // 显示部分售出水稻的弹窗
         showSellRiceModal(buildingId) {
-            const b = this.buildings.find(x => x.id === buildingId);
-            if (!b || b.id !== 'ricefield' || !b.isBuilt) {
-                alert('无效的建筑！');
-                return;
-            }
-            const currentRice = b.rice || 0;
-            if (currentRice <= 0) {
-                alert('当前没有水稻库存！');
-                return;
-            }
-            const ricePrice = 3.5;
-            const amountStr = prompt(`请输入要售出的水稻数量（当前库存：${currentRice} 单位，单价：💰${ricePrice}/单位）：`, currentRice.toString());
-            if (!amountStr) return;
-            const amount = parseInt(amountStr);
-            if (isNaN(amount) || amount <= 0) {
-                alert('请输入有效的数量！');
-                return;
-            }
-            if (amount > currentRice) {
-                alert(`售出数量不能超过当前库存（${currentRice} 单位）！`);
-                return;
-            }
-            this.sellRice(buildingId, amount);
+            this.showSellItemModal(buildingId, { expectedBuildingId: 'ricefield', inventoryKey: 'rice', itemName: '水稻', price: 3.5 });
+        }
+        // 售出玉米（全部）
+        sellCorn(buildingId, amount) {
+            this.sellItem(buildingId, amount, { expectedBuildingId: 'cornplantation', inventoryKey: 'corn', itemName: '玉米', price: 3.2, logEmoji: '🌽' });
+        }
+        // 显示部分售出玉米的弹窗
+        showSellCornModal(buildingId) {
+            this.showSellItemModal(buildingId, { expectedBuildingId: 'cornplantation', inventoryKey: 'corn', itemName: '玉米', price: 3.2 });
+        }
+        // 售出土豆（全部）
+        sellPotato(buildingId, amount) {
+            this.sellItem(buildingId, amount, { expectedBuildingId: 'potatofarm', inventoryKey: 'potato', itemName: '土豆', price: 2.8, logEmoji: '🥔' });
+        }
+        // 显示部分售出土豆的弹窗
+        showSellPotatoModal(buildingId) {
+            this.showSellItemModal(buildingId, { expectedBuildingId: 'potatofarm', inventoryKey: 'potato', itemName: '土豆', price: 2.8 });
         }
         // 显示批款界面
         showGrantModal() {
@@ -2634,81 +3079,56 @@ const TOWN_EVENTS = [
                 }
             });
         }
-        // 每日小麦生产（小麦农场）
-        produceWheat() {
-            const wheatFarm = this.buildings.find(b => b.id === 'wheatfarm' && b.isBuilt);
-            if (!wheatFarm) return;
+        // 通用生产函数
+        produceItem(config) {
+            const { buildingId, itemName, inventoryKey, baseMin, baseMax, skillType, logTag, logEmoji } = config;
+            const building = this.buildings.find(b => b.id === buildingId && b.isBuilt);
+            if (!building) return;
             
-            // 基础产出：15-35单位
-            const baseProduced = rand(15, 35);
-            
-            // 计算员工技能加成（农场工人需要 social 技能）
+            const baseProduced = rand(baseMin, baseMax);
             let skillBonus = 1.0;
-            if (wheatFarm.staff && wheatFarm.staff.length > 0) {
+            if (building.staff && building.staff.length > 0) {
                 let totalSkill = 0;
                 let staffCount = 0;
-                wheatFarm.staff.forEach(staffName => {
+                building.staff.forEach(staffName => {
                     const staff = this.chars.find(c => c.name === staffName);
-                    if (staff && staff.job && staff.job.buildingId === wheatFarm.id) {
-                        totalSkill += staff.skills.social || 0;
+                    if (staff && staff.job && staff.job.buildingId === building.id) {
+                        totalSkill += staff.skills[skillType] || 0;
                         staffCount++;
                     }
                 });
                 if (staffCount > 0) {
                     const avgSkill = totalSkill / staffCount;
-                    // 技能加成：每10点技能增加5%产出（最高100%加成）
                     skillBonus = 1.0 + Math.min(1.0, (avgSkill / 10) * 0.05);
                 }
             }
-            
-            // 建筑等级加成：每级增加10%产出
-            const levelBonus = 1.0 + (wheatFarm.level - 1) * 0.1;
-            
-            // 计算最终产出
+            const levelBonus = 1.0 + (building.level - 1) * 0.1;
             const produced = Math.floor(baseProduced * skillBonus * levelBonus);
             
-            wheatFarm.wheat = (wheatFarm.wheat || 0) + produced;
-            const skillInfo = wheatFarm.staff && wheatFarm.staff.length > 0 ? `（技能加成：${((skillBonus - 1) * 100).toFixed(1)}%，等级加成：${((levelBonus - 1) * 100).toFixed(1)}%）` : '';
-            wheatFarm.addLog(`${this.getDateTimeStr()} 生产小麦 ${produced} 单位${skillInfo}，当前库存：${wheatFarm.wheat} 单位`);
-            this.log(`[🌾农场] **${wheatFarm.name}** 生产小麦 ${produced} 单位${skillInfo}，当前库存：${wheatFarm.wheat} 单位`, "tag-build");
+            building[inventoryKey] = (building[inventoryKey] || 0) + produced;
+            const skillInfo = building.staff && building.staff.length > 0 ? `（技能加成：${((skillBonus - 1) * 100).toFixed(1)}%，等级加成：${((levelBonus - 1) * 100).toFixed(1)}%）` : '';
+            building.addLog(`${this.getDateTimeStr()} 生产${itemName} ${produced} 单位${skillInfo}，当前库存：${building[inventoryKey]} 单位`);
+            this.log(`[${logEmoji}${logTag}] **${building.name}** 生产${itemName} ${produced} 单位${skillInfo}，当前库存：${building[inventoryKey]} 单位`, "tag-build");
+        }
+        // 每日小麦生产（小麦农场）
+        produceWheat() {
+            this.produceItem({ buildingId: 'wheatfarm', itemName: '小麦', inventoryKey: 'wheat', baseMin: 15, baseMax: 35, skillType: 'social', logTag: '农场', logEmoji: '🌾' });
         }
         // 每日水稻生产（水稻田地）
         produceRice() {
-            const riceField = this.buildings.find(b => b.id === 'ricefield' && b.isBuilt);
-            if (!riceField) return;
-            
-            // 基础产出：15-35单位
-            const baseProduced = rand(15, 35);
-            
-            // 计算员工技能加成（水稻工人需要 social 技能）
-            let skillBonus = 1.0;
-            if (riceField.staff && riceField.staff.length > 0) {
-                let totalSkill = 0;
-                let staffCount = 0;
-                riceField.staff.forEach(staffName => {
-                    const staff = this.chars.find(c => c.name === staffName);
-                    if (staff && staff.job && staff.job.buildingId === riceField.id) {
-                        totalSkill += staff.skills.social || 0;
-                        staffCount++;
-                    }
-                });
-                if (staffCount > 0) {
-                    const avgSkill = totalSkill / staffCount;
-                    // 技能加成：每10点技能增加5%产出（最高100%加成）
-                    skillBonus = 1.0 + Math.min(1.0, (avgSkill / 10) * 0.05);
-                }
-            }
-            
-            // 建筑等级加成：每级增加10%产出
-            const levelBonus = 1.0 + (riceField.level - 1) * 0.1;
-            
-            // 计算最终产出
-            const produced = Math.floor(baseProduced * skillBonus * levelBonus);
-            
-            riceField.rice = (riceField.rice || 0) + produced;
-            const skillInfo = riceField.staff && riceField.staff.length > 0 ? `（技能加成：${((skillBonus - 1) * 100).toFixed(1)}%，等级加成：${((levelBonus - 1) * 100).toFixed(1)}%）` : '';
-            riceField.addLog(`${this.getDateTimeStr()} 生产水稻 ${produced} 单位${skillInfo}，当前库存：${riceField.rice} 单位`);
-            this.log(`[🌾田地] **${riceField.name}** 生产水稻 ${produced} 单位${skillInfo}，当前库存：${riceField.rice} 单位`, "tag-build");
+            this.produceItem({ buildingId: 'ricefield', itemName: '水稻', inventoryKey: 'rice', baseMin: 15, baseMax: 35, skillType: 'social', logTag: '田地', logEmoji: '🌾' });
+        }
+        // 每日玉米生产（玉米种植园）
+        produceCorn() {
+            this.produceItem({ buildingId: 'cornplantation', itemName: '玉米', inventoryKey: 'corn', baseMin: 15, baseMax: 35, skillType: 'social', logTag: '种植园', logEmoji: '🌽' });
+        }
+        // 每日土豆生产（土豆农场）
+        producePotato() {
+            this.produceItem({ buildingId: 'potatofarm', itemName: '土豆', inventoryKey: 'potato', baseMin: 15, baseMax: 35, skillType: 'social', logTag: '农场', logEmoji: '🥔' });
+        }
+        // 每日茶叶生产（茶叶种植园）
+        produceTea() {
+            this.produceItem({ buildingId: 'teaplantation', itemName: '茶叶', inventoryKey: 'tea', baseMin: 15, baseMax: 35, skillType: 'social', logTag: '种植园', logEmoji: '🍵' });
         }
         // 每日电子元件生产（电子厂）
         produceElectronics() {
@@ -3168,15 +3588,25 @@ const TOWN_EVENTS = [
                 const availableBuildings = this.buildings.filter(b => b.isBuilt && b.jobs && b.jobs.length > 0 && (!b.staff || b.staff.length < b.jobs.length));
                 if (availableBuildings.length > 0) {
                     const targetBuilding = availableBuildings[Math.floor(Math.random() * availableBuildings.length)];
-                    const availableJobs = targetBuilding.jobs.filter(j => !targetBuilding.staff || !targetBuilding.staff.some(s => s.role === j.role));
+                    // 计算已占用的岗位（兼容 staff 中既可能存储 name 字符串，也可能是 {name, role} 对象的情况）
+                    const occupiedRoles = (targetBuilding.staff || []).map(s => {
+                        const staffName = (typeof s === 'object' && s && s.name) ? s.name : s;
+                        const staffChar = this.chars.find(ch => ch.name === staffName);
+                        return staffChar && staffChar.job ? staffChar.job.role : null;
+                    }).filter(Boolean);
+                    // jobs 存储为字符串（角色名），筛选出尚未被占用的岗位
+                    const availableJobs = targetBuilding.jobs.filter(j => !occupiedRoles.includes(j));
                     if (availableJobs.length > 0) {
-                        const job = availableJobs[0];
-                        c.job = { buildingId: targetBuilding.id, role: job.role };
+                        const jobRole = availableJobs[0];
+                        c.job = { buildingId: targetBuilding.id, role: jobRole };
                         if (!targetBuilding.staff) targetBuilding.staff = [];
-                        targetBuilding.staff.push({ name: c.name, role: job.role });
+                        // 避免重复加入并确保不超过岗位上限
+                        if (!targetBuilding.staff.some(s => (typeof s === 'object' && s.name ? s.name : s) === c.name) && targetBuilding.staff.length < targetBuilding.jobs.length) {
+                            targetBuilding.staff.push(c.name);
+                        }
                         c.happiness = Math.max(0, c.happiness - 15);
-                        c.addLog(`[⚔️强制征召] 被强制分配到 ${targetBuilding.name} 担任 ${job.role}`);
-                        msg += `- ${c.name} 被强制分配到 ${targetBuilding.name} 担任 ${job.role}\n`;
+                        c.addLog(`[⚔️强制征召] 被强制分配到 ${targetBuilding.name} 担任 ${jobRole}`);
+                        msg += `- ${c.name} 被强制分配到 ${targetBuilding.name} 担任 ${jobRole}\n`;
                         conscripted++;
                     }
                 }
@@ -3342,7 +3772,7 @@ const TOWN_EVENTS = [
             }
             else if (id === 'anniversary') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); for(let k in c.relationships) c.relationships[k].love += 2; }); }
             else if (id === 'fireworks') { if (Math.random() < 0.05) { const built = this.buildings.filter(b => b.isBuilt); if (built.length > 0) { const burn = choose(built); burn.isBuilt = false; burn.currentProgress = 0; burn.staff.forEach(sName => { const s = this.chars.find(x=>x.name===sName); if(s) { s.job = null; s.happiness -= 30; } }); burn.staff = []; this.log(`[🔥火灾] 天呐！烟花引燃了 **${burn.name}**！建筑被烧毁，需要重建！`, "tag-crime"); this.chars.forEach(c => c.happiness -= 10); } } else { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 25); for(let k in c.relationships) c.relationships[k].love += 5; }); } }
-            else if (id === 'jobfair') { let hiredCount = 0; this.buildings.forEach(b => { if (b.isBuilt && b.staff.length < b.jobs.length) { const needed = b.jobs.length - b.staff.length; for(let i=0; i<needed; i++) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0 && Math.random() < 0.5) { const worker = choose(candidates); const role = b.jobs[b.staff.length]; worker.job = { buildingId: b.id, role: role }; b.staff.push(worker.name); worker.happiness += 10; this.logInteraction(`[🤝入职] **${worker.name}** 在招聘会上找到了 **${b.name}** 的工作！`, "tag-build"); hiredCount++; } } } }); if(hiredCount === 0) this.log("招聘会结束了，似乎没有合适的岗位或求职者。", "tag-reject"); }
+            else if (id === 'jobfair') { let hiredCount = 0; this.buildings.forEach(b => { if (b.isBuilt && b.staff.length < b.jobs.length) { const needed = b.jobs.length - b.staff.length; for(let i=0; i<needed; i++) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0 && Math.random() < 0.5) { const worker = choose(candidates); const role = b.jobs[b.staff.length]; worker.job = { buildingId: b.id, role: role }; if (!b.staff.includes(worker.name) && b.staff.length < b.jobs.length) { b.staff.push(worker.name); worker.happiness += 10; this.logInteraction(`[🤝入职] **${worker.name}** 在招聘会上找到了 **${b.name}** 的工作！`, "tag-build"); hiredCount++; } } } } }); if(hiredCount === 0) this.log("招聘会结束了，似乎没有合适的岗位或求职者。", "tag-reject"); }
             else if (id === 'artfest') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 15); for(let k in c.relationships) c.relationships[k].love += 3; }); if (Math.random() < 0.1) { const victim = choose(this.chars); victim.happiness -= 10; this.logInteraction(`[🎨失窃] 糟糕！**${victim.name}** 珍藏的艺术品在活动中被偷了！(心情-10)`, "tag-crime"); } }
             else if (id === 'marathon') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); c.hunger = Math.max(0, c.hunger - 10); }); if (Math.random() < 0.05) { const injured = choose(this.chars); injured.happiness -= 20; injured.health = Math.max(0, injured.health - 20); this.logInteraction(`[🚑意外] **${injured.name}** 在马拉松中不慎扭伤了脚！(心情-20, 健康-20)`, "tag-reject"); } }
             else if (id === 'reading') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 5); for(let k in c.relationships) c.relationships[k].love += 2; }); if (Math.random() < 0.2) { const winner = choose(this.chars); winner.happiness = Math.min(100, winner.happiness + 10); this.logInteraction(`[🧠竞赛] **${winner.name}** 赢得了读书知识竞赛的冠军！大家向他表示祝贺。`, "tag-build"); } }
@@ -3594,13 +4024,33 @@ const TOWN_EVENTS = [
             b.isUnderConstruction = !b.isUnderConstruction;
             this.updateUI();
         }
-        accelerateBuild(buildId) { 
+        manualStartBuilding(buildId) {
+            const b = this.buildings.find(x => x.id === buildId);
+            if (!b || b.isBuilt) return;
+            // 检查是否有正在建造的建筑
+            const buildingBuilding = this.buildings.find(building => !building.isBuilt && building.isUnderConstruction);
+            if (buildingBuilding) {
+                // 重置正在建造的建筑状态
+                buildingBuilding.isUnderConstruction = false;
+                buildingBuilding.hasPermit = false;
+                buildingBuilding.currentProgress = 0;
+                this.log(`[🏗️建造] **${buildingBuilding.name}** 的建造已取消，重新变回待投票启动状态。`, "tag-build");
+            }
+            // 启动新建筑的建造
+            b.isUnderConstruction = true;
+            b.hasPermit = true;
+            this.log(`[🏗️建造] 玩家手动选择建造 **${b.name}**，正式动工！`, "tag-build");
+            this.updateUI();
+        }
+        accelerateBuild(buildId, amount = 50) { 
             const b = this.buildings.find(x => x.id === buildId); 
             if (!b || b.isBuilt) return; 
-            if (this.townMoney >= 50) { 
-                this.townMoney = parseFloat((this.townMoney - 50).toFixed(2));
-                let accelerateProgress = 20;
-                // 计算投资加速（只计算建造类型的投资，投资金额占总成本的比例，等比例加速）
+            amount = Number(amount) || 50;
+            if (this.townMoney >= amount) { 
+                this.townMoney = parseFloat((this.townMoney - amount).toFixed(2));
+                // 直接将所付金额作为加速进度（50 -> +50，100 -> +100 等）
+                let accelerateProgress = amount;
+                // 计算投资加速（只计算建造类型的投资，投资金额占总成本的比例，等比例放大）
                 const totalBuildInvestment = Object.values(b.investments || {}).reduce((sum, inv) => {
                     if (inv.type === 'build') return sum + (inv.amount || 0);
                     return sum;
@@ -3610,7 +4060,7 @@ const TOWN_EVENTS = [
                     accelerateProgress = Math.floor(accelerateProgress * (1 + investmentRatio));
                 }
                 b.currentProgress += accelerateProgress; 
-                this.log(`[💸加速] 镇长斥资加速 **${b.name}** 建设。`, "tag-build"); 
+                this.log(`[💸加速] 镇长斥资加速 **${b.name}** 建设（💰${amount}）。实际加速进度 +${accelerateProgress}`, "tag-build"); 
                 if (b.currentProgress >= b.totalCost && !b.isBuilt) { 
                     b.isBuilt = true; 
                     // 政府建筑列表（直接从镇库支付工资，不需要初始资金）
@@ -3638,7 +4088,7 @@ const TOWN_EVENTS = [
                 } 
                 this.updateUI(); 
             } else { 
-                alert("镇库资金不足 (需要50)！"); 
+                alert(`镇库资金不足 (需要${amount})！`); 
             } 
         }
         upgradeBuilding(bid) { 
@@ -3757,7 +4207,136 @@ const TOWN_EVENTS = [
                 char.skills[skillType] = rand(10, 19);
             }
         }
-        runElectionsAndHiring() { this.buildings.forEach(b => { if (!b.isBuilt || b.jobs.length === 0) return; if (b.staff.length === 0) { const candidates = this.chars.filter(c => !c.job).sort(() => Math.random() - 0.5); if (candidates.length > 0) { const votes = {}; candidates.forEach(c => votes[c.name] = 0); this.chars.forEach(voter => { let bestC = null; let maxLove = -999; candidates.forEach(c => { let love = (c.name !== voter.name) ? (voter.relationships[c.name]?.love || 0) : 50; love += rand(-20, 20); if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) votes[bestC.name]++; }); let winner = candidates[0]; let maxVotes = -1; for (let name in votes) { if (votes[name] > maxVotes) { maxVotes = votes[name]; winner = candidates.find(c => c.name === name); } } if (winner) { const roleName = b.jobs[0]; this.ensureEmployeeSkillsReset(winner, roleName); winner.job = { buildingId: b.id, role: roleName }; b.staff.push(winner.name); this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build"); } } } else if (b.staff.length < b.jobs.length) { const managerName = b.staff[0]; const manager = this.chars.find(c => c.name === managerName); if (manager) { const roleName = b.jobs[b.staff.length]; const candidates = this.chars.filter(c => !c.job); let bestC = null; let maxLove = -999; candidates.forEach(c => { const rel = manager.relationships[c.name]; let love = rel ? rel.love : 0; if (love > maxLove) { maxLove = love; bestC = c; } }); if (bestC) { this.ensureEmployeeSkillsReset(bestC, roleName); bestC.job = { buildingId: b.id, role: roleName }; b.staff.push(bestC.name); this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${roleName}。`); } } } if (b.id === 'footshop' && b.isBuilt && b.staff.length > 0) { const bossName = b.staff[0]; const boss = this.chars.find(c => c.name === bossName); if (boss && b.prostitutes.length < 3) { const candidates = this.chars.filter(c => !c.job && !c.prostitute && (c.hasTrait('estrous') || c.hasTrait('lustful'))); if (candidates.length > 0 && Math.random() < 0.1) { const target = choose(candidates); target.prostitute = { buildingId: b.id }; b.prostitutes.push(target.name); this.logInteraction(`[💋拉皮条] **${boss.name}** 说服了 **${target.name}** 在洗脚店卖银...`, "tag-drama"); } } } }); }
+        // 尝试让居民跳槽：如果找到更好的岗位或有空缺岗位，则执行跳槽并返回 true
+        trySwitchJob(char) {
+            if (!char || !char.job) return false;
+            const currentBuilding = this.buildings.find(b => b.id === char.job.buildingId);
+            const currentBaseWage = getJobWage(char.job.role) || 0;
+            // 搜集候选岗位：有空缺岗位 或 基础工资显著高于当前岗位（>20%）
+            const candidates = [];
+            this.buildings.forEach(b => {
+                if (!b.isBuilt || !b.jobs || b.jobs.length === 0) return;
+                if (b.id === (char.job && char.job.buildingId)) return; // 排除当前单位
+                // 优先考虑有空缺的岗位
+                if ((b.staff ? b.staff.length : 0) < b.jobs.length) {
+                    const roleName = b.jobs[(b.staff ? b.staff.length : 0)];
+                    candidates.push({ building: b, role: roleName, reason: 'vacancy' });
+                    return;
+                }
+                // 否则考虑更高工资岗位
+                const topRole = b.jobs[0];
+                const topWage = getJobWage(topRole) || 0;
+                if (topWage > currentBaseWage * 1.2) {
+                    candidates.push({ building: b, role: topRole, reason: 'better_pay', wage: topWage });
+                }
+            });
+            if (candidates.length === 0) return false;
+            // 排序：优先空缺岗位，再按工资降序
+            candidates.sort((a, b) => {
+                if (a.reason === b.reason) return (b.wage || 0) - (a.wage || 0);
+                return a.reason === 'vacancy' ? -1 : 1;
+            });
+            const pick = candidates[0];
+            if (!pick) return false;
+            // 执行跳槽：从原单位移除、加入新单位
+            if (currentBuilding && currentBuilding.staff) {
+                const idx = currentBuilding.staff.indexOf(char.name);
+                if (idx >= 0) currentBuilding.staff.splice(idx, 1);
+            }
+            const newBuilding = pick.building;
+            const newRole = pick.role;
+            // 重置技能（见习化）以匹配新岗位
+            this.ensureEmployeeSkillsReset(char, newRole);
+            char.job = { buildingId: newBuilding.id, role: newRole };
+            if (!newBuilding.staff) newBuilding.staff = [];
+            if (!newBuilding.staff.includes(char.name) && newBuilding.staff.length < newBuilding.jobs.length) {
+                newBuilding.staff.push(char.name);
+            }
+            // 提升心情并记录日志
+            char.happiness = Math.min(100, char.happiness + 10);
+            const timeStr = this.getDateTimeStr();
+            char.addLog(`${timeStr} 跳槽到 ${newBuilding.name} 担任 ${newRole}`);
+            this.logInteraction(`[🔁跳槽] **${char.name}** 从 ${currentBuilding ? currentBuilding.name : '前单位'} 跳槽到 **${newBuilding.name}** 担任 ${newRole}`, "tag-build");
+            return true;
+        }
+        runElectionsAndHiring() {
+            this.buildings.forEach(b => {
+                if (!b.isBuilt || b.jobs.length === 0) return;
+                // 若无员工，进行选举产生第一名员工
+                if (!b.staff || b.staff.length === 0) {
+                    const candidates = this.chars.filter(c => !c.job).sort(() => Math.random() - 0.5);
+                    if (candidates.length > 0) {
+                        const votes = {};
+                        candidates.forEach(c => votes[c.name] = 0);
+                        this.chars.forEach(voter => {
+                            let bestC = null; let maxLove = -999;
+                            candidates.forEach(c => {
+                                let love = (c.name !== voter.name) ? (voter.relationships[c.name]?.love || 0) : 50;
+                                love += rand(-20, 20);
+                                if (love > maxLove) { maxLove = love; bestC = c; }
+                            });
+                            if (bestC) votes[bestC.name]++;
+                        });
+                        let winner = candidates[0]; let maxVotes = -1;
+                        for (let name in votes) {
+                            if (votes[name] > maxVotes) { maxVotes = votes[name]; winner = candidates.find(c => c.name === name); }
+                        }
+                        if (winner) {
+                            const roleName = b.jobs[0];
+                            this.ensureEmployeeSkillsReset(winner, roleName);
+                            winner.job = { buildingId: b.id, role: roleName };
+                            if (!b.staff) b.staff = [];
+                            if (!b.staff.includes(winner.name) && b.staff.length < b.jobs.length) {
+                                b.staff.push(winner.name);
+                                this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build");
+                            }
+                        }
+                    }
+                } else if (b.staff.length < b.jobs.length) {
+                    const managerName = b.staff[0];
+                    const manager = this.chars.find(c => c.name === managerName);
+                    if (manager) {
+                        // 找到下一个未被占用的岗位（兼容 staff 中可能为对象或字符串）
+                        const occupiedRoles = (b.staff || []).map(s => {
+                            const staffName = (typeof s === 'object' && s && s.name) ? s.name : s;
+                            const staffChar = this.chars.find(ch => ch.name === staffName);
+                            return staffChar && staffChar.job ? staffChar.job.role : null;
+                        }).filter(Boolean);
+                        const nextRole = b.jobs.find(j => !occupiedRoles.includes(j)) || b.jobs[b.staff.length];
+                        const candidates = this.chars.filter(c => !c.job);
+                        let bestC = null; let maxLove = -999;
+                        candidates.forEach(c => {
+                            const rel = manager.relationships[c.name];
+                            let love = rel ? rel.love : 0;
+                            if (love > maxLove) { maxLove = love; bestC = c; }
+                        });
+                        if (bestC) {
+                            this.ensureEmployeeSkillsReset(bestC, nextRole);
+                            bestC.job = { buildingId: b.id, role: nextRole };
+                            if (!b.staff) b.staff = [];
+                            if (!b.staff.includes(bestC.name) && b.staff.length < b.jobs.length) {
+                                b.staff.push(bestC.name);
+                                this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${nextRole}。`);
+                            }
+                        }
+                    }
+                }
+
+                if (b.id === 'footshop' && b.isBuilt && b.staff.length > 0) {
+                    const bossName = b.staff[0];
+                    const boss = this.chars.find(c => c.name === bossName);
+                    if (boss && b.prostitutes.length < 3) {
+                        const candidates = this.chars.filter(c => !c.job && !c.prostitute && (c.hasTrait('estrous') || c.hasTrait('lustful')));
+                        if (candidates.length > 0 && Math.random() < 0.1) {
+                            const target = choose(candidates);
+                            target.prostitute = { buildingId: b.id };
+                            b.prostitutes.push(target.name);
+                            this.logInteraction(`[💋拉皮条] **${boss.name}** 说服了 **${target.name}** 在洗脚店卖银...`, "tag-drama");
+                        }
+                    }
+                }
+            });
+        }
         doRobbery(p, target = null) {
             p.consecutiveWork = 0;
             let victim = target; if (!victim) { const targets = this.chars.filter(c => c.name !== p.name && c.money > 20); if (targets.length === 0) return false; victim = choose(targets); }
@@ -5046,7 +5625,7 @@ const TOWN_EVENTS = [
                     let btnHtml = '';
                     if (!b.isBuilt) {
                         if (b.isUnderConstruction) {
-                            btnHtml = `<button class="btn accelerate" onclick="gameInstance.accelerateBuild('${b.id}')">💸 资金加速 (50)</button><button class="btn stop-build" onclick="gameInstance.toggleConstruction('${b.id}')">⏹ 暂停施工</button>`;
+                            btnHtml = `<button class="btn accelerate" onclick="gameInstance.accelerateBuild('${b.id}',50)">💸 资金加速 (50)</button><button class="btn accelerate" onclick="gameInstance.accelerateBuild('${b.id}',100)">💸 资金加速 (100)</button><button class="btn accelerate" onclick="gameInstance.accelerateBuild('${b.id}',200)">💸 资金加速 (200)</button><button class="btn accelerate" onclick="gameInstance.accelerateBuild('${b.id}',500)">💸 资金加速 (500)</button><button class="btn stop-build" onclick="gameInstance.toggleConstruction('${b.id}')">⏹ 暂停施工</button>`;
                         } else if (b.currentProgress > 0 || b.hasPermit) {
                             btnHtml = `<button class="btn resume-build" onclick="gameInstance.toggleConstruction('${b.id}')">▶ 恢复施工</button>`;
                         } else {
@@ -5054,7 +5633,7 @@ const TOWN_EVENTS = [
                             if (b.category === 'power') {
                                 btnHtml = `<button class="btn start-build" onclick="gameInstance.toggleConstruction('${b.id}')">🏗️ 开始建造</button>`;
                         } else {
-                            btnHtml = `<button class="btn start-build" disabled title="请等待镇长发起投票">🗳️ 待投票启动</button>`;
+                            btnHtml = `<button class="btn start-build" onclick="gameInstance.manualStartBuilding('${b.id}')" title="手动选择建造此建筑">🏗️ 手动建造</button>`;
                             }
                         }
                     }
@@ -5264,6 +5843,21 @@ const TOWN_EVENTS = [
                 `;
             }
             let bagHtml = '<div style="color:#999; font-size:0.85rem;">背包空空如也</div>'; if (c.bag && c.bag.length > 0) { bagHtml = '<div class="bag-grid">'; c.bag.forEach(itemId => { const item = ITEMS_DB[itemId]; if(item) { const tooltipText = getItemTooltipText(itemId); bagHtml += `<div class="bag-item tooltip-item" data-tip="${tooltipText}">${item.name}</div>`; } }); bagHtml += '</div>'; }
+            // 生成虚拟币持仓显示
+            let holdingsHtml = '<div style="color:#999;">暂无持仓</div>';
+            if (this.cryptoHoldings && (this.cryptoHoldings[c.name] || this.cryptoHoldings[`镇库(玩家)`])) {
+                const h = this.cryptoHoldings[c.name] || {};
+                const entries = Object.keys(h);
+                if (entries.length > 0) {
+                    holdingsHtml = '<div style="font-size:0.95rem; color:#333;">';
+                    entries.forEach(k => {
+                        const coin = this.cryptoMarket && this.cryptoMarket.coins.find(cc => cc.id === k);
+                        const name = coin ? `${coin.name} (${coin.symbol})` : k;
+                        holdingsHtml += `<div style="margin-bottom:6px;">${name}: <b>${h[k]}</b></div>`;
+                    });
+                    holdingsHtml += '</div>';
+                }
+            }
             let historyHtml = '<div class="history-list">'; if (!c.history || c.history.length === 0) { historyHtml += '<div class="history-item">暂无活动记录</div>'; } else { c.history.forEach(h => { historyHtml += `<div class="history-item">${h}</div>`; }); } historyHtml += '</div>';
             let jailStatus = ""; if (c.jailTerm > 0) { jailStatus = `<div style="margin-top:5px; color:#e74c3c; font-weight:bold;">⛓️ 服刑中: 剩余 ${(c.jailTerm/60).toFixed(1)} 小时</div>`; }
             const skillsHtml = `
@@ -5300,7 +5894,7 @@ const TOWN_EVENTS = [
                             <div class="detail-group"><div class="detail-label">人际关系 (点击查看详情)</div><div class="detail-desc">伴侣: ${c.partner ? `<b>${c.partner}</b>` : '单身'} ${c.prostitute ? '(失足)' : ''}</div><div class="history-list" style="max-height:400px;">${relationListHtml}</div></div>
                         </div>
                         <div id="char-tab-assets-content" class="char-tab-panel">
-                            <div class="detail-group"><div class="detail-label">住宅 <button class="edit-btn" onclick="gameInstance.showResidenceSelect('${c.name}')">[更换住宅]</button></div>
+                        <div class="detail-group"><div class="detail-label">住宅 <button class="edit-btn" onclick="gameInstance.showResidenceSelect('${c.name}')">[更换住宅]</button></div>
                    ${c.residence ? (() => {
                        const res = gameInstance.buildings.find(b => b.id === c.residence);
                        if(!res) return '<div class="detail-val">无</div>';
@@ -5311,6 +5905,8 @@ const TOWN_EVENTS = [
                        if(effects.staminaRecovery) effectsText.push(`体力恢复+${(effects.staminaRecovery * 100).toFixed(0)}%`);
                        return `<div class="detail-val">${res.name}</div><div class="detail-desc">${res.desc}${effectsText.length > 0 ? '<br>效果: ' + effectsText.join(', ') : ''}</div>`;
                    })() : '<div class="detail-val">无</div>'}
+                        </div>
+                        <div class="detail-group"><div class="detail-label">🪙 虚拟币持仓</div><div class="detail-desc">${holdingsHtml}</div></div>
                             </div>
                             <div class="detail-group"><div class="detail-label">💰 近十次资金收入</div>
                     ${(() => {
@@ -5353,6 +5949,10 @@ const TOWN_EVENTS = [
         showBuildingDetail(bid) {
             const b = this.buildings.find(x => x.id === bid); if(!b) return;
             const modal = document.getElementById('building-detail-modal');
+            if (modal) {
+                // 点击 overlay 的空白区域即可关闭建筑详情（点击 modal-content 不会触发）
+                modal.onclick = (e) => { if (e.target === modal) this.closeBuildingDetail(); };
+            }
             const nameEl = document.getElementById('b-detail-name'); if(nameEl) nameEl.innerText = b.name;
             const content = document.getElementById('b-detail-content');
             // 如果是住宅建筑，使用特殊显示逻辑
@@ -5498,153 +6098,60 @@ const TOWN_EVENTS = [
                 </div>
                 `;
             }
-            // 小麦库存显示（仅小麦农场）
-            let wheatHtml = '';
-            if (b.isBuilt && b.id === 'wheatfarm') {
-                const wheatAmount = b.wheat || 0;
-                const wheatPrice = 3; // 每单位小麦售价3元
-                const totalValue = wheatAmount * wheatPrice;
-                // 计算产出范围（基础15-35，考虑实际员工技能和等级加成）
-                const baseMin = 15, baseMax = 35;
-                // 计算实际员工技能加成（与生产函数逻辑一致）
+            // 通用库存显示函数
+            const getInventoryHtml = (config) => {
+                const { buildingId, inventoryKey, itemName, price, emoji, baseMin, baseMax, skillType, sellFunc, showModalFunc, bgColor = '#fff8e1', borderColor = '#ffc107', textColor = '#f57c00', btnColor = '#f57c00', btnHoverColor = '#ff9800', borderTopColor = '#ffecb3' } = config;
+                if (!b.isBuilt || b.id !== buildingId) return '';
+                const amount = b[inventoryKey] || 0;
+                const totalValue = amount * price;
                 let actualSkillBonus = 1.0;
                 if (b.staff && b.staff.length > 0) {
-                    let totalSkill = 0;
-                    let staffCount = 0;
+                    let totalSkill = 0, staffCount = 0;
                     b.staff.forEach(staffName => {
                         const staff = this.chars.find(c => c.name === staffName);
                         if (staff && staff.job && staff.job.buildingId === b.id) {
-                            totalSkill += staff.skills.social || 0;
+                            totalSkill += staff.skills[skillType] || 0;
                             staffCount++;
                         }
                     });
                     if (staffCount > 0) {
                         const avgSkill = totalSkill / staffCount;
-                        // 技能加成：每10点技能增加5%产出（最高100%加成）
                         actualSkillBonus = 1.0 + Math.min(1.0, (avgSkill / 10) * 0.05);
                     }
                 }
-                const levelBonus = 1.0 + (b.level - 1) * 0.1; // 等级加成
+                const levelBonus = 1.0 + (b.level - 1) * 0.1;
                 const minProduced = Math.floor(baseMin * levelBonus);
                 const maxProduced = Math.floor(baseMax * actualSkillBonus * levelBonus);
-                wheatHtml = `
-                <div class="section-title">🌾 小麦库存</div>
-                <div style="background:#fff8e1; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ffc107;">
+                return `
+                <div class="section-title">${emoji} ${itemName}库存</div>
+                <div style="background:${bgColor}; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid ${borderColor};">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <div style="flex:1;">
                             <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">当前库存</div>
-                            <div style="font-size:1.5rem; font-weight:bold; color:#f57c00;">🌾 ${wheatAmount} 单位</div>
-                            <div style="font-size:0.75rem; color:#999; margin-top:5px;">每单位售价：💰${wheatPrice} | 总价值：💰${this.formatMoney(totalValue)}</div>
-                            <div style="font-size:0.75rem; color:#666; margin-top:8px; padding-top:8px; border-top:1px solid #ffecb3;">📊 每日产出范围：${minProduced}-${maxProduced} 单位（基础${baseMin}-${baseMax}，受员工技能和建筑等级影响）</div>
+                            <div style="font-size:1.5rem; font-weight:bold; color:${textColor};">${emoji} ${amount} 单位</div>
+                            <div style="font-size:0.75rem; color:#999; margin-top:5px;">每单位售价：💰${price} | 总价值：💰${this.formatMoney(totalValue)}</div>
+                            <div style="font-size:0.75rem; color:#666; margin-top:8px; padding-top:8px; border-top:1px solid ${borderTopColor};">📊 每日产出范围：${minProduced}-${maxProduced} 单位（基础${baseMin}-${baseMax}，受员工技能和建筑等级影响）</div>
                         </div>
                     </div>
-                    ${wheatAmount > 0 ? `
+                    ${amount > 0 ? `
                     <div style="display:flex; gap:10px;">
-                        <button class="btn" style="background:#f57c00; color:white; flex:1;" onclick="gameInstance.sellWheat('${b.id}', 'all')">全部售出 (💰${this.formatMoney(totalValue)})</button>
-                        <button class="btn" style="background:#ff9800; color:white; flex:1;" onclick="gameInstance.showSellWheatModal('${b.id}')">部分售出</button>
+                        <button class="btn" style="background:${btnColor}; color:white; flex:1;" onclick="gameInstance.${sellFunc}('${b.id}', 'all')">全部售出 (💰${this.formatMoney(totalValue)})</button>
+                        <button class="btn" style="background:${btnHoverColor}; color:white; flex:1;" onclick="gameInstance.${showModalFunc}('${b.id}')">部分售出</button>
                     </div>
-                    ` : '<div style="text-align:center; color:#999; padding:10px;">暂无小麦库存，每日24:00自动生产</div>'}
+                    ` : `<div style="text-align:center; color:#999; padding:10px;">暂无${itemName}库存，每日24:00自动生产</div>`}
                 </div>
                 `;
-            }
-            // 水稻库存显示（仅水稻田地）
-            let riceHtml = '';
-            if (b.isBuilt && b.id === 'ricefield') {
-                const riceAmount = b.rice || 0;
-                const ricePrice = 3.5; // 每单位水稻售价3.5元
-                const totalValue = riceAmount * ricePrice;
-                // 计算产出范围（基础15-35，考虑实际员工技能和等级加成）
-                const baseMin = 15, baseMax = 35;
-                // 计算实际员工技能加成（与生产函数逻辑一致）
-                let actualSkillBonus = 1.0;
-                if (b.staff && b.staff.length > 0) {
-                    let totalSkill = 0;
-                    let staffCount = 0;
-                    b.staff.forEach(staffName => {
-                        const staff = this.chars.find(c => c.name === staffName);
-                        if (staff && staff.job && staff.job.buildingId === b.id) {
-                            totalSkill += staff.skills.social || 0;
-                            staffCount++;
-                        }
-                    });
-                    if (staffCount > 0) {
-                        const avgSkill = totalSkill / staffCount;
-                        // 技能加成：每10点技能增加5%产出（最高100%加成）
-                        actualSkillBonus = 1.0 + Math.min(1.0, (avgSkill / 10) * 0.05);
-                    }
-                }
-                const levelBonus = 1.0 + (b.level - 1) * 0.1; // 等级加成
-                const minProduced = Math.floor(baseMin * levelBonus);
-                const maxProduced = Math.floor(baseMax * actualSkillBonus * levelBonus);
-                riceHtml = `
-                <div class="section-title">🌾 水稻库存</div>
-                <div style="background:#fff8e1; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ffc107;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div style="flex:1;">
-                            <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">当前库存</div>
-                            <div style="font-size:1.5rem; font-weight:bold; color:#f57c00;">🌾 ${riceAmount} 单位</div>
-                            <div style="font-size:0.75rem; color:#999; margin-top:5px;">每单位售价：💰${ricePrice} | 总价值：💰${this.formatMoney(totalValue)}</div>
-                            <div style="font-size:0.75rem; color:#666; margin-top:8px; padding-top:8px; border-top:1px solid #ffecb3;">📊 每日产出范围：${minProduced}-${maxProduced} 单位（基础${baseMin}-${baseMax}，受员工技能和建筑等级影响）</div>
-                        </div>
-                    </div>
-                    ${riceAmount > 0 ? `
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn" style="background:#f57c00; color:white; flex:1;" onclick="gameInstance.sellRice('${b.id}', 'all')">全部售出 (💰${this.formatMoney(totalValue)})</button>
-                        <button class="btn" style="background:#ff9800; color:white; flex:1;" onclick="gameInstance.showSellRiceModal('${b.id}')">部分售出</button>
-                    </div>
-                    ` : '<div style="text-align:center; color:#999; padding:10px;">暂无水稻库存，每日24:00自动生产</div>'}
-                </div>
-                `;
-            }
-            // 电子元件库存显示（仅电子厂）
-            let electronicsHtml = '';
-            if (b.isBuilt && b.id === 'electronics') {
-                const electronicsAmount = b.electronics || 0;
-                const electronicsPrice = 9; // 每单位电子元件售价9元
-                const totalValue = electronicsAmount * electronicsPrice;
-                // 计算产出范围（基础10-20，考虑实际员工技能和等级加成）
-                const baseMin = 10, baseMax = 20;
-                // 计算实际员工技能加成（与生产函数逻辑一致）
-                let actualSkillBonus = 1.0;
-                if (b.staff && b.staff.length > 0) {
-                    let totalSkill = 0;
-                    let staffCount = 0;
-                    b.staff.forEach(staffName => {
-                        const staff = this.chars.find(c => c.name === staffName);
-                        if (staff && staff.job && staff.job.buildingId === b.id) {
-                            totalSkill += staff.skills.culture || 0;
-                            staffCount++;
-                        }
-                    });
-                    if (staffCount > 0) {
-                        const avgSkill = totalSkill / staffCount;
-                        // 技能加成：每10点技能增加5%产出（最高100%加成）
-                        actualSkillBonus = 1.0 + Math.min(1.0, (avgSkill / 10) * 0.05);
-                    }
-                }
-                const levelBonus = 1.0 + (b.level - 1) * 0.1; // 等级加成
-                const minProduced = Math.floor(baseMin * levelBonus);
-                const maxProduced = Math.floor(baseMax * actualSkillBonus * levelBonus);
-                electronicsHtml = `
-                <div class="section-title">🔌 电子元件库存</div>
-                <div style="background:#e8eaf6; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #3f51b5;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div style="flex:1;">
-                            <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">当前库存</div>
-                            <div style="font-size:1.5rem; font-weight:bold; color:#3f51b5;">🔌 ${electronicsAmount} 单位</div>
-                            <div style="font-size:0.75rem; color:#999; margin-top:5px;">每单位售价：💰${electronicsPrice} | 总价值：💰${this.formatMoney(totalValue)}</div>
-                            <div style="font-size:0.75rem; color:#666; margin-top:8px; padding-top:8px; border-top:1px solid #c5cae9;">📊 每日产出范围：${minProduced}-${maxProduced} 单位（基础${baseMin}-${baseMax}，受员工技能和建筑等级影响）</div>
-                        </div>
-                    </div>
-                    ${electronicsAmount > 0 ? `
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn" style="background:#3f51b5; color:white; flex:1;" onclick="gameInstance.sellElectronics('${b.id}', 'all')">全部售出 (💰${this.formatMoney(totalValue)})</button>
-                        <button class="btn" style="background:#5c6bc0; color:white; flex:1;" onclick="gameInstance.showSellElectronicsModal('${b.id}')">部分售出</button>
-                    </div>
-                    ` : '<div style="text-align:center; color:#999; padding:10px;">暂无电子元件库存，每日24:00自动生产</div>'}
-                </div>
-                `;
-            }
+            };
+            // 小麦库存显示
+            const wheatHtml = getInventoryHtml({ buildingId: 'wheatfarm', inventoryKey: 'wheat', itemName: '小麦', price: 3, emoji: '🌾', baseMin: 15, baseMax: 35, skillType: 'social', sellFunc: 'sellWheat', showModalFunc: 'showSellWheatModal' });
+            // 水稻库存显示
+            const riceHtml = getInventoryHtml({ buildingId: 'ricefield', inventoryKey: 'rice', itemName: '水稻', price: 3.5, emoji: '🌾', baseMin: 15, baseMax: 35, skillType: 'social', sellFunc: 'sellRice', showModalFunc: 'showSellRiceModal' });
+            // 玉米库存显示
+            const cornHtml = getInventoryHtml({ buildingId: 'cornplantation', inventoryKey: 'corn', itemName: '玉米', price: 3.2, emoji: '🌽', baseMin: 15, baseMax: 35, skillType: 'social', sellFunc: 'sellCorn', showModalFunc: 'showSellCornModal' });
+            // 土豆库存显示
+            const potatoHtml = getInventoryHtml({ buildingId: 'potatofarm', inventoryKey: 'potato', itemName: '土豆', price: 2.8, emoji: '🥔', baseMin: 15, baseMax: 35, skillType: 'social', sellFunc: 'sellPotato', showModalFunc: 'showSellPotatoModal' });
+            // 电子元件库存显示
+            const electronicsHtml = getInventoryHtml({ buildingId: 'electronics', inventoryKey: 'electronics', itemName: '电子元件', price: 9, emoji: '🔌', baseMin: 10, baseMax: 20, skillType: 'culture', sellFunc: 'sellElectronics', showModalFunc: 'showSellElectronicsModal', bgColor: '#e8eaf6', borderColor: '#3f51b5', textColor: '#3f51b5', btnColor: '#3f51b5', btnHoverColor: '#5c6bc0', borderTopColor: '#c5cae9' });
             // 收入统计HTML（仅显示有员工的非银行建筑）- 紧凑版
             let revenueStatsHtml = '';
             if (b.isBuilt && b.id !== 'bank' && b.jobs && b.jobs.length > 0) {
@@ -5785,6 +6292,8 @@ const TOWN_EVENTS = [
                     ${buildingMoneyHtml}
                     ${wheatHtml}
                     ${riceHtml}
+                    ${cornHtml}
+                    ${potatoHtml}
                     ${electronicsHtml}
                     ${bankDepositsHtml}
                     ${b.id === 'hotel' && b.isBuilt ? `
@@ -6576,7 +7085,7 @@ const TOWN_EVENTS = [
         closeMap() { switchTab('residents'); }
         closeGameGuide() { this.closeModal('guide-modal'); }
         manualSave() { this.saveData(false); }
-        resetData() { if(confirm("确定要重置所有数据吗？这将无法撤销！")) { localStorage.removeItem('happyTownV2_Save'); location.reload(); } }
+        resetData() { if(confirm("确定要重置所有数据吗？这将无法撤销！")) { try { localStorage.removeItem('game_crypto_state_v1'); } catch(e) {} localStorage.removeItem('happyTownV2_Save'); location.reload(); } }
         openEditModal(title, options, currentVal, type, charName) {
             const titleEl = document.getElementById('edit-title'); if(titleEl) titleEl.innerText = title;
             const sel = document.getElementById('edit-select');
