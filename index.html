@@ -257,6 +257,7 @@ const TOWN_EVENTS = [
         { id: 'infrastructure', name: '🏗️ 推进基础设施建设', cost: 0, desc: '增加在建设的建筑的20%进度。副作用：居民因施工噪音心情-5。3天内只能进行一次。', emoji: '🏗️', special: true },
         { id: 'literacy', name: '📚 扫盲教育推进', cost: 200, desc: '居民文化技能普遍提升。', emoji: '📚', special: true },
         { id: 'investment', name: '💰 投资行动', cost: 0, desc: '鼓励全镇居民对建造中的建筑或现有建筑进行大额投资。3天内只能进行一次。', emoji: '💰', special: true },
+        { id: 'crypto_incentive', name: '🪙 虚拟币激励', cost: 0, desc: '通过镇府宣传与补贴刺激虚拟币交易，可能触发一次市场价格上涨（冷却时间3天）。', emoji: '🪙', special: true },
         // 节日 / 特定日期
         { id: 'new_year', name: '🧨 元旦佳节', cost: 300, desc: '新年新气象！全员快乐+20，消费欲望提升。', emoji: '🧨', date: {m:1, d:1} },
         { id: 'cat_return', name: '🐱 猫咪报恩日', cost: 0, desc: '传说中猫神显灵的日子，每位居民都会遇到随机好事！', emoji: '🐱', date: {m:2, d:22} },
@@ -516,6 +517,7 @@ const TOWN_EVENTS = [
             this.townLevelPopupShown = new Set(); // 记录已经显示过弹窗的等级，防止重复弹出
             this.lastInfrastructureBuildTime = 0; // 上次使用"推进基础设施建设"的时间（游戏天数）
             this.lastInvestmentActionTime = 0; // 上次使用"投资行动"的时间（游戏天数）
+            this.lastCryptoIncentiveTime = 0; // 上次使用"虚拟币激励"的时间（游戏天数）
             this.dailyTotalRevenue = 0; // 每日总收入（只统计收入，不包括支出）
             this.lastRevenueResetDay = 0; // 上次重置每日收入的日期
             // DeepSeek API 配置
@@ -550,6 +552,87 @@ const TOWN_EVENTS = [
                     }
                     const headerGroup = document.querySelector('header .header-group');
                     if (headerGroup && !document.getElementById('version-banner')) {
+                        // 版本历史数据，后续可在此追加旧版本记录
+                        const VERSION_HISTORY = [
+                            { ver: '2.6.0', title: '虚拟币市场版', details: '新增虚拟币市场与玩家/居民交易功能。' },
+                            { ver: '2.5.0', title: '稳定与修复', details: '修复若干崩溃并改善性能。' },
+                            { ver: '2.4.0', title: '社区功能', details: '新增社区互动与好友系统。' }
+                        ];
+
+                        // 创建并展示变更记录模态框（如果尚未创建）
+                        function ensureChangelogModal() {
+                            if (document.getElementById('changelog-overlay')) return;
+                            const overlay = document.createElement('div');
+                            overlay.id = 'changelog-overlay';
+                            overlay.style.position = 'fixed';
+                            overlay.style.left = '0';
+                            overlay.style.top = '0';
+                            overlay.style.width = '100%';
+                            overlay.style.height = '100%';
+                            overlay.style.background = 'rgba(0,0,0,0.45)';
+                            overlay.style.display = 'flex';
+                            overlay.style.alignItems = 'center';
+                            overlay.style.justifyContent = 'center';
+                            overlay.style.zIndex = '9999';
+
+                            const modal = document.createElement('div');
+                            modal.id = 'changelog-modal';
+                            modal.style.background = '#fff';
+                            modal.style.color = '#222';
+                            modal.style.maxWidth = '800px';
+                            modal.style.width = '90%';
+                            modal.style.maxHeight = '80%';
+                            modal.style.overflow = 'auto';
+                            modal.style.borderRadius = '10px';
+                            modal.style.padding = '18px';
+                            modal.style.position = 'relative';
+
+                            const title = document.createElement('h3');
+                            title.innerText = '版本更新记录';
+                            title.style.margin = '0 0 8px 0';
+                            modal.appendChild(title);
+
+                            const closeBtn = document.createElement('button');
+                            closeBtn.innerText = '关闭';
+                            closeBtn.style.position = 'absolute';
+                            closeBtn.style.right = '12px';
+                            closeBtn.style.top = '12px';
+                            closeBtn.style.padding = '6px 10px';
+                            closeBtn.style.cursor = 'pointer';
+                            closeBtn.addEventListener('click', () => overlay.remove());
+                            modal.appendChild(closeBtn);
+
+                            const list = document.createElement('div');
+                            list.id = 'changelog-list';
+                            list.style.marginTop = '12px';
+                            list.style.fontSize = '14px';
+                            list.style.lineHeight = '1.6';
+
+                            VERSION_HISTORY.forEach(v => {
+                                const item = document.createElement('div');
+                                item.style.padding = '10px 0';
+                                item.style.borderBottom = '1px solid #eee';
+
+                                const h = document.createElement('div');
+                                h.style.fontWeight = '700';
+                                h.innerText = `${v.ver} — ${v.title}`;
+                                item.appendChild(h);
+
+                                const p = document.createElement('div');
+                                p.style.marginTop = '6px';
+                                p.style.color = '#444';
+                                p.innerText = v.details;
+                                item.appendChild(p);
+
+                                list.appendChild(item);
+                            });
+
+                            modal.appendChild(list);
+                            overlay.appendChild(modal);
+                            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+                            document.body.appendChild(overlay);
+                        }
+
                         const vb = document.createElement('div');
                         vb.id = 'version-banner';
                         vb.style.fontSize = '0.85rem';
@@ -559,7 +642,10 @@ const TOWN_EVENTS = [
                         vb.style.color = 'white';
                         vb.style.borderRadius = '8px';
                         vb.style.fontWeight = '600';
+                        vb.style.cursor = 'pointer';
+                        vb.setAttribute('title', '点击查看版本更新记录');
                         vb.innerText = 'Ver 2.6.0 — 虚拟币市场版：新增虚拟币市场与玩家/居民交易功能';
+                        vb.addEventListener('click', () => { ensureChangelogModal(); });
                         headerGroup.appendChild(vb);
                     }
                     // 更新顶部小版本号文本（header h1 的 small 标签）
@@ -608,6 +694,56 @@ const TOWN_EVENTS = [
             // 小镇等级加成
             attraction += this.townLevel * 5; // 每个等级+5吸引力
             return Math.max(0, attraction);
+        }
+        // ==== 员工与岗位同步工具（确保 building.staff 与 chars[].job 保持一致） ====
+        assignStaffToBuilding(buildingId, charName, role) {
+            const b = this.buildings.find(x => x.id === buildingId);
+            if (!b) return false;
+            this.ensureBuildingStaff(b);
+            const maxSlots = b.jobs ? b.jobs.length : Infinity;
+            let assigned = false;
+            if (!b.staff.includes(charName) && b.staff.length < maxSlots) {
+                b.staff.push(charName);
+                assigned = true;
+            }
+            const ch = this.chars.find(c => c.name === charName);
+            if (ch) {
+                if (assigned) {
+                    ch.job = { buildingId: buildingId, role: role || (b.jobs && b.jobs[b.staff.indexOf(charName)]) || '员工' };
+                } else {
+                    // 无法分配（例如岗位已满）时，不要错误地设置居民的 job；
+                    // 若该居民的 job 指向该 building 但 building.staff 中未包含该居民，则清理该 job
+                    if (ch.job && ch.job.buildingId === buildingId && !b.staff.includes(charName)) {
+                        ch.job = null;
+                    }
+                }
+            }
+            return assigned;
+        }
+        removeStaffFromBuilding(buildingId, charName) {
+            const b = this.buildings.find(x => x.id === buildingId);
+            if (!b || !b.staff) return;
+            const idx = b.staff.indexOf(charName);
+            if (idx >= 0) b.staff.splice(idx, 1);
+            const ch = this.chars.find(c => c.name === charName);
+            if (ch && ch.job && ch.job.buildingId === buildingId) ch.job = null;
+        }
+        setBuildingStaffFromList(buildingId, staffList) {
+            const b = this.buildings.find(x => x.id === buildingId);
+            if (!b) return;
+            const saved = Array.isArray(staffList) ? staffList.slice() : [];
+            b.staff = [];
+            const maxSlots = b.jobs ? b.jobs.length : saved.length;
+            for (let i = 0; i < Math.min(saved.length, maxSlots); i++) {
+                const name = (typeof saved[i] === 'object' && saved[i] && saved[i].name) ? saved[i].name : saved[i];
+                if (!name) continue;
+                const role = (b.jobs && b.jobs[i]) ? b.jobs[i] : (b.jobs && b.jobs[0]) || null;
+                this.assignStaffToBuilding(buildingId, name, role);
+            }
+        }
+        ensureBuildingStaff(building) {
+            if (!building) return;
+            if (!building.staff) building.staff = [];
         }
         getIdeologyNames() { return IDEOLOGIES.map(i => i.name); }
         getTraitNames() { return TRAITS.map(t => t.name); }
@@ -1887,15 +2023,18 @@ const TOWN_EVENTS = [
             this.cryptoMarket.config = {
                 autoTradeProb: 0.03, // 居民自动交易概率（每轮每居民）
                 maxTradePct: 0.5,    // 单次交易最大占资金比例（居民）
-                volatility: 0.15,    // 价格波动幅度（固定默认 ±15%）
+                volatility: 0.30,    // 价格波动幅度（固定默认 ±30%）
+                upCap: 0.30,         // 单步最大涨幅 +30%
+                downCap: -0.15,      // 单步最大跌幅 -15%
                 historyLength: 100   // 价格历史长度
             };
-            // 初始化价格历史数组，并初始化 min/max
+            // 初始化价格历史数组，并初始化 min/max 与初始价
             this.cryptoMarket.coins.forEach(c => {
                 c.history = [c.price];
                 c.historyMax = this.cryptoMarket.config.historyLength || 100;
                 c.minPrice = (typeof c.minPrice === 'number') ? c.minPrice : c.price;
                 c.maxPrice = (typeof c.maxPrice === 'number') ? c.maxPrice : c.price;
+                c.initialPrice = (typeof c.initialPrice === 'number') ? c.initialPrice : c.price;
             });
             this.cryptoHoldings = this.cryptoHoldings || {};
             // 尝试从 localStorage 加载之前的市场状态（价格历史 / 持仓 / 交易记录）
@@ -1909,13 +2048,41 @@ const TOWN_EVENTS = [
             if (this.cryptoMarket.intervalId) return;
             // 每10秒更新一次价格（可调整）
             this.cryptoMarket.intervalId = setInterval(() => {
-                const cfg = this.cryptoMarket.config || { volatility: 0.1, autoTradeProb: 0.03, maxTradePct: 0.5, historyLength: 100 };
+                const cfg = this.cryptoMarket.config || { volatility: 0.3, autoTradeProb: 0.03, maxTradePct: 0.5, historyLength: 100 };
                 this.cryptoMarket.coins.forEach(c => {
-                    // 随机波动：使用可配置的 volatility（例如 0.1 表示 ±10%）
+                    // 随机波动：使用可配置的 volatility（例如 0.3 表示 ±30%）
                     const base = (Math.random() - 0.5) * cfg.volatility;
                     const noise = (Math.random() - 0.5) * (cfg.volatility * 0.2);
-                    const changePct = base + noise;
-                    const newPrice = Math.max(0.0001, parseFloat((c.price * (1 + changePct)).toFixed(2)));
+                    let changePct = base + noise;
+                    // 如果管理/玩家为该币设置了forceNextMove，则强制下一次走势（使用一个温和随机幅度）
+                    if (c.forceNextMove) {
+                        const upCap = (typeof cfg.upCap === 'number') ? cfg.upCap : 0.30;
+                        const downCap = (typeof cfg.downCap === 'number') ? cfg.downCap : -0.15;
+                        if (c.forceNextMove === 'up') {
+                            // 保证为正（1% - upCap）
+                            changePct = 0.01 + Math.random() * Math.max(0, upCap - 0.01);
+                        } else if (c.forceNextMove === 'down') {
+                            // 保证为负（-1% 到 downCap）
+                            const negCap = Math.min(-0.01, downCap);
+                            // 生成负值：在 negCap .. -0.01 之间
+                            changePct = negCap + Math.random() * (Math.abs(negCap) - 0.01);
+                            // ensure negative
+                            if (changePct >= 0) changePct = -0.01;
+                        }
+                        // 清除覆盖标志（仅生效一次）
+                        const coinName = c.name;
+                        c.forceNextMove = null;
+                        if (!this.cryptoMarket.log) this.cryptoMarket.log = [];
+                        this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} 管理器: ${coinName} 的下次走势被强制为 ${changePct>0 ? '上涨' : '下跌'}`);
+                    }
+                    // 应用不对称上/下限：默认下限 -15%，上限 +30%
+                    const upCap = (typeof cfg.upCap === 'number') ? cfg.upCap : 0.30;
+                    const downCap = (typeof cfg.downCap === 'number') ? cfg.downCap : -0.15;
+                    changePct = Math.max(downCap, Math.min(changePct, upCap));
+                    // 计算新价并且不低于初始价的 35%
+                    const rawNewPrice = parseFloat((c.price * (1 + changePct)).toFixed(2));
+                    const floor = (typeof c.initialPrice === 'number') ? parseFloat((c.initialPrice * 0.35).toFixed(8)) : 0.0001;
+                    const newPrice = Math.max(floor, parseFloat(Math.max(0.0001, rawNewPrice).toFixed(2)));
                     c.change = parseFloat(((newPrice - c.price) / c.price * 100).toFixed(2));
                     c.price = newPrice;
                     // 更新历史最低/最高价（保留两位小数）
@@ -1981,6 +2148,7 @@ const TOWN_EVENTS = [
                             const maxLen = (this.cryptoMarket.config && this.cryptoMarket.config.historyLength) || 100;
                             c.history = savedCoin.history.slice(-maxLen);
                             if (typeof savedCoin.price === 'number') c.price = savedCoin.price;
+                            if (savedCoin.forceNextMove) c.forceNextMove = savedCoin.forceNextMove;
                         }
                     });
                     // 额外恢复 min/max（以防上面未覆盖到）
@@ -2022,7 +2190,15 @@ const TOWN_EVENTS = [
                 if (!this.cryptoMarket) return;
                 const data = {
                     cryptoMarket: {
-                        coins: this.cryptoMarket.coins.map(c => ({ id: c.id, history: c.history || [], price: c.price, minPrice: (typeof c.minPrice === 'number' ? c.minPrice : c.price), maxPrice: (typeof c.maxPrice === 'number' ? c.maxPrice : c.price) })),
+                        coins: this.cryptoMarket.coins.map(c => ({
+                            id: c.id,
+                            history: c.history || [],
+                            price: c.price,
+                            minPrice: (typeof c.minPrice === 'number' ? c.minPrice : c.price),
+                            maxPrice: (typeof c.maxPrice === 'number' ? c.maxPrice : c.price),
+                            initialPrice: (typeof c.initialPrice === 'number' ? c.initialPrice : c.price),
+                            forceNextMove: c.forceNextMove || null
+                        })),
                         log: this.cryptoMarket.log || [],
                         selectedCoinId: this.cryptoMarket.selectedCoinId || null
                     },
@@ -2064,12 +2240,16 @@ const TOWN_EVENTS = [
                                 <div style="font-weight:bold; cursor:pointer;" onclick="gameInstance.cryptoMarket.selectedCoinId='${c.id}'; gameInstance.renderCryptoCharts('${c.id}');">${c.emoji} ${c.name} (${c.symbol})</div>
                                 <div style="font-size:0.85rem; color:#666;">价格: 💰${this.formatMoney(c.price)} <span style="margin-left:8px; color:${c.change>0?'#27ae60':'#e74c3c'}">${changeSign} ${Math.abs(c.change)}%</span></div>
                                 <div style="font-size:0.8rem; color:#999; margin-top:4px;">最低: 💰${this.formatMoney((typeof c.minPrice === 'number' ? c.minPrice : c.price))}  最高: 💰${this.formatMoney((typeof c.maxPrice === 'number' ? c.maxPrice : c.price))}</div>
+                                <div id="pred-${c.id}" style="font-size:0.82rem; color:#444; margin-top:6px;">点击上方“预测下一次涨跌”查看</div>
+                                <div id="force-${c.id}" style="font-size:0.82rem; color:#b8860b; margin-top:6px;">${c.forceNextMove ? (c.forceNextMove === 'up' ? '已设置：下次必涨' : '已设置：下次必跌') : ''}</div>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
                                 <input type="number" id="buy-${c.id}" placeholder="买入数量" style="width:90px; padding:6px;">
                                 <button class="btn" style="background:#27ae60;" onclick="gameInstance.buyCrypto('${c.id}', document.getElementById('crypto-char-select')?.value || '', parseFloat(document.getElementById('buy-${c.id}').value || 0))">买</button>
                                 <input type="number" id="sell-${c.id}" placeholder="卖出数量" style="width:90px; padding:6px;">
                                 <button class="btn" style="background:#e74c3c;" onclick="gameInstance.sellCrypto('${c.id}', document.getElementById('crypto-char-select')?.value || '', parseFloat(document.getElementById('sell-${c.id}').value || 0))">卖</button>
+                                <button class="btn" style="background:#f1c40f; color:#333;" onclick="gameInstance.forceCryptoNextMove('${c.id}','up')">涨幅</button>
+                                <button class="btn" style="background:#95a5a6; color:#111;" onclick="gameInstance.forceCryptoNextMove('${c.id}','down')">跌幅</button>
                                 <canvas id="spark-${c.id}" width="120" height="36" style="margin-left:8px; border-radius:4px; background:#fff;"></canvas>
                             </div>
                         </div>`;
@@ -2081,6 +2261,7 @@ const TOWN_EVENTS = [
                 <div style="margin-bottom:10px; display:flex; gap:10px; align-items:center;">
                     <label>选择居民/玩家: </label><select id="crypto-char-select">${charOptions}</select>
                     <button class="btn" style="background:#6a4fb8; color:white;" onclick="gameInstance.renderCryptoMarket()">刷新</button>
+                    <button class="btn" style="background:#f39c12; color:white;" onclick="gameInstance.previewCryptoNextMove()">预测下一次涨跌</button>
                 </div>
                 <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
                     <label>自动交易概率: <input id="crypto-auto-prob" type="number" step="0.01" min="0" max="1" value="${cfg.autoTradeProb || 0.03}" style="width:80px;"></label>
@@ -2090,13 +2271,14 @@ const TOWN_EVENTS = [
                 </div>
                 <div style="border:1px solid #eee; border-radius:6px; background:#fff; overflow:hidden;">${coinsHtml}</div>
                 <div style="margin-top:10px; display:flex; gap:12px; align-items:flex-start;">
-                    <div style="flex:1;">
-                        <div style="font-weight:bold; margin-bottom:6px;">📈 价格历史（选中币种）</div>
-                        <canvas id="crypto-price-chart" width="720" height="180" style="background:#fff; border:1px solid #eee; border-radius:6px;"></canvas>
-                    </div>
+                    <div style="flex:1;"></div>
                     <div style="width:300px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-weight:bold;">🧾 持仓分布</div><div><button class="btn" onclick="gameInstance.renderCryptoCharts(gameInstance.cryptoMarket.selectedCoinId || gameInstance.cryptoMarket.coins[0].id)">刷新</button></div></div>
                         <div id="crypto-holdings-chart" style="margin-top:8px; max-height:180px; overflow:auto; border:1px solid #eee; background:#fff; border-radius:6px; padding:8px;"></div>
+                        <div style="margin-top:12px;">
+                            <div style="font-weight:bold; margin-bottom:6px;">📈 价格历史（选中币种）</div>
+                            <canvas id="crypto-price-chart" width="720" height="180" style="background:#fff; border:1px solid #eee; border-radius:6px;"></canvas>
+                        </div>
                     </div>
                 </div>
                 <div style="margin-top:10px;"><div style="font-weight:bold; margin-bottom:6px;">📣 交易记录</div><div id="crypto-market-log" style="max-height:160px; overflow:auto; background:#f8f9fa; border:1px solid #eee; border-radius:6px; padding:8px;">${logs}</div></div>
@@ -2182,7 +2364,9 @@ const TOWN_EVENTS = [
             this.cryptoMarket.config = {
                 autoTradeProb: 0.03,
                 maxTradePct: 0.5,
-                volatility: 0.15,
+                volatility: 0.30,
+                upCap: 0.30,
+                downCap: -0.15,
                 historyLength: 100
             };
             // 更新 UI 控件显示
@@ -2199,7 +2383,7 @@ const TOWN_EVENTS = [
             this.simulateCryptoPrices();
             this.renderCryptoMarket();
             if (this.saveCryptoState) this.saveCryptoState();
-            alert('已重置为默认市场配置（波动 ±15%）');
+            alert('已重置为默认市场配置（涨幅上限 +30%，跌幅下限 -15%）');
         }
         // 更新市场配置（从 UI 读取）
         updateCryptoConfig() {
@@ -2223,6 +2407,51 @@ const TOWN_EVENTS = [
             } catch (e) {
                 console.warn('更新市场配置失败', e);
             }
+        }
+
+        // 预测下一次价格移动方向（基于当前市场波动参数的蒙特卡洛采样）
+        previewCryptoNextMove(trials = 300) {
+            if (!this.cryptoMarket || !Array.isArray(this.cryptoMarket.coins)) return alert('市场尚未初始化');
+            const cfg = this.cryptoMarket.config || { volatility: 0.3, upCap: 0.3, downCap: -0.15 };
+            const vol = typeof cfg.volatility === 'number' ? cfg.volatility : 0.3;
+            const upCap = typeof cfg.upCap === 'number' ? cfg.upCap : 0.3;
+            const downCap = typeof cfg.downCap === 'number' ? cfg.downCap : -0.15;
+            // 限制 trials 数量防止过慢
+            trials = Math.max(50, Math.min(1000, parseInt(trials) || 300));
+            this.cryptoMarket.coins.forEach(coin => {
+                let upCount = 0;
+                for (let i = 0; i < trials; i++) {
+                    const base = (Math.random() - 0.5) * vol;
+                    const noise = (Math.random() - 0.5) * (vol * 0.2);
+                    let changePct = base + noise;
+                    changePct = Math.max(downCap, Math.min(changePct, upCap));
+                    if (changePct > 0) upCount++;
+                }
+                const pUp = Math.round((upCount / trials) * 100);
+                const el = document.getElementById(`pred-${coin.id}`);
+                if (el) {
+                    let arrow = '→', color = '#999';
+                    if (pUp >= 55) { arrow = '↑'; color = '#27ae60'; }
+                    else if (pUp <= 45) { arrow = '↓'; color = '#e74c3c'; }
+                    el.innerHTML = `预测: <span style="color:${color}; font-weight:bold">${arrow} ${pUp}% 上涨</span> (基于 ${trials} 次模拟)`;
+                }
+            });
+        }
+
+        // 强制设置某个币的下次走势（'up' 或 'down'），仅生效一次并会持久化
+        forceCryptoNextMove(coinId, dir) {
+            if (!this.cryptoMarket || !Array.isArray(this.cryptoMarket.coins)) return alert('市场尚未初始化');
+            const coin = this.cryptoMarket.coins.find(c => c.id === coinId);
+            if (!coin) return alert('找不到该币种');
+            if (dir !== 'up' && dir !== 'down') return alert('方向必须为 up 或 down');
+            coin.forceNextMove = dir;
+            // 更新 UI 提示与日志
+            if (!this.cryptoMarket.log) this.cryptoMarket.log = [];
+            this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} 管理器: 设置 ${coin.name} 下次必${dir === 'up' ? '涨' : '跌'}`);
+            this.logInteraction(`[🪙操控] 管理设置 ${coin.name} 下次必${dir === 'up' ? '涨' : '跌'}`, "tag-item");
+            // 立即刷新市场面板以显示标记
+            this.renderCryptoMarket();
+            if (this.saveCryptoState) this.saveCryptoState();
         }
 
         // 渲染价格历史主图与持仓分布
@@ -2385,6 +2614,24 @@ const TOWN_EVENTS = [
                     }
                     if (decisionBtn) {
                         decisionBtn.innerHTML = `${decision.name}<br><small style="font-size: 0.8rem; opacity: 0.9;">${decision.desc}</small>`;
+                    }
+                    // 添加“强制工作”按钮：让所有无业居民执行一次零工
+                    let forceOddBtn = document.getElementById('mayor-force-oddjob-btn');
+                    if (!forceOddBtn) {
+                        const mayorSection = document.querySelector('.gov-mayor-section');
+                        if (mayorSection) {
+                            forceOddBtn = document.createElement('button');
+                            forceOddBtn.id = 'mayor-force-oddjob-btn';
+                            forceOddBtn.className = 'btn';
+                            forceOddBtn.style.cssText = 'background: #16a085; color: white; font-weight: bold; margin-top: 8px; width: 100%; padding: 8px;';
+                            forceOddBtn.onclick = () => {
+                                if (confirm('确认强制所有无业居民进行一次零工吗？')) this.executeForcedOddJobs();
+                            };
+                            mayorSection.appendChild(forceOddBtn);
+                        }
+                    }
+                    if (forceOddBtn) {
+                        forceOddBtn.innerHTML = `强制工作<br><small style="font-size:0.75rem; opacity:0.9;">让所有无业居民做一次零工</small>`;
                     }
                 }
             }
@@ -3596,14 +3843,10 @@ const TOWN_EVENTS = [
                     }).filter(Boolean);
                     // jobs 存储为字符串（角色名），筛选出尚未被占用的岗位
                     const availableJobs = targetBuilding.jobs.filter(j => !occupiedRoles.includes(j));
-                    if (availableJobs.length > 0) {
+                        if (availableJobs.length > 0) {
                         const jobRole = availableJobs[0];
-                        c.job = { buildingId: targetBuilding.id, role: jobRole };
-                        if (!targetBuilding.staff) targetBuilding.staff = [];
-                        // 避免重复加入并确保不超过岗位上限
-                        if (!targetBuilding.staff.some(s => (typeof s === 'object' && s.name ? s.name : s) === c.name) && targetBuilding.staff.length < targetBuilding.jobs.length) {
-                            targetBuilding.staff.push(c.name);
-                        }
+                        // 使用统一接口分配员工，确保 chars.job 与 building.staff 同步
+                        this.assignStaffToBuilding(targetBuilding.id, c.name, jobRole);
                         c.happiness = Math.max(0, c.happiness - 15);
                         c.addLog(`[⚔️强制征召] 被强制分配到 ${targetBuilding.name} 担任 ${jobRole}`);
                         msg += `- ${c.name} 被强制分配到 ${targetBuilding.name} 担任 ${jobRole}\n`;
@@ -3618,6 +3861,34 @@ const TOWN_EVENTS = [
                 this.updateUI();
             } else {
                 alert("没有可分配的工作岗位。");
+            }
+        }
+        executeForcedOddJobs() {
+            if (!this.mayor) { alert("当前没有镇长，无法执行决策。"); return; }
+            if (this.chars.length < 1) { alert("没有居民，无法执行。"); return; }
+            const unemployed = this.chars.filter(c => !c.job && !c.prostitute);
+            if (unemployed.length === 0) { alert("当前没有无业居民无需强制工作。"); return; }
+            let acted = 0;
+            let totalPaid = 0;
+            unemployed.forEach(c => {
+                // 使用现有的零工执行逻辑，使其立即按次结算并记录
+                const beforeMoney = c.money;
+                try {
+                    this.doOddJob(c);
+                } catch (e) {
+                    console.warn('执行零工失败', c.name, e);
+                    return;
+                }
+                const paid = c.money - beforeMoney;
+                if (paid > 0) totalPaid = parseFloat((totalPaid + paid).toFixed(2));
+                acted++;
+            });
+            if (acted > 0) {
+                this.log(`[⚖️决策] 镇长执行了"强制工作"决策！强制 ${acted} 位无业居民进行零工，共发放 💰${this.formatMoney(totalPaid)}。`, "tag-gov");
+                alert(`🎩 镇长发起 [强制工作]：\n\n✅ 共强制 ${acted} 位无业居民进行一次零工\n💰 共计发放 ${this.formatMoney(totalPaid)}（已结算）\n⚠️ 居民心情/体力将受影响`);
+                this.updateUI();
+            } else {
+                alert("未能成功让任何居民做零工。");
             }
         }
         executeMayorDecision() {
@@ -3699,7 +3970,7 @@ const TOWN_EVENTS = [
                 // 特殊处理：推进基础设施建设、投资行动 - 检查3天限制
                 let buttonText = canAfford ? '🎉 立即举办' : '💸 资金不足';
                 let buttonDisabled = !canAfford;
-                if (ev.id === 'infrastructure' || ev.id === 'investment') {
+                if (ev.id === 'infrastructure' || ev.id === 'investment' || ev.id === 'crypto_incentive') {
                     let currentTotalDays = 0;
                     for (let m = 1; m < this.dateMonth; m++) {
                         currentTotalDays += MONTH_DAYS[m];
@@ -3772,7 +4043,27 @@ const TOWN_EVENTS = [
             }
             else if (id === 'anniversary') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); for(let k in c.relationships) c.relationships[k].love += 2; }); }
             else if (id === 'fireworks') { if (Math.random() < 0.05) { const built = this.buildings.filter(b => b.isBuilt); if (built.length > 0) { const burn = choose(built); burn.isBuilt = false; burn.currentProgress = 0; burn.staff.forEach(sName => { const s = this.chars.find(x=>x.name===sName); if(s) { s.job = null; s.happiness -= 30; } }); burn.staff = []; this.log(`[🔥火灾] 天呐！烟花引燃了 **${burn.name}**！建筑被烧毁，需要重建！`, "tag-crime"); this.chars.forEach(c => c.happiness -= 10); } } else { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 25); for(let k in c.relationships) c.relationships[k].love += 5; }); } }
-            else if (id === 'jobfair') { let hiredCount = 0; this.buildings.forEach(b => { if (b.isBuilt && b.staff.length < b.jobs.length) { const needed = b.jobs.length - b.staff.length; for(let i=0; i<needed; i++) { const candidates = this.chars.filter(c => !c.job); if (candidates.length > 0 && Math.random() < 0.5) { const worker = choose(candidates); const role = b.jobs[b.staff.length]; worker.job = { buildingId: b.id, role: role }; if (!b.staff.includes(worker.name) && b.staff.length < b.jobs.length) { b.staff.push(worker.name); worker.happiness += 10; this.logInteraction(`[🤝入职] **${worker.name}** 在招聘会上找到了 **${b.name}** 的工作！`, "tag-build"); hiredCount++; } } } } }); if(hiredCount === 0) this.log("招聘会结束了，似乎没有合适的岗位或求职者。", "tag-reject"); }
+            else if (id === 'jobfair') {
+                let hiredCount = 0;
+                this.buildings.forEach(b => {
+                    if (b.isBuilt && b.staff.length < b.jobs.length) {
+                        const needed = b.jobs.length - b.staff.length;
+                        for (let i = 0; i < needed; i++) {
+                            const candidates = this.chars.filter(c => !c.job);
+                            if (candidates.length > 0 && Math.random() < 0.5) {
+                                const worker = choose(candidates);
+                                const role = b.jobs[b.staff.length];
+                                // 使用统一接口分配员工，确保数据一致
+                                this.assignStaffToBuilding(b.id, worker.name, role);
+                                worker.happiness += 10;
+                                this.logInteraction(`[🤝入职] **${worker.name}** 在招聘会上找到了 **${b.name}** 的工作！`, "tag-build");
+                                hiredCount++;
+                            }
+                        }
+                    }
+                });
+                if (hiredCount === 0) this.log("招聘会结束了，似乎没有合适的岗位或求职者。", "tag-reject");
+            }
             else if (id === 'artfest') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 15); for(let k in c.relationships) c.relationships[k].love += 3; }); if (Math.random() < 0.1) { const victim = choose(this.chars); victim.happiness -= 10; this.logInteraction(`[🎨失窃] 糟糕！**${victim.name}** 珍藏的艺术品在活动中被偷了！(心情-10)`, "tag-crime"); } }
             else if (id === 'marathon') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); c.hunger = Math.max(0, c.hunger - 10); }); if (Math.random() < 0.05) { const injured = choose(this.chars); injured.happiness -= 20; injured.health = Math.max(0, injured.health - 20); this.logInteraction(`[🚑意外] **${injured.name}** 在马拉松中不慎扭伤了脚！(心情-20, 健康-20)`, "tag-reject"); } }
             else if (id === 'reading') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 5); for(let k in c.relationships) c.relationships[k].love += 2; }); if (Math.random() < 0.2) { const winner = choose(this.chars); winner.happiness = Math.min(100, winner.happiness + 10); this.logInteraction(`[🧠竞赛] **${winner.name}** 赢得了读书知识竞赛的冠军！大家向他表示祝贺。`, "tag-build"); } }
@@ -3980,6 +4271,68 @@ const TOWN_EVENTS = [
                 } else {
                     this.logInteraction(`[💰专项行动] 投资行动完成，但当前没有符合条件的建筑或居民资金不足，无人进行投资。`, "tag-build");
                 }
+            }
+            else if (id === 'crypto_incentive') {
+                // 计算当前总天数（从游戏开始计算）
+                let currentTotalDays = 0;
+                for (let m = 1; m < this.dateMonth; m++) {
+                    currentTotalDays += MONTH_DAYS[m];
+                }
+                currentTotalDays += this.dateDay;
+
+                // 检查是否在3天内使用过
+                if (this.lastCryptoIncentiveTime > 0) {
+                    const daysDiff = currentTotalDays - this.lastCryptoIncentiveTime;
+                    if (daysDiff < 3) {
+                        const remainingDays = 3 - daysDiff;
+                        this.logInteraction(`[⚠️限制] 虚拟币激励在3天内只能使用一次，还需等待 ${remainingDays} 天。`, "tag-reject");
+                        return;
+                    }
+                }
+
+                // 初始化市场（如果尚未初始化）
+                if (!this.cryptoMarket) this.initCryptoMarket();
+
+                // 70% 概率触发一次显著的价格上涨（随机选取1-3种币）
+                const surgeProb = 0.7;
+                if (Math.random() < surgeProb && this.cryptoMarket && Array.isArray(this.cryptoMarket.coins) && this.cryptoMarket.coins.length > 0) {
+                    const cnt = Math.min(this.cryptoMarket.coins.length, 1 + Math.floor(Math.random() * 3));
+                    const picked = [];
+                    for (let i = 0; i < cnt; i++) {
+                        // 选取未被选过的币
+                        let idx;
+                        let attempts = 0;
+                        do {
+                            idx = Math.floor(Math.random() * this.cryptoMarket.coins.length);
+                            attempts++;
+                        } while (picked.includes(idx) && attempts < 10);
+                        picked.push(idx);
+                    }
+                    let totalAffected = 0;
+                    picked.forEach(i => {
+                        const coin = this.cryptoMarket.coins[i];
+                        if (!coin) return;
+                        // 随机涨幅 5% - 25%
+                        const pct = 0.05 + Math.random() * 0.20;
+                        const newPrice = parseFloat((coin.price * (1 + pct)).toFixed(2));
+                        coin.change = parseFloat(((newPrice - coin.price) / coin.price * 100).toFixed(2));
+                        coin.price = newPrice;
+                        coin.history = coin.history || [];
+                        coin.history.push(coin.price);
+                        if (coin.history.length > (this.cryptoMarket.config.historyLength || 100)) coin.history.shift();
+                        coin.minPrice = Math.min(coin.minPrice || coin.price, coin.price);
+                        coin.maxPrice = Math.max(coin.maxPrice || coin.price, coin.price);
+                        totalAffected++;
+                        if (!this.cryptoMarket.log) this.cryptoMarket.log = [];
+                        this.cryptoMarket.log.unshift(`${this.getDateTimeStr()} 市场刺激: ${coin.name} 上涨 ${Math.round(pct*100)}% -> ${this.formatMoney(coin.price)}`);
+                    });
+                    this.logInteraction(`[🪙专项行动] 虚拟币激励生效，市场中 ${totalAffected} 种虚拟币出现上涨！`, "tag-item");
+                } else {
+                    this.logInteraction(`[🪙尝试] 虚拟币激励未能带来明显涨幅，市场保持平稳。`, "tag-reject");
+                }
+
+                // 记录使用时间（使用总天数）
+                this.lastCryptoIncentiveTime = currentTotalDays;
             }
             else if (id === 'new_year') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 20); c.money = Math.floor(c.money * 1.1); }); this.log("新年新气象，大家心情大好，存款似乎也变多了？", "tag-promote"); }
             else if (id === 'fools_day') { this.chars.forEach(c => { c.happiness = Math.min(100, c.happiness + 10); }); if(Math.random()<0.5) { const v = choose(this.chars); v.happiness -= 15; this.logInteraction(`[🤡恶搞] **${v.name}** 被人贴了"我是笨蛋"的纸条，气得不行！`, "tag-reject"); } }
@@ -4238,19 +4591,19 @@ const TOWN_EVENTS = [
             });
             const pick = candidates[0];
             if (!pick) return false;
-            // 执行跳槽：从原单位移除、加入新单位
-            if (currentBuilding && currentBuilding.staff) {
-                const idx = currentBuilding.staff.indexOf(char.name);
-                if (idx >= 0) currentBuilding.staff.splice(idx, 1);
-            }
+            // 尝试执行跳槽：先尝试分配到目标单位，成功后再从原单位移除，避免因目标已满导致丢失原岗位
             const newBuilding = pick.building;
             const newRole = pick.role;
-            // 重置技能（见习化）以匹配新岗位
+            // 重置技能（见习化）以匹配新岗位，然后使用统一接口分配员工
             this.ensureEmployeeSkillsReset(char, newRole);
-            char.job = { buildingId: newBuilding.id, role: newRole };
-            if (!newBuilding.staff) newBuilding.staff = [];
-            if (!newBuilding.staff.includes(char.name) && newBuilding.staff.length < newBuilding.jobs.length) {
-                newBuilding.staff.push(char.name);
+            const assigned = this.assignStaffToBuilding(newBuilding.id, char.name, newRole);
+            if (!assigned) {
+                // 目标岗位已满，无法跳槽
+                return false;
+            }
+            // 分配成功后再从原单位移除（保持原单位数据一致）
+            if (currentBuilding && currentBuilding.staff) {
+                this.removeStaffFromBuilding(currentBuilding.id, char.name);
             }
             // 提升心情并记录日志
             char.happiness = Math.min(100, char.happiness + 10);
@@ -4284,12 +4637,9 @@ const TOWN_EVENTS = [
                         if (winner) {
                             const roleName = b.jobs[0];
                             this.ensureEmployeeSkillsReset(winner, roleName);
-                            winner.job = { buildingId: b.id, role: roleName };
-                            if (!b.staff) b.staff = [];
-                            if (!b.staff.includes(winner.name) && b.staff.length < b.jobs.length) {
-                                b.staff.push(winner.name);
-                                this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build");
-                            }
+                            // 使用统一接口分配员工并记录日志
+                            this.assignStaffToBuilding(b.id, winner.name, roleName);
+                            this.log(`[🗳️选举] **${winner.name}** 当选为 **${b.name}** 的${roleName}！`, "tag-build");
                         }
                     }
                 } else if (b.staff.length < b.jobs.length) {
@@ -4312,12 +4662,9 @@ const TOWN_EVENTS = [
                         });
                         if (bestC) {
                             this.ensureEmployeeSkillsReset(bestC, nextRole);
-                            bestC.job = { buildingId: b.id, role: nextRole };
-                            if (!b.staff) b.staff = [];
-                            if (!b.staff.includes(bestC.name) && b.staff.length < b.jobs.length) {
-                                b.staff.push(bestC.name);
-                                this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${nextRole}。`);
-                            }
+                            // 使用统一接口分配员工
+                            this.assignStaffToBuilding(b.id, bestC.name, nextRole);
+                            this.log(`[🤝招聘] ${b.name}经理 **${manager.name}** 录用了 **${bestC.name}** 担任 ${nextRole}。`);
                         }
                     }
                 }
@@ -5157,7 +5504,7 @@ const TOWN_EVENTS = [
         updateRelationshipStatus(p, t, pRel, tRel) { if (pRel.status === 'stranger' && pRel.love > 10) { pRel.status = 'friend'; tRel.status = 'friend'; } else if (pRel.status === 'friend' && pRel.love > 60 && !['lover','spouse','mistress','enemy','ex'].includes(pRel.status)) { pRel.status = 'bestfriend'; tRel.status = 'bestfriend'; } }
         checkRomanceEvent(p, t, pRel, tRel, v) { if (!p.partner && !t.partner && pRel.love > 70 && pRel.status !== 'spouse') { if (Math.random() < 0.2) { if (t.decideProposal(p.name, 'confess')) { p.partner = t.name; t.partner = p.name; pRel.status = "lover"; tRel.status = "lover"; p.happiness += 20; t.happiness += 20; this.unlockAchievement('first_marriage'); this.logInteraction(`[❤️表白] ${p.name} 向 ${t.name} 表白成功！`, "tag-love"); } else { p.happiness -= 20; pRel.love -= 10; this.logInteraction(`[💔拒绝] ${p.name} 表白失败...`, "tag-reject"); } return true; } } return false; }
         breakInteraction(c) { if (c.interactingWith) { const partner = this.chars.find(x => x.name === c.interactingWith); if (partner) { partner.interactingWith = null; partner.currentAction = "发呆"; } c.interactingWith = null; } }
-        saveData(isAuto = false) { const data = { chars: this.chars, buildings: this.buildings, tourists: this.tourists || [], townMoney: this.townMoney, gameTime: this.gameTime, gameDay: this.gameDay, dateMonth: this.dateMonth, dateDay: this.dateDay, weather: this.weather, achievements: this.achievements, policySocialSecurity: this.policySocialSecurity, policyHousing: this.policyHousing, policyFood: this.policyFood, policyTaxHike: this.policyTaxHike, enableDayNight: this.enableDayNight, enableWeatherEffect: this.enableWeatherEffect, mayor: this.mayor, taxRate: this.taxRate, financeHistory: this.financeHistory, townLevel: this.townLevel, townLevelPopupShown: this.townLevelPopupShown ? Array.from(this.townLevelPopupShown) : [], lastInfrastructureBuildTime: this.lastInfrastructureBuildTime || 0, lastInvestmentActionTime: this.lastInvestmentActionTime || 0, dailyTotalRevenue: this.dailyTotalRevenue || 0, lastRevenueResetDay: this.lastRevenueResetDay || 0, constructionVoteCount: this.constructionVoteCount || 0, ts: Date.now() }; localStorage.setItem('happyTownV2_Save', JSON.stringify(data)); this.lastSaveTime = Date.now(); if (!isAuto) alert("✅ 存档成功！"); }
+        saveData(isAuto = false) { const data = { chars: this.chars, buildings: this.buildings, tourists: this.tourists || [], townMoney: this.townMoney, gameTime: this.gameTime, gameDay: this.gameDay, dateMonth: this.dateMonth, dateDay: this.dateDay, weather: this.weather, achievements: this.achievements, policySocialSecurity: this.policySocialSecurity, policyHousing: this.policyHousing, policyFood: this.policyFood, policyTaxHike: this.policyTaxHike, enableDayNight: this.enableDayNight, enableWeatherEffect: this.enableWeatherEffect, mayor: this.mayor, taxRate: this.taxRate, financeHistory: this.financeHistory, townLevel: this.townLevel, townLevelPopupShown: this.townLevelPopupShown ? Array.from(this.townLevelPopupShown) : [], lastInfrastructureBuildTime: this.lastInfrastructureBuildTime || 0, lastInvestmentActionTime: this.lastInvestmentActionTime || 0, lastCryptoIncentiveTime: this.lastCryptoIncentiveTime || 0, dailyTotalRevenue: this.dailyTotalRevenue || 0, lastRevenueResetDay: this.lastRevenueResetDay || 0, constructionVoteCount: this.constructionVoteCount || 0, ts: Date.now() }; localStorage.setItem('happyTownV2_Save', JSON.stringify(data)); this.lastSaveTime = Date.now(); if (!isAuto) alert("✅ 存档成功！"); }
         loadFromJSON(jsonStr) {
             try {
                 const data = JSON.parse(jsonStr);
@@ -5185,6 +5532,7 @@ const TOWN_EVENTS = [
                 this.townLevelPopupShown = data.townLevelPopupShown ? new Set(data.townLevelPopupShown) : new Set();
                 this.lastInfrastructureBuildTime = data.lastInfrastructureBuildTime || 0;
                 this.lastInvestmentActionTime = data.lastInvestmentActionTime || 0;
+                this.lastCryptoIncentiveTime = data.lastCryptoIncentiveTime || 0;
                 // 加载每日总收入相关数据（兼容旧存档）
                 this.dailyTotalRevenue = data.dailyTotalRevenue !== undefined ? data.dailyTotalRevenue : 0;
                 this.lastRevenueResetDay = data.lastRevenueResetDay !== undefined ? data.lastRevenueResetDay : 0;
@@ -5210,7 +5558,8 @@ const TOWN_EVENTS = [
                     let b = bp ? new Building(bp) : new Building(bData);
                     if (bData.currentProgress !== undefined) b.currentProgress = bData.currentProgress;
                     if (bData.isBuilt !== undefined) b.isBuilt = bData.isBuilt;
-                    if (bData.staff !== undefined) b.staff = bData.staff; if (!b.staff) b.staff = [];
+                    if (bData.staff !== undefined) b.staff = bData.staff;
+                    this.ensureBuildingStaff(b);
                     if (bData.prostitutes !== undefined) b.prostitutes = bData.prostitutes; if (!b.prostitutes) b.prostitutes = [];
                     if(bData.history) b.history = bData.history;
                     b.level = bData.level || 1; b.isUnderConstruction = bData.isUnderConstruction || false;
@@ -5299,6 +5648,14 @@ const TOWN_EVENTS = [
                     for (let name in c.relationships) { const rel = c.relationships[name]; if (!rel.status || !['stranger', 'friend', 'bestfriend', 'lover', 'spouse', 'mistress', 'ex','enemy'].includes(rel.status)) { rel.status = rel.love > 10 ? 'friend' : 'stranger'; } }
                     return c;
                 });
+                // 将存档中每个建筑的 staff 列表规范化为同步分配（以 building.jobs 确定岗位）
+                try {
+                    this.buildings.forEach(b => {
+                        const saved = b.staff ? (Array.isArray(b.staff) ? b.staff.slice() : []) : [];
+                        b.staff = [];
+                        if (saved.length > 0) this.setBuildingStaffFromList(b.id, saved);
+                    });
+                } catch (e) { console.warn('恢复 staff 列表时出错', e); }
                 this.runElectionsAndHiring();
             } catch(e) { console.error("存档损坏", e); this.initNewGame(); }
         }
@@ -6554,6 +6911,36 @@ const TOWN_EVENTS = [
             this.updateTownLevelDisplay();
             // 检查是否可以升级
             this.checkTownLevelUpgrade();
+            // 同步：规范员工分配（以 building.staff 为准，修正 chars 中可能的脏数据）
+            try {
+                this.buildings.forEach(b => {
+                    if (!b || !b.jobs) return;
+                    this.ensureBuildingStaff(b);
+                    const cleaned = [];
+                    for (let i = 0; i < b.staff.length; i++) {
+                        const raw = b.staff[i];
+                        const name = (typeof raw === 'object' && raw && raw.name) ? raw.name : raw;
+                        const ch = this.chars.find(c => c.name === name);
+                        if (!ch) continue;
+                        if (cleaned.length < (b.jobs ? b.jobs.length : 0)) {
+                            const role = (b.jobs && b.jobs[cleaned.length]) ? b.jobs[cleaned.length] : (ch.job && ch.job.role) || (b.jobs && b.jobs[0]) || '员工';
+                            this.assignStaffToBuilding(b.id, name, role);
+                            cleaned.push(name);
+                        } else {
+                            // 超额的 staff 条目，清除其工作信息
+                            ch.job = null;
+                        }
+                    }
+                    b.staff = cleaned;
+                });
+                // 清理未在任何 building.staff 中但仍持有 job 的居民
+                this.chars.forEach(c => {
+                    const assignedBuilding = this.buildings.find(b => (b.staff || []).includes(c.name));
+                    if (!assignedBuilding && c.job) c.job = null;
+                });
+            } catch (e) {
+                console.warn('同步员工分配失败', e);
+            }
             // 如果财政界面是打开的，更新财政界面显示
             const financeModal = document.getElementById('finance-modal');
             if(financeModal && financeModal.classList.contains('active')) {
@@ -7654,4 +8041,30 @@ const TOWN_EVENTS = [
     }
     // Start Game
     new Game();
-</script><script type="module" src="/index.tsx"></script></body></html>
+</script><script type="module" src="/index.tsx"></script><style>
+/* 覆盖：拓宽右侧面板并避免虚拟币市场文字溢出 */
+.col-right{min-width:360px !important;}
+.fund-item{word-break:break-word;white-space:normal;min-width:0 !important;}
+
+/* 重置虚拟币市场为宽屏双栏布局 */
+#crypto-modal .modal-content{max-width:1200px; width:95%; max-height:90vh; padding:0; display:flex; flex-direction:column;}
+#crypto-market-content{display:grid; grid-template-columns: 2fr 1fr; gap:18px; padding:20px; min-height:60vh; box-sizing:border-box;}
+#crypto-market-content .crypto-left{overflow:auto;}
+#crypto-market-content .crypto-right{overflow:auto; min-width:280px; border-left:1px solid #eee; padding-left:16px;}
+
+/* 项目卡与表格增强 */
+.crypto-coin-card{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:8px;border:1px solid #eee;background:var(--card);margin-bottom:8px;}
+.crypto-coin-card .coin-info{display:flex;gap:12px;align-items:center;}
+.crypto-coin-card .coin-name{font-weight:700;}
+.crypto-coin-card .coin-price{font-family:monospace;font-weight:700;color:#e67e22;}
+.crypto-order-panel{display:flex;flex-direction:column;gap:8px;}
+.crypto-order-panel input[type="number"], .crypto-order-panel select{padding:8px;border-radius:6px;border:1px solid #ddd;width:100%;}
+.crypto-order-panel button{width:100%;}
+
+/* 响应式：小屏幕回退为单列模态 */
+@media (max-width:900px){
+    #crypto-market-content{grid-template-columns:1fr; padding:14px;}
+    #crypto-market-content .crypto-right{border-left:none;padding-left:0;min-width:0;}
+    .col-right{min-width:0 !important;}
+}
+</style></body></html>
